@@ -1,0 +1,2774 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ventorea Studios</title>
+
+    <meta
+        name="description"
+        content="Ventorea Studios creates immersive life simulation experiences built around realism, freedom, and interconnected systems."
+    >
+
+    <style>
+
+        /* =========================
+           GLOBAL
+        ========================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #071426;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        nav {
+            width: 100%;
+            padding: 20px 8%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background-color: #050d1a;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 1000;
+
+            border-bottom: 1px solid #102945;
+        }
+
+        nav h2 {
+            color: #ffffff;
+        }
+
+        nav div {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            color: #b9c7d9;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+        }
+
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 88vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+
+            padding: 40px 20px;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    #102d4d 0%,
+                    #071426 55%,
+                    #050d1a 100%
+                );
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .studio-logo {
+            display: block;
+
+            width: 420px;
+            max-width: 85%;
+
+            height: auto;
+
+            margin: 0 auto 35px;
+
+            border-radius: 14px;
+        }
+
+        .hero p:first-child {
+            color: #6fa8ff;
+
+            font-size: 14px;
+
+            letter-spacing: 3px;
+
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 68px;
+
+            line-height: 1.1;
+
+            margin-bottom: 25px;
+        }
+
+        .hero p {
+            color: #b9c7d9;
+
+            font-size: 20px;
+
+            margin-bottom: 30px;
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .button {
+            display: inline-block;
+
+            padding: 14px 28px;
+
+            background-color: #246bce;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 8px;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-size: 16px;
+
+            transition: 0.3s;
+        }
+
+        .button:hover {
+            background-color: #3284f0;
+
+            transform: translateY(-2px);
+        }
+
+
+        /* =========================
+           SECTIONS
+           ========================= */
+
+        section {
+            max-width: 1100px;
+
+            margin: auto;
+
+            padding: 100px 30px;
+        }
+
+        .section-title {
+            text-align: center;
+
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 40px;
+
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: #9eafc4;
+
+            margin-top: 8px;
+        }
+
+
+        /* =========================
+           CARDS
+           ========================= */
+
+        .cards {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 25px;
+        }
+
+        .card {
+            background-color: #0d2038;
+
+            padding: 30px;
+
+            border-radius: 12px;
+
+            border: 1px solid #183452;
+
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+
+            border-color: #246bce;
+
+            background-color: #102947;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #9eafc4;
+        }
+
+
+        /* =========================
+           ABOUT THE GAME
+           ========================= */
+
+        #game {
+            border-top: 1px solid #102945;
+        }
+
+        .game-description {
+            max-width: 850px;
+
+            margin: 0 auto 60px;
+
+            text-align: center;
+
+            color: #b9c7d9;
+
+            font-size: 18px;
+        }
+
+        .game-goal {
+            max-width: 850px;
+
+            margin: 70px auto 0;
+
+            text-align: center;
+
+            color: #9eafc4;
+
+            font-size: 18px;
+        }
+
+
+        /* =========================
+           LEARN MORE
+           ========================= */
+
+        #learn-more {
+            border-top: 1px solid #102945;
+        }
+
+        .learn-more-description {
+            max-width: 850px;
+
+            margin: 0 auto 50px;
+
+            text-align: center;
+
+            color: #b9c7d9;
+
+            font-size: 18px;
+        }
+
+        .learn-more-list {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 25px;
+        }
+
+        .learn-more-card {
+            background-color: #0d2038;
+
+            padding: 30px;
+
+            border-radius: 12px;
+
+            border: 1px solid #183452;
+
+            transition: 0.3s;
+        }
+
+        .learn-more-card:hover {
+            transform: translateY(-5px);
+
+            border-color: #246bce;
+
+            background-color: #102947;
+        }
+
+        .learn-more-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .learn-more-card p {
+            color: #9eafc4;
+        }
+
+
+        /* =========================
+           DEVELOPMENT STATUS
+           ========================= */
+
+        #status {
+            border-top: 1px solid #102945;
+        }
+
+        .status-box {
+            max-width: 850px;
+
+            margin: auto;
+
+            background-color: #0d2038;
+
+            border: 1px solid #183452;
+
+            border-radius: 15px;
+
+            padding: 40px;
+        }
+
+        .status-header {
+            text-align: center;
+
+            margin-bottom: 35px;
+        }
+
+        .status-header h3 {
+            font-size: 28px;
+
+            margin-bottom: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+
+            padding: 8px 16px;
+
+            background-color: #12345a;
+
+            color: #6fa8ff;
+
+            border-radius: 20px;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            letter-spacing: 1px;
+        }
+
+        .status-list {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 16px 18px;
+
+            background-color: #071426;
+
+            border: 1px solid #183452;
+
+            border-radius: 8px;
+        }
+
+        .status-item span:first-child {
+            color: #ffffff;
+        }
+
+        .status-planned {
+            color: #9eafc4;
+        }
+
+        .status-development {
+            color: #6fa8ff;
+        }
+
+        .status-announced {
+            color: #b9c7d9;
+        }
+
+
+        /* =========================
+           RELEASE
+           ========================= */
+
+        .release-box {
+            max-width: 700px;
+
+            margin: 60px auto 0;
+
+            padding: 35px;
+
+            text-align: center;
+
+            background-color: #0d2038;
+
+            border: 1px solid #183452;
+
+            border-radius: 12px;
+        }
+
+        .release-box h3 {
+            font-size: 24px;
+
+            margin-bottom: 12px;
+        }
+
+        .release-box p {
+            color: #9eafc4;
+        }
+
+
+        /* =========================
+           PHILOSOPHY
+           ========================= */
+
+        .philosophy {
+            text-align: center;
+
+            border-top: 1px solid #102945;
+        }
+
+        .quote {
+            font-size: 30px;
+
+            font-weight: bold;
+
+            max-width: 850px;
+
+            margin: 30px auto;
+
+            line-height: 1.4;
+        }
+
+
+        /* =========================
+           DEVELOPMENT UPDATES
+           ========================= */
+
+        #updates {
+            border-top: 1px solid #102945;
+        }
+
+        .update-card {
+            max-width: 850px;
+
+            margin: auto;
+
+            background-color: #0d2038;
+
+            border: 1px solid #183452;
+
+            border-radius: 12px;
+
+            padding: 30px;
+        }
+
+        .update-date {
+            color: #6fa8ff;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 10px;
+        }
+
+        .update-card h3 {
+            margin-bottom: 10px;
+
+            font-size: 24px;
+        }
+
+        .update-card p {
+            color: #9eafc4;
+        }
+
+
+        /* =========================
+           POLICY
+           ========================= */
+
+        #policy {
+            border-top: 1px solid #102945;
+        }
+
+
+        /* =========================
+           VIOLATIONS
+           ========================= */
+
+        #violations {
+            border-top: 1px solid #102945;
+        }
+
+
+        /* =========================
+           PRIVACY POLICY
+           ========================= */
+
+        #privacy {
+            border-top: 1px solid #102945;
+        }
+
+
+        /* =========================
+           COMMUNITY GUIDELINES
+           ========================= */
+
+        #community {
+            border-top: 1px solid #102945;
+        }
+
+
+        /* =========================
+           FAQ
+           ========================= */
+
+        #faq {
+            border-top: 1px solid #102945;
+        }
+
+        .faq-container {
+            max-width: 850px;
+
+            margin: auto;
+        }
+
+        .faq-item {
+            background-color: #0d2038;
+
+            border: 1px solid #183452;
+
+            border-radius: 10px;
+
+            padding: 25px;
+
+            margin-bottom: 15px;
+        }
+
+        .faq-item h3 {
+            margin-bottom: 8px;
+
+            font-size: 19px;
+        }
+
+        .faq-item p {
+            color: #9eafc4;
+        }
+
+
+        /* =========================
+           SOCIAL MEDIA
+           ========================= */
+
+        .social-media {
+            border-top: 1px solid #102945;
+        }
+
+        .social-links {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 20px;
+        }
+
+        .social-card {
+            background-color: #0d2038;
+
+            border: 1px solid #183452;
+
+            border-radius: 12px;
+
+            padding: 30px 20px;
+
+            text-align: center;
+
+            text-decoration: none;
+
+            color: white;
+
+            transition: 0.3s;
+        }
+
+        .social-card:hover {
+            transform: translateY(-5px);
+
+            border-color: #246bce;
+
+            background-color: #102947;
+        }
+
+        .social-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .social-card p {
+            color: #9eafc4;
+
+            font-size: 14px;
+        }
+
+
+        /* =========================
+           CONTACT
+           ========================= */
+
+        .contact {
+            background-color: #0d2038;
+
+            border-radius: 15px;
+
+            padding: 60px 40px;
+        }
+
+        .contact-form {
+            max-width: 650px;
+
+            margin: 50px auto 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+
+            padding: 14px;
+
+            background-color: #071426;
+
+            color: white;
+
+            border: 1px solid #183452;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #246bce;
+        }
+
+        .form-group textarea {
+            min-height: 160px;
+
+            resize: vertical;
+        }
+
+        .contact-form .button {
+            width: 100%;
+        }
+
+        .contact-email {
+            text-align: center;
+
+            margin-top: 25px;
+
+            color: #9eafc4;
+        }
+
+        .contact-email a {
+            color: #6fa8ff;
+
+            text-decoration: none;
+        }
+
+
+        /* =========================
+           FOOTER
+           ========================= */
+
+        footer {
+            text-align: center;
+
+            padding: 45px;
+
+            background-color: #050d1a;
+
+            color: #71839b;
+
+            border-top: 1px solid #102945;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+        footer p {
+            margin: 5px;
+        }
+
+        .footer-links {
+            margin: 20px 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            flex-wrap: wrap;
+
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: #9eafc4;
+
+            text-decoration: none;
+
+            transition: 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 800px) {
+
+            nav {
+                flex-direction: column;
+
+                gap: 15px;
+            }
+
+            nav div {
+                flex-wrap: wrap;
+
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 44px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .studio-logo {
+                width: 280px;
+
+                max-width: 80%;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .learn-more-list {
+                grid-template-columns: 1fr;
+            }
+
+            .social-links {
+                grid-template-columns: 1fr;
+            }
+
+            .status-list {
+                grid-template-columns: 1fr;
+            }
+
+            .quote {
+                font-size: 24px;
+            }
+
+            section {
+                padding: 75px 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVIGATION
+         ========================= -->
+
+    <nav>
+
+        <h2>
+            Ventorea Studios
+        </h2>
+
+        <div>
+
+            <a href="#">
+                Home
+            </a>
+
+            <a href="#about">
+                About
+            </a>
+
+            <a href="#games">
+                Games
+            </a>
+
+            <a href="#game">
+                About the Game
+            </a>
+
+            <a href="#learn-more">
+                Learn More
+            </a>
+
+            <a href="#status">
+                Development
+            </a>
+
+            <a href="#philosophy">
+                Philosophy
+            </a>
+
+            <a href="#updates">
+                Updates
+            </a>
+
+            <a href="#policy">
+                Policy
+            </a>
+
+            <a href="#community">
+                Community
+            </a>
+
+            <a href="#privacy">
+                Privacy
+            </a>
+
+            <a href="#faq">
+                FAQ
+            </a>
+
+            <a href="#social">
+                Social
+            </a>
+
+            <a href="#contact">
+                Contact
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         HERO
+         ========================= -->
+
+    <header class="hero">
+
+        <div class="hero-content">
+
+            <img
+                src="Ventorea Studios image.jpeg"
+                alt="Ventorea Studios Logo"
+                class="studio-logo"
+            >
+
+            <p>
+                INDEPENDENT GAME DEVELOPMENT STUDIO
+            </p>
+
+            <h1>
+                Real life, reimagined.
+            </h1>
+
+            <p>
+                We create immersive worlds built around realism,
+                freedom, and meaningful player experiences.
+            </p>
+
+            <a
+                href="#about"
+                class="button"
+            >
+                Discover Ventorea
+            </a>
+
+            <br>
+            <br>
+
+            <a
+                href="#contact"
+                class="button"
+            >
+                Contact Us
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================
+         ABOUT
+         ========================= -->
+
+    <section id="about">
+
+        <div class="section-title">
+
+            <h2>
+                About Ventorea
+            </h2>
+
+            <p>
+                Building worlds that feel alive.
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Realism
+                </h3>
+
+                <p>
+                    Our games are designed around believable systems
+                    inspired by the real world.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Freedom
+                </h3>
+
+                <p>
+                    Players should be free to make their own choices
+                    and create their own stories.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Living Worlds
+                </h3>
+
+                <p>
+                    Every system should interact with the world
+                    instead of existing separately.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         GAMES
+         ========================= -->
+
+    <section id="games">
+
+        <div class="section-title">
+
+            <h2>
+                Our Games
+            </h2>
+
+            <p>
+                Experiences currently being developed by
+                Ventorea Studios.
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Life Simulation
+                </h3>
+
+                <p>
+                    A massive life simulation experience where players
+                    can build careers, own property, travel, interact
+                    with others, and create their own lives.
+                </p>
+
+                <br>
+
+                <a
+                    href="#learn-more"
+                    class="button"
+                >
+                    Learn More
+                </a>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    In Development
+                </h3>
+
+                <p>
+                    Our main project is currently in development,
+                    with a focus on building its world, systems,
+                    gameplay, and overall direction.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Future
+                </h3>
+
+                <p>
+                    Additional projects may be considered as
+                    Ventorea Studios grows and development progresses.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         ABOUT THE GAME
+         ========================= -->
+
+    <section id="game">
+
+        <div class="section-title">
+
+            <h2>
+                About the Game
+            </h2>
+
+            <p>
+                A life simulation built around realism,
+                freedom, and a world that continues to live around you.
+            </p>
+
+        </div>
+
+
+        <p class="game-description">
+
+            Our goal is to create a living virtual world where
+            players can experience everyday life while having the
+            freedom to create their own story.
+
+            The world is designed around interconnected systems,
+            meaning the actions of players and the world itself
+            can affect what happens around them.
+
+        </p>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Live Your Own Life
+                </h3>
+
+                <p>
+                    Create your own character and build a life your way.
+                    Choose where you live, what you do, where you work,
+                    and how you spend your time.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Build a Career
+                </h3>
+
+                <p>
+                    Start from the beginning and work your way toward
+                    your goals. Build a career, earn money, manage your
+                    finances, and create your own future.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Own Property
+                </h3>
+
+                <p>
+                    Buy homes, apartments, businesses, and other
+                    properties as you progress through your life.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Explore the World
+                </h3>
+
+                <p>
+                    Travel through cities and different environments,
+                    use transportation, visit airports, and experience
+                    a world designed to feel connected.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Living Systems
+                </h3>
+
+                <p>
+                    The planned world includes interconnected systems
+                    such as jobs, education, transportation, weather,
+                    finances, emergency services, law enforcement,
+                    and other aspects of everyday life.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Dynamic NPCs
+                </h3>
+
+                <p>
+                    NPCs are planned to behave as part of the world,
+                    creating interactions and situations that can change
+                    depending on what happens around them.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="section-title"
+            style="margin-top: 90px;"
+        >
+
+            <h2>
+                What Is The Goal?
+            </h2>
+
+            <p>
+                There is no single way to play.
+            </p>
+
+        </div>
+
+
+        <p class="game-goal">
+
+            The goal is to create your own life.
+
+            You decide what you want to become, how you want to live,
+            and what choices you make along the way.
+
+            Whether you want to build a successful career,
+            own businesses and property, travel the world,
+            or simply experience everyday life,
+            the choice is yours.
+
+        </p>
+
+
+        <div
+            class="section-title"
+            style="margin-top: 90px;"
+        >
+
+            <h2>
+                Release
+            </h2>
+
+            <p>
+                Development is currently in progress.
+            </p>
+
+        </div>
+
+
+        <div class="release-box">
+
+            <h3>
+                Release: Not Announced
+            </h3>
+
+            <p>
+                Ventorea Studios does not currently have a confirmed
+                release date or release window.
+
+                A release window will be announced when development
+                reaches a stage where we can provide a reliable estimate.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         LEARN MORE
+         ========================= -->
+
+    <section id="learn-more">
+
+        <div class="section-title">
+
+            <h2>
+                Learn More
+            </h2>
+
+            <p>
+                Take a closer look at the vision behind Ventorea's
+                life simulation experience.
+            </p>
+
+        </div>
+
+
+        <p class="learn-more-description">
+
+            Ventorea's main game is being designed as a connected
+            virtual world where everyday life, player decisions,
+            and world systems can influence one another.
+
+            The goal is not simply to create a game where you complete
+            missions. The goal is to create a world where you can
+            decide what kind of life you want to live.
+
+        </p>
+
+
+        <div class="learn-more-list">
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Character & Identity
+                </h3>
+
+                <p>
+                    Players will be able to create and develop their
+                    own characters and shape their lives through
+                    personal choices, careers, relationships,
+                    activities, and progression.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Careers & Economy
+                </h3>
+
+                <p>
+                    The game is planned to include careers, income,
+                    spending, finances, businesses, property,
+                    and other systems designed to create a connected
+                    economic experience.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Cities & Transportation
+                </h3>
+
+                <p>
+                    Players will be able to explore cities and
+                    environments while using different forms of
+                    transportation. Airports and travel systems
+                    are also part of the planned world.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    NPCs & World Activity
+                </h3>
+
+                <p>
+                    NPCs are planned to form part of the living world,
+                    with activities and behaviors that can change
+                    depending on the environment and events around them.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Weather & Environment
+                </h3>
+
+                <p>
+                    Weather and environmental conditions are planned
+                    to be part of the world and may interact with
+                    different systems and activities.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Emergency Services
+                </h3>
+
+                <p>
+                    Emergency services and law enforcement are planned
+                    parts of the world, helping create a more believable
+                    and interconnected environment.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Multiplayer
+                </h3>
+
+                <p>
+                    Multiplayer is currently planned. Specific
+                    multiplayer features, player limits, and technical
+                    requirements have not been finalized.
+                </p>
+
+            </div>
+
+
+            <div class="learn-more-card">
+
+                <h3>
+                    Continuous Development
+                </h3>
+
+                <p>
+                    Ventorea Studios plans to continue developing the
+                    game as the project grows. New systems, features,
+                    improvements, and additional content may be added
+                    throughout development and after release.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         DEVELOPMENT STATUS
+         ========================= -->
+
+    <section id="status">
+
+        <div class="section-title">
+
+            <h2>
+                Development Status
+            </h2>
+
+            <p>
+                Follow the current progress of Ventorea's main project.
+            </p>
+
+        </div>
+
+
+        <div class="status-box">
+
+            <div class="status-header">
+
+                <h3>
+                    Ventorea Life Simulation
+                </h3>
+
+                <span class="status-indicator">
+                    ● IN DEVELOPMENT
+                </span>
+
+            </div>
+
+
+            <div class="status-list">
+
+                <div class="status-item">
+
+                    <span>
+                        World Design
+                    </span>
+
+                    <span class="status-development">
+                        In Development
+                    </span>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span>
+                        Life Systems
+                    </span>
+
+                    <span class="status-development">
+                        In Development
+                    </span>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span>
+                        NPC Systems
+                    </span>
+
+                    <span class="status-planned">
+                        Planned
+                    </span>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span>
+                        Multiplayer
+                    </span>
+
+                    <span class="status-planned">
+                        Planned
+                    </span>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span>
+                        Release Date
+                    </span>
+
+                    <span class="status-announced">
+                        Not Announced
+                    </span>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span>
+                        Platform
+                    </span>
+
+                    <span class="status-announced">
+                        To Be Announced
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         PHILOSOPHY
+         ========================= -->
+
+    <section
+        id="philosophy"
+        class="philosophy"
+    >
+
+        <div class="section-title">
+
+            <h2>
+                Our Philosophy
+            </h2>
+
+        </div>
+
+
+        <p class="quote">
+
+            "If it exists in real life, it should exist in the game
+            whenever practical."
+
+        </p>
+
+
+        <p>
+
+            This principle guides the systems we design
+            and the worlds we create.
+
+        </p>
+
+    </section>
+
+
+
+    <!-- =========================
+         DEVELOPMENT UPDATES
+         ========================= -->
+
+    <section id="updates">
+
+        <div class="section-title">
+
+            <h2>
+                Development Updates
+            </h2>
+
+            <p>
+                Follow the journey as Ventorea Studios grows.
+            </p>
+
+        </div>
+
+
+        <div class="update-card">
+
+            <div class="update-date">
+                AUGUST 2026
+            </div>
+
+            <h3>
+                Ventorea Studios Website
+            </h3>
+
+            <p>
+                The official Ventorea Studios website is being
+                developed alongside the early stages of the studio
+                and its main game project.
+
+                More development updates will be added here as
+                progress continues.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         POLICY
+         ========================= -->
+
+    <section id="policy">
+
+        <div class="section-title">
+
+            <h2>
+                Studio Policy
+            </h2>
+
+            <p>
+                Standards that guide our games,
+                community, and development.
+            </p>
+
+            <p>
+                Last Updated: August 2026
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Fair Play
+                </h3>
+
+                <p>
+                    We aim to provide a fair experience for everyone.
+                    Exploiting bugs, abusing systems, or intentionally
+                    disrupting other players is not supported.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Respect
+                </h3>
+
+                <p>
+                    Players and members of the community are expected
+                    to treat others with respect and help maintain a
+                    welcoming environment.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Game Integrity
+                </h3>
+
+                <p>
+                    Our systems are designed to protect the integrity
+                    of the game and provide a consistent experience
+                    for the community.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         VIOLATIONS
+         ========================= -->
+
+    <section id="violations">
+
+        <div class="section-title">
+
+            <h2>
+                Violations
+            </h2>
+
+            <p>
+                Actions that may result in restrictions
+                or other enforcement measures.
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Exploiting
+                </h3>
+
+                <p>
+                    Using bugs, glitches, unauthorized software,
+                    or other methods to gain an unfair advantage
+                    may result in enforcement action.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Disruption
+                </h3>
+
+                <p>
+                    Intentionally disrupting other players,
+                    servers, or game systems may result
+                    in restrictions.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Unauthorized Access
+                </h3>
+
+                <p>
+                    Attempting to access accounts, systems,
+                    servers, or information without authorization
+                    is prohibited.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         PRIVACY POLICY
+         ========================= -->
+
+    <section id="privacy">
+
+        <div class="section-title">
+
+            <h2>
+                Privacy Policy
+            </h2>
+
+            <p>
+                How Ventorea Studios intends to handle information
+                and protect the privacy of our users and community.
+            </p>
+
+            <p>
+                Last Updated: August 2026
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Information We Collect
+                </h3>
+
+                <p>
+                    Ventorea Studios may collect information that
+                    you voluntarily provide when contacting us,
+                    participating in our community, or using our
+                    services.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    How We Use Information
+                </h3>
+
+                <p>
+                    Information may be used to respond to requests,
+                    provide support, improve our services, communicate
+                    with our community, and maintain the security
+                    of our systems.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Information Protection
+                </h3>
+
+                <p>
+                    We aim to use reasonable measures to protect
+                    information from unauthorized access, disclosure,
+                    alteration, or destruction.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Third-Party Services
+                </h3>
+
+                <p>
+                    Our website, games, or services may use third-party
+                    platforms and services. Their own privacy policies
+                    may apply when you interact with those services.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Children's Privacy
+                </h3>
+
+                <p>
+                    We do not intentionally collect personal information
+                    from children when such collection is prohibited by
+                    applicable laws.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Policy Updates
+                </h3>
+
+                <p>
+                    This Privacy Policy may be updated as Ventorea
+                    Studios develops new services, features, and
+                    systems. Important changes may be announced
+                    through our official channels.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         COMMUNITY GUIDELINES
+         ========================= -->
+
+    <section id="community">
+
+        <div class="section-title">
+
+            <h2>
+                Community Guidelines
+            </h2>
+
+            <p>
+                Guidelines for keeping the Ventorea Studios
+                community safe, respectful, and enjoyable.
+            </p>
+
+            <p>
+                Last Updated: August 2026
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <h3>
+                    Respect Others
+                </h3>
+
+                <p>
+                    Treat other players, community members,
+                    developers, and staff with respect.
+                    Harassment, bullying, threats, or targeted
+                    abuse are not tolerated.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    No Cheating
+                </h3>
+
+                <p>
+                    Do not use unauthorized software, exploits,
+                    cheats, or other methods intended to gain
+                    an unfair advantage or bypass game systems.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    No Disruption
+                </h3>
+
+                <p>
+                    Do not intentionally disrupt games, servers,
+                    communities, or other players' experiences.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Keep It Appropriate
+                </h3>
+
+                <p>
+                    Do not share content that is illegal, excessively
+                    violent, sexually explicit, hateful, or otherwise
+                    inappropriate for the community.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    No Unauthorized Access
+                </h3>
+
+                <p>
+                    Do not attempt to access another person's account,
+                    private information, servers, systems, or other
+                    resources without authorization.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Follow Platform Rules
+                </h3>
+
+                <p>
+                    When using third-party platforms or services,
+                    community members are also expected to follow
+                    the rules and policies of those platforms.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Reporting
+                </h3>
+
+                <p>
+                    If you encounter behavior that violates these
+                    guidelines, you may report it through the
+                    available Ventorea Studios support or
+                    reporting channels.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>
+                    Enforcement
+                </h3>
+
+                <p>
+                    Violations may result in warnings, content removal,
+                    temporary restrictions, suspension, or permanent
+                    removal from certain Ventorea Studios services,
+                    depending on the severity of the violation.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         FAQ
+         ========================= -->
+
+    <section id="faq">
+
+        <div class="section-title">
+
+            <h2>
+                Frequently Asked Questions
+            </h2>
+
+            <p>
+                Some of the most common questions about Ventorea.
+            </p>
+
+        </div>
+
+
+        <div class="faq-container">
+
+
+            <div class="faq-item">
+
+                <h3>
+                    What is Ventorea Studios?
+                </h3>
+
+                <p>
+                    Ventorea Studios is an independent game development
+                    studio focused on creating immersive experiences
+                    built around realism, freedom, and interconnected
+                    systems.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    What is Ventorea's main game?
+                </h3>
+
+                <p>
+                    Ventorea's main project is a large-scale life
+                    simulation focused on realism, freedom, and
+                    interconnected systems.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Is Ventorea Studios easy to hack?
+                </h3>
+
+                <p>
+                    Security is taken seriously. Ventorea Studios aims
+                    to use reasonable security measures to protect its
+                    services, systems, and users. No online service can
+                    honestly guarantee that it can never be attacked.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    What platforms will the game support?
+                </h3>
+
+                <p>
+                    Platforms have not been officially announced yet.
+                    The game may support PC, consoles, or multiple
+                    platforms depending on development and technical
+                    decisions.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will there be a trailer?
+                </h3>
+
+                <p>
+                    Ventorea Studios plans to share official trailers,
+                    gameplay footage, or other videos when there is
+                    enough development progress to show the project
+                    properly.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will there be a playable trial or demo?
+                </h3>
+
+                <p>
+                    A playable demo or trial has not been confirmed yet.
+                    If Ventorea Studios decides to release one, more
+                    information will be announced through official
+                    channels.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    When will the game release?
+                </h3>
+
+                <p>
+                    There is currently no confirmed release date
+                    or release window. A release window will be
+                    announced when development reaches a stage
+                    where a reliable estimate can be provided.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will the game be multiplayer?
+                </h3>
+
+                <p>
+                    Multiplayer is currently planned, but specific
+                    multiplayer features and requirements have not
+                    been finalized.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will the game support cross-platform play?
+                </h3>
+
+                <p>
+                    Cross-platform play has not been confirmed yet.
+                    This will depend on the final platforms and
+                    multiplayer technology used by the game.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will the game be free?
+                </h3>
+
+                <p>
+                    Pricing has not been announced yet.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will players be able to customize their characters?
+                </h3>
+
+                <p>
+                    Character creation and customization are planned
+                    parts of the life simulation experience.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will there be jobs and careers?
+                </h3>
+
+                <p>
+                    Yes. Careers and employment are planned to be
+                    important parts of the game's life simulation
+                    systems.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will players be able to own businesses and property?
+                </h3>
+
+                <p>
+                    Yes. Owning homes, apartments, businesses,
+                    and other properties is part of the planned
+                    gameplay experience.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will there be vehicles and transportation?
+                </h3>
+
+                <p>
+                    Transportation is planned as part of the game,
+                    allowing players to move around the world and
+                    experience different forms of travel.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will the world have NPCs?
+                </h3>
+
+                <p>
+                    Yes. Dynamic NPCs are planned to help create
+                    a living world where people and activities
+                    interact with the player and their surroundings.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    Will the game receive updates?
+                </h3>
+
+                <p>
+                    Ventorea Studios intends to continue improving
+                    the game throughout development and potentially
+                    after release with new features, improvements,
+                    and content.
+                </p>
+
+            </div>
+
+
+            <div class="faq-item">
+
+                <h3>
+                    How can I contact Ventorea Studios?
+                </h3>
+
+                <p>
+                    You can use the contact form on this website or
+                    email Ventorea Studios directly at
+                    realityforgeoffcial@gmail.com.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         SOCIAL MEDIA
+         ========================= -->
+
+    <section
+        id="social"
+        class="social-media"
+    >
+
+        <div class="section-title">
+
+            <h2>
+                Social Media Accounts
+            </h2>
+
+            <p>
+                Follow Ventorea Studios for updates,
+                announcements, development news, and more.
+            </p>
+
+        </div>
+
+
+        <div class="social-links">
+
+
+            <!-- INSTAGRAM -->
+
+            <a
+                class="social-card"
+                href="https://www.instagram.com/ventoreastudios/"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    Instagram
+                </h3>
+
+                <p>
+                    @ventoreastudios
+                </p>
+
+            </a>
+
+
+            <!-- FACEBOOK -->
+
+            <a
+                class="social-card"
+                href="https://www.facebook.com/VentoreaStudios"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    Facebook
+                </h3>
+
+                <p>
+                    VentoreaStudios
+                </p>
+
+            </a>
+
+
+            <!-- TIKTOK -->
+
+            <a
+                class="social-card"
+                href="https://www.tiktok.com/@ventoreastudio"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    TikTok
+                </h3>
+
+                <p>
+                    @ventoreastudio
+                </p>
+
+            </a>
+
+
+            <!-- LINKEDIN -->
+
+            <a
+                class="social-card"
+                href="https://www.linkedin.com/search/results/companies/?keywords=Ventorea%20Studios"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    LinkedIn
+                </h3>
+
+                <p>
+                    Ventorea Studios
+                </p>
+
+            </a>
+
+
+            <!-- X -->
+
+            <a
+                class="social-card"
+                href="https://x.com/VentoreaStudios"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    X
+                </h3>
+
+                <p>
+                    @VentoreaStudios
+                </p>
+
+            </a>
+
+
+            <!-- YOUTUBE -->
+
+            <a
+                class="social-card"
+                href="https://www.youtube.com/@VentoreaStudio"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    YouTube
+                </h3>
+
+                <p>
+                    @VentoreaStudio
+                </p>
+
+            </a>
+
+
+            <!-- BLUESKY -->
+
+            <a
+                class="social-card"
+                href="https://bsky.app/profile/ventoreastudio.bsky.social"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <h3>
+                    Bluesky
+                </h3>
+
+                <p>
+                    @ventoreastudio.bsky.social
+                </p>
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         CONTACT
+         ========================= -->
+
+    <section id="contact">
+
+        <div class="contact">
+
+            <div class="section-title">
+
+                <h2>
+                    Contact Ventorea Studios
+                </h2>
+
+                <p>
+                    Have a question, suggestion,
+                    or need help? Send us a message.
+                </p>
+
+            </div>
+
+
+            <form
+                class="contact-form"
+                action="mailto:realityforgeoffcial@gmail.com"
+                method="post"
+                enctype="text/plain"
+            >
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="Name"
+                        placeholder="Your name"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="Email"
+                        placeholder="your@email.com"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="subject">
+                        Subject
+                    </label>
+
+                    <input
+                        type="text"
+                        id="subject"
+                        name="Subject"
+                        placeholder="What is your message about?"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="message">
+                        Message
+                    </label>
+
+                    <textarea
+                        id="message"
+                        name="Message"
+                        placeholder="Write your message here..."
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Send Message
+                </button>
+
+
+            </form>
+
+
+            <div class="contact-email">
+
+                Or email us directly:
+
+                <a href="mailto:realityforgeoffcial@gmail.com">
+                    realityforgeoffcial@gmail.com
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         FOOTER
+         ========================= -->
+
+    <footer>
+
+        <p>
+            © 2026
+            <strong>Ventorea Studios</strong>.
+            All rights reserved.
+        </p>
+
+
+        <div class="footer-links">
+
+            <a href="#about">
+                About
+            </a>
+
+            <a href="#game">
+                About the Game
+            </a>
+
+            <a href="#learn-more">
+                Learn More
+            </a>
+
+            <a href="#status">
+                Development
+            </a>
+
+            <a href="#updates">
+                Updates
+            </a>
+
+            <a href="#policy">
+                Studio Policy
+            </a>
+
+            <a href="#community">
+                Community Guidelines
+            </a>
+
+            <a href="#privacy">
+                Privacy Policy
+            </a>
+
+            <a href="#faq">
+                FAQ
+            </a>
+
+            <a href="#social">
+                Social Media
+            </a>
+
+            <a href="#contact">
+                Contact
+            </a>
+
+        </div>
+
+
+        <p>
+            Real life, reimagined.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>
+```
