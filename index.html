@@ -1,2774 +1,4259 @@
 ```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Ventorea Studios</title>
-
-    <meta
-        name="description"
-        content="Ventorea Studios creates immersive life simulation experiences built around realism, freedom, and interconnected systems."
-    >
-
-    <style>
-
-        /* =========================
-           GLOBAL
-        ========================= */
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: #071426;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-        }
-
-
-        /* =========================
-           NAVIGATION
-        ========================= */
-
-        nav {
-            width: 100%;
-            padding: 20px 8%;
-
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            background-color: #050d1a;
-
-            position: sticky;
-            top: 0;
-
-            z-index: 1000;
-
-            border-bottom: 1px solid #102945;
-        }
-
-        nav h2 {
-            color: #ffffff;
-        }
-
-        nav div {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        nav a {
-            color: #b9c7d9;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        nav a:hover {
-            color: #ffffff;
-        }
-
-
-        /* =========================
-           HERO
-        ========================= */
-
-        .hero {
-            min-height: 88vh;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            text-align: center;
-
-            padding: 40px 20px;
-
-            background:
-                radial-gradient(
-                    circle at center,
-                    #102d4d 0%,
-                    #071426 55%,
-                    #050d1a 100%
-                );
-        }
-
-        .hero-content {
-            max-width: 900px;
-        }
-
-        .studio-logo {
-            display: block;
-
-            width: 420px;
-            max-width: 85%;
-
-            height: auto;
-
-            margin: 0 auto 35px;
-
-            border-radius: 14px;
-        }
-
-        .hero p:first-child {
-            color: #6fa8ff;
-
-            font-size: 14px;
-
-            letter-spacing: 3px;
-
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-size: 68px;
-
-            line-height: 1.1;
-
-            margin-bottom: 25px;
-        }
-
-        .hero p {
-            color: #b9c7d9;
-
-            font-size: 20px;
-
-            margin-bottom: 30px;
-        }
-
-
-        /* =========================
-           BUTTON
-        ========================= */
-
-        .button {
-            display: inline-block;
-
-            padding: 14px 28px;
-
-            background-color: #246bce;
-
-            color: white;
-
-            text-decoration: none;
-
-            border-radius: 8px;
-
-            border: none;
-
-            cursor: pointer;
-
-            font-size: 16px;
-
-            transition: 0.3s;
-        }
-
-        .button:hover {
-            background-color: #3284f0;
-
-            transform: translateY(-2px);
-        }
-
-
-        /* =========================
-           SECTIONS
-           ========================= */
-
-        section {
-            max-width: 1100px;
-
-            margin: auto;
-
-            padding: 100px 30px;
-        }
-
-        .section-title {
-            text-align: center;
-
-            margin-bottom: 50px;
-        }
-
-        .section-title h2 {
-            font-size: 40px;
-
-            margin-bottom: 15px;
-        }
-
-        .section-title p {
-            color: #9eafc4;
-
-            margin-top: 8px;
-        }
-
-
-        /* =========================
-           CARDS
-           ========================= */
-
-        .cards {
-            display: grid;
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
-            gap: 25px;
-        }
-
-        .card {
-            background-color: #0d2038;
-
-            padding: 30px;
-
-            border-radius: 12px;
-
-            border: 1px solid #183452;
-
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-
-            border-color: #246bce;
-
-            background-color: #102947;
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-        }
-
-        .card p {
-            color: #9eafc4;
-        }
-
-
-        /* =========================
-           ABOUT THE GAME
-           ========================= */
-
-        #game {
-            border-top: 1px solid #102945;
-        }
-
-        .game-description {
-            max-width: 850px;
-
-            margin: 0 auto 60px;
-
-            text-align: center;
-
-            color: #b9c7d9;
-
-            font-size: 18px;
-        }
-
-        .game-goal {
-            max-width: 850px;
-
-            margin: 70px auto 0;
-
-            text-align: center;
-
-            color: #9eafc4;
-
-            font-size: 18px;
-        }
-
-
-        /* =========================
-           LEARN MORE
-           ========================= */
-
-        #learn-more {
-            border-top: 1px solid #102945;
-        }
-
-        .learn-more-description {
-            max-width: 850px;
-
-            margin: 0 auto 50px;
-
-            text-align: center;
-
-            color: #b9c7d9;
-
-            font-size: 18px;
-        }
-
-        .learn-more-list {
-            display: grid;
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-            gap: 25px;
-        }
-
-        .learn-more-card {
-            background-color: #0d2038;
-
-            padding: 30px;
-
-            border-radius: 12px;
-
-            border: 1px solid #183452;
-
-            transition: 0.3s;
-        }
-
-        .learn-more-card:hover {
-            transform: translateY(-5px);
-
-            border-color: #246bce;
-
-            background-color: #102947;
-        }
-
-        .learn-more-card h3 {
-            margin-bottom: 10px;
-        }
-
-        .learn-more-card p {
-            color: #9eafc4;
-        }
-
-
-        /* =========================
-           DEVELOPMENT STATUS
-           ========================= */
-
-        #status {
-            border-top: 1px solid #102945;
-        }
-
-        .status-box {
-            max-width: 850px;
-
-            margin: auto;
-
-            background-color: #0d2038;
-
-            border: 1px solid #183452;
-
-            border-radius: 15px;
-
-            padding: 40px;
-        }
-
-        .status-header {
-            text-align: center;
-
-            margin-bottom: 35px;
-        }
-
-        .status-header h3 {
-            font-size: 28px;
-
-            margin-bottom: 10px;
-        }
-
-        .status-indicator {
-            display: inline-block;
-
-            padding: 8px 16px;
-
-            background-color: #12345a;
-
-            color: #6fa8ff;
-
-            border-radius: 20px;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            letter-spacing: 1px;
-        }
-
-        .status-list {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 15px;
-        }
-
-        .status-item {
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            padding: 16px 18px;
-
-            background-color: #071426;
-
-            border: 1px solid #183452;
-
-            border-radius: 8px;
-        }
-
-        .status-item span:first-child {
-            color: #ffffff;
-        }
-
-        .status-planned {
-            color: #9eafc4;
-        }
-
-        .status-development {
-            color: #6fa8ff;
-        }
-
-        .status-announced {
-            color: #b9c7d9;
-        }
-
-
-        /* =========================
-           RELEASE
-           ========================= */
-
-        .release-box {
-            max-width: 700px;
-
-            margin: 60px auto 0;
-
-            padding: 35px;
-
-            text-align: center;
-
-            background-color: #0d2038;
-
-            border: 1px solid #183452;
-
-            border-radius: 12px;
-        }
-
-        .release-box h3 {
-            font-size: 24px;
-
-            margin-bottom: 12px;
-        }
-
-        .release-box p {
-            color: #9eafc4;
-        }
-
-
-        /* =========================
-           PHILOSOPHY
-           ========================= */
-
-        .philosophy {
-            text-align: center;
-
-            border-top: 1px solid #102945;
-        }
-
-        .quote {
-            font-size: 30px;
-
-            font-weight: bold;
-
-            max-width: 850px;
-
-            margin: 30px auto;
-
-            line-height: 1.4;
-        }
-
-
-        /* =========================
-           DEVELOPMENT UPDATES
-           ========================= */
-
-        #updates {
-            border-top: 1px solid #102945;
-        }
-
-        .update-card {
-            max-width: 850px;
-
-            margin: auto;
-
-            background-color: #0d2038;
-
-            border: 1px solid #183452;
-
-            border-radius: 12px;
-
-            padding: 30px;
-        }
-
-        .update-date {
-            color: #6fa8ff;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            letter-spacing: 1px;
-
-            margin-bottom: 10px;
-        }
-
-        .update-card h3 {
-            margin-bottom: 10px;
-
-            font-size: 24px;
-        }
-
-        .update-card p {
-            color: #9eafc4;
-        }
-
-
-        /* =========================
-           POLICY
-           ========================= */
-
-        #policy {
-            border-top: 1px solid #102945;
-        }
-
-
-        /* =========================
-           VIOLATIONS
-           ========================= */
-
-        #violations {
-            border-top: 1px solid #102945;
-        }
-
-
-        /* =========================
-           PRIVACY POLICY
-           ========================= */
-
-        #privacy {
-            border-top: 1px solid #102945;
-        }
-
-
-        /* =========================
-           COMMUNITY GUIDELINES
-           ========================= */
-
-        #community {
-            border-top: 1px solid #102945;
-        }
-
-
-        /* =========================
-           FAQ
-           ========================= */
-
-        #faq {
-            border-top: 1px solid #102945;
-        }
-
-        .faq-container {
-            max-width: 850px;
-
-            margin: auto;
-        }
-
-        .faq-item {
-            background-color: #0d2038;
-
-            border: 1px solid #183452;
-
-            border-radius: 10px;
-
-            padding: 25px;
-
-            margin-bottom: 15px;
-        }
-
-        .faq-item h3 {
-            margin-bottom: 8px;
-
-            font-size: 19px;
-        }
-
-        .faq-item p {
-            color: #9eafc4;
-        }
-
-
-        /* =========================
-           SOCIAL MEDIA
-           ========================= */
-
-        .social-media {
-            border-top: 1px solid #102945;
-        }
-
-        .social-links {
-            display: grid;
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
-            gap: 20px;
-        }
-
-        .social-card {
-            background-color: #0d2038;
-
-            border: 1px solid #183452;
-
-            border-radius: 12px;
-
-            padding: 30px 20px;
-
-            text-align: center;
-
-            text-decoration: none;
-
-            color: white;
-
-            transition: 0.3s;
-        }
-
-        .social-card:hover {
-            transform: translateY(-5px);
-
-            border-color: #246bce;
-
-            background-color: #102947;
-        }
-
-        .social-card h3 {
-            margin-bottom: 8px;
-        }
-
-        .social-card p {
-            color: #9eafc4;
-
-            font-size: 14px;
-        }
-
-
-        /* =========================
-           CONTACT
-           ========================= */
-
-        .contact {
-            background-color: #0d2038;
-
-            border-radius: 15px;
-
-            padding: 60px 40px;
-        }
-
-        .contact-form {
-            max-width: 650px;
-
-            margin: 50px auto 0;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-
-            margin-bottom: 8px;
-
-            font-weight: bold;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-
-            padding: 14px;
-
-            background-color: #071426;
-
-            color: white;
-
-            border: 1px solid #183452;
-
-            border-radius: 8px;
-
-            font-size: 16px;
-
-            outline: none;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: #246bce;
-        }
-
-        .form-group textarea {
-            min-height: 160px;
-
-            resize: vertical;
-        }
-
-        .contact-form .button {
-            width: 100%;
-        }
-
-        .contact-email {
-            text-align: center;
-
-            margin-top: 25px;
-
-            color: #9eafc4;
-        }
-
-        .contact-email a {
-            color: #6fa8ff;
-
-            text-decoration: none;
-        }
-
-
-        /* =========================
-           FOOTER
-           ========================= */
-
-        footer {
-            text-align: center;
-
-            padding: 45px;
-
-            background-color: #050d1a;
-
-            color: #71839b;
-
-            border-top: 1px solid #102945;
-        }
-
-        footer strong {
-            color: white;
-        }
-
-        footer p {
-            margin: 5px;
-        }
-
-        .footer-links {
-            margin: 20px 0;
-
-            display: flex;
-
-            justify-content: center;
-
-            flex-wrap: wrap;
-
-            gap: 20px;
-        }
-
-        .footer-links a {
-            color: #9eafc4;
-
-            text-decoration: none;
-
-            transition: 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-
-        /* =========================
-           MOBILE
-           ========================= */
-
-        @media (max-width: 800px) {
-
-            nav {
-                flex-direction: column;
-
-                gap: 15px;
-            }
-
-            nav div {
-                flex-wrap: wrap;
-
-                justify-content: center;
-            }
-
-            .hero h1 {
-                font-size: 44px;
-            }
-
-            .hero p {
-                font-size: 18px;
-            }
-
-            .studio-logo {
-                width: 280px;
-
-                max-width: 80%;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .learn-more-list {
-                grid-template-columns: 1fr;
-            }
-
-            .social-links {
-                grid-template-columns: 1fr;
-            }
-
-            .status-list {
-                grid-template-columns: 1fr;
-            }
-
-            .quote {
-                font-size: 24px;
-            }
-
-            section {
-                padding: 75px 20px;
-            }
-
-        }
-
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Ventorea Studios — creators of Realistic Simulation Life (RSL).">
+<meta name="theme-color" content="#01040a">
+
+<title>Ventorea Studios | Realistic Simulation Life</title>
+
+<style>
+:root{
+    --bg:#01040a;
+    --bg2:#030914;
+    --card:#07101e;
+    --card2:#0a1729;
+
+    --blue:#2688ff;
+    --blue2:#55a9ff;
+    --cyan:#65d9ff;
+
+    --white:#fff;
+    --text:#edf6ff;
+    --muted:#879bb2;
+
+    --green:#50e29a;
+    --yellow:#ffd45c;
+    --red:#ff6675;
+
+    --border:rgba(120,180,240,.11);
+    --border2:rgba(70,150,255,.38);
+
+    --shadow:0 25px 90px rgba(0,0,0,.55);
+
+    --mx:50%;
+    --my:50%;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+    scroll-padding-top:82px;
+}
+
+body{
+    background:#01040a;
+    color:var(--text);
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    line-height:1.65;
+    overflow-x:hidden;
+}
+
+body.locked{
+    overflow:hidden;
+}
+
+button,
+input,
+textarea,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.container{
+    width:min(1450px,94%);
+    margin:auto;
+}
+
+section{
+    position:relative;
+    padding:120px 0;
+}
+
+section::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:85%;
+    height:1px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(70,150,255,.18),
+        transparent
+    );
+}
+
+.section-header{
+    max-width:900px;
+    margin:0 auto 60px;
+    text-align:center;
+}
+
+.section-tag{
+    display:inline-block;
+    margin-bottom:15px;
+    color:var(--blue2);
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:3px;
+    text-transform:uppercase;
+}
+
+.section-title{
+    font-size:clamp(38px,5vw,68px);
+    line-height:1;
+    letter-spacing:-3px;
+    margin-bottom:20px;
+}
+
+.section-description{
+    max-width:760px;
+    margin:auto;
+    color:var(--muted);
+    font-size:16px;
+}
+
+.blue{
+    color:var(--blue2);
+}
+
+/* =========================================================
+   CURSOR BACKGROUND
+========================================================= */
+
+.background{
+    position:fixed;
+    inset:0;
+    z-index:-20;
+    pointer-events:none;
+    overflow:hidden;
+    background:#01040a;
+}
+
+.background::before{
+    content:"";
+    position:absolute;
+    inset:-30%;
+    background:
+        radial-gradient(
+            circle 550px at var(--mx) var(--my),
+            rgba(0,110,255,.16),
+            transparent 70%
+        );
+    transition:
+        background .18s ease;
+}
+
+.background-grid{
+    position:absolute;
+    inset:0;
+
+    background-image:
+        linear-gradient(
+            rgba(80,150,220,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(80,150,220,.025) 1px,
+            transparent 1px
+        );
+
+    background-size:70px 70px;
+
+    mask-image:linear-gradient(
+        to bottom,
+        black,
+        transparent 95%
+    );
+}
+
+.background-glow{
+    position:absolute;
+    width:650px;
+    height:650px;
+    border-radius:50%;
+    filter:blur(140px);
+    opacity:.09;
+    background:#006eff;
+    top:-300px;
+    left:-250px;
+    animation:floatGlow 18s infinite alternate ease-in-out;
+}
+
+.background-glow.two{
+    width:550px;
+    height:550px;
+    right:-250px;
+    top:35%;
+    background:#0044ff;
+    animation-duration:23s;
+}
+
+.background-glow.three{
+    width:500px;
+    height:500px;
+    left:35%;
+    bottom:-350px;
+    background:#5900ff;
+    opacity:.045;
+}
+
+@keyframes floatGlow{
+    from{
+        transform:translate(0,0);
+    }
+    to{
+        transform:translate(180px,130px);
+    }
+}
+
+/* =========================================================
+   ACCESS SCREEN
+========================================================= */
+
+#securityScreen{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(15,65,125,.25),
+            transparent 50%
+        ),
+        #01040a;
+
+    transition:
+        opacity .7s ease,
+        visibility .7s ease;
+}
+
+#securityScreen.hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.security-box{
+    width:min(500px,90%);
+    padding:45px 35px;
+
+    text-align:center;
+
+    border:1px solid rgba(80,160,255,.2);
+    border-radius:24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(10,24,44,.96),
+            rgba(2,7,15,.98)
+        );
+
+    box-shadow:
+        0 30px 120px rgba(0,0,0,.8),
+        0 0 80px rgba(20,100,255,.08);
+}
+
+.security-logo{
+    font-size:24px;
+    font-weight:950;
+    letter-spacing:-1px;
+    margin-bottom:25px;
+}
+
+.security-logo span{
+    color:var(--blue2);
+}
+
+.security-icon{
+    width:70px;
+    height:70px;
+    margin:0 auto 20px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    background:rgba(38,136,255,.1);
+    border:1px solid rgba(38,136,255,.3);
+
+    font-size:30px;
+
+    box-shadow:0 0 40px rgba(38,136,255,.12);
+}
+
+.security-box h1{
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.security-box p{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:25px;
+}
+
+.verify-status{
+    min-height:20px;
+    margin-top:15px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   NAV
+========================================================= */
+
+#navbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:78px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 3%;
+
+    background:rgba(1,4,10,.78);
+    backdrop-filter:blur(22px);
+
+    border-bottom:1px solid var(--border);
+
+    z-index:2000;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:950;
+    letter-spacing:-.7px;
+    white-space:nowrap;
+}
+
+.logo span{
+    color:var(--blue2);
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:19px;
+}
+
+.nav-links a{
+    color:#8295aa;
+    font-size:13px;
+    font-weight:700;
+    transition:.2s;
+}
+
+.nav-links a:hover{
+    color:white;
+}
+
+.nav-contact{
+    padding:9px 16px;
+    border-radius:8px;
+    background:var(--blue);
+    color:white !important;
+}
+
+.menu-btn{
+    display:none;
+    border:0;
+    background:none;
+    color:white;
+    font-size:27px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    border:1px solid var(--blue);
+    background:var(--blue);
+    color:white;
+
+    padding:13px 24px;
+    border-radius:9px;
+
+    font-size:14px;
+    font-weight:800;
+
+    transition:
+        transform .2s,
+        box-shadow .2s,
+        background .2s,
+        border-color .2s;
+}
+
+.btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 15px 40px rgba(38,136,255,.28);
+}
+
+.btn.secondary{
+    background:rgba(255,255,255,.025);
+    border-color:#263d56;
+    color:#b9c9da;
+}
+
+.btn.secondary:hover{
+    background:rgba(255,255,255,.07);
+    border-color:#3b5876;
+}
+
+.btn.full{
+    width:100%;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+    min-height:100vh;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:150px 20px 100px;
+}
+
+.hero-content{
+    width:min(1100px,100%);
+}
+
+.hero-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+
+    padding:8px 17px;
+
+    border:1px solid rgba(100,170,230,.24);
+    border-radius:999px;
+
+    background:rgba(15,50,90,.18);
+
+    color:var(--blue2);
+
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:2.5px;
+
+    margin-bottom:27px;
+}
+
+.hero-badge::before{
+    content:"";
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 13px var(--green);
+}
+
+.hero h1{
+    font-size:clamp(55px,9vw,120px);
+    line-height:.88;
+    letter-spacing:-7px;
+    margin-bottom:30px;
+}
+
+.hero h1 span{
+    background:
+        linear-gradient(
+            90deg,
+            #fff,
+            #4d9aff,
+            #83d6ff,
+            #fff
+        );
+
+    background-size:220% auto;
+
+    -webkit-background-clip:text;
+    background-clip:text;
+
+    color:transparent;
+
+    animation:titleShift 7s linear infinite;
+}
+
+@keyframes titleShift{
+    to{
+        background-position:220% center;
+    }
+}
+
+.hero-description{
+    max-width:850px;
+    margin:auto;
+    color:#91a7bd;
+    font-size:clamp(16px,2vw,20px);
+}
+
+.hero-description strong{
+    color:#dbeaff;
+}
+
+.hero-buttons{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin-top:36px;
+    flex-wrap:wrap;
+}
+
+.hero-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-top:60px;
+}
+
+.hero-stat{
+    padding:20px;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    background:rgba(255,255,255,.018);
+    backdrop-filter:blur(12px);
+
+    transition:.25s;
+}
+
+.hero-stat:hover{
+    border-color:var(--border2);
+    transform:translateY(-4px);
+}
+
+.hero-stat strong{
+    display:block;
+    font-size:22px;
+}
+
+.hero-stat span{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card{
+    position:relative;
+
+    padding:28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(9,22,41,.92),
+            rgba(3,9,18,.95)
+        );
+
+    border:1px solid var(--border);
+    border-radius:19px;
+
+    box-shadow:var(--shadow);
+
+    transition:
+        transform .3s,
+        border-color .3s,
+        background .3s;
+}
+
+.card:hover{
+    transform:translateY(-6px);
+    border-color:var(--border2);
+}
+
+.card-icon{
+    font-size:32px;
+    margin-bottom:13px;
+}
+
+.card h3{
+    margin-bottom:9px;
+    font-size:19px;
+}
+
+.card p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.highlight{
+    border-color:rgba(70,150,255,.28);
+}
+
+/* =========================================================
+   PHILOSOPHY
+========================================================= */
+
+.philosophy{
+    max-width:1050px;
+    margin:auto;
+
+    padding:60px;
+
+    text-align:center;
+
+    border:1px solid rgba(70,150,255,.22);
+    border-radius:25px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(40,120,255,.1),
+            transparent 65%
+        );
+
+    box-shadow:var(--shadow);
+}
+
+.philosophy blockquote{
+    font-size:clamp(28px,4vw,48px);
+    line-height:1.12;
+    font-weight:900;
+    letter-spacing:-1.5px;
+}
+
+.philosophy cite{
+    display:block;
+    margin-top:22px;
+    color:var(--blue2);
+    font-size:13px;
+    font-style:normal;
+}
+
+/* =========================================================
+   FEATURES
+========================================================= */
+
+.feature-list{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.feature-row{
+    display:flex;
+    gap:18px;
+    align-items:flex-start;
+
+    padding:23px;
+
+    border:1px solid var(--border);
+    border-radius:17px;
+
+    background:rgba(255,255,255,.018);
+
+    transition:.25s;
+}
+
+.feature-row:hover{
+    border-color:var(--border2);
+    transform:translateY(-4px);
+}
+
+.feature-number{
+    min-width:42px;
+    height:42px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    background:rgba(49,140,255,.12);
+    color:var(--blue2);
+
+    font-weight:900;
+}
+
+.feature-row h3{
+    margin-bottom:5px;
+}
+
+.feature-row p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* =========================================================
+   GRAPHICS
+========================================================= */
+
+.graphics{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.graphics-card{
+    padding:28px;
+    text-align:center;
+
+    border:1px solid var(--border);
+    border-radius:18px;
+
+    background:rgba(255,255,255,.018);
+
+    transition:.25s;
+}
+
+.graphics-card:hover{
+    transform:translateY(-5px);
+    border-color:var(--border2);
+}
+
+.graphics-dot{
+    width:18px;
+    height:18px;
+    margin:0 auto 15px;
+    border-radius:50%;
+}
+
+.low .graphics-dot{
+    background:#ff5151;
+    box-shadow:0 0 18px rgba(255,81,81,.55);
+}
+
+.medium .graphics-dot{
+    background:#ffd34e;
+    box-shadow:0 0 18px rgba(255,211,78,.5);
+}
+
+.high .graphics-dot{
+    background:#4fe28c;
+    box-shadow:0 0 18px rgba(79,226,140,.5);
+}
+
+.ultra .graphics-dot{
+    background:#59a8ff;
+    box-shadow:0 0 18px rgba(89,168,255,.6);
+}
+
+.graphics-card p{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:7px;
+}
+
+/* =========================================================
+   ROADMAP
+========================================================= */
+
+.timeline{
+    display:grid;
+    gap:14px;
+    max-width:950px;
+    margin:auto;
+}
+
+.timeline-item{
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+
+    padding:22px;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:rgba(255,255,255,.018);
+
+    transition:.25s;
+}
+
+.timeline-item:hover{
+    border-color:var(--border2);
+    transform:translateX(5px);
+}
+
+.timeline-number{
+    min-width:42px;
+    height:42px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    background:rgba(49,140,255,.13);
+    color:#9dceff;
+
+    font-weight:900;
+}
+
+.timeline-item h3{
+    margin-bottom:4px;
+}
+
+.timeline-item p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+}
+
+.status-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+
+    padding:20px 22px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:rgba(255,255,255,.018);
+}
+
+.status-name{
+    font-weight:750;
+}
+
+.status-pill{
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.status-planned{
+    background:rgba(255,209,90,.1);
+    color:var(--yellow);
+}
+
+.status-development{
+    background:rgba(85,227,154,.1);
+    color:var(--green);
+}
+
+.status-coming{
+    background:rgba(49,140,255,.1);
+    color:var(--blue2);
+}
+
+/* =========================================================
+   PRICING
+========================================================= */
+
+.price-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:22px;
+    max-width:1000px;
+    margin:auto;
+}
+
+.price-card{
+    padding:34px;
+
+    border:1px solid var(--border);
+    border-radius:21px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(10,24,44,.94),
+            rgba(3,9,18,.96)
+        );
+
+    box-shadow:var(--shadow);
+}
+
+.price-card.featured{
+    border-color:rgba(49,140,255,.42);
+    box-shadow:
+        var(--shadow),
+        0 0 60px rgba(30,120,255,.07);
+}
+
+.price-badge{
+    display:inline-block;
+
+    padding:5px 10px;
+    border-radius:999px;
+
+    background:rgba(49,140,255,.12);
+    color:var(--blue2);
+
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:1.5px;
+}
+
+.price{
+    font-size:50px;
+    font-weight:950;
+    margin:12px 0 5px;
+}
+
+.price-sub{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.price-list{
+    margin:25px 0;
+    padding-left:20px;
+    color:#c2d0e1;
+    font-size:14px;
+}
+
+.price-list li{
+    margin:8px 0;
+}
+
+.offer{
+    max-width:1000px;
+    margin:20px auto 0;
+
+    padding:20px;
+
+    text-align:center;
+
+    border:1px solid rgba(255,209,90,.18);
+    border-radius:15px;
+
+    background:rgba(255,209,90,.025);
+
+    color:#d9c98d;
+    font-size:13px;
+}
+
+/* =========================================================
+   PAYMENT
+========================================================= */
+
+.payment-box{
+    max-width:1000px;
+    margin:25px auto 0;
+
+    padding:30px;
+
+    border:1px solid var(--border);
+    border-radius:20px;
+
+    background:rgba(255,255,255,.018);
+}
+
+.payment-methods{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-top:20px;
+}
+
+.payment-method{
+    padding:14px;
+    text-align:center;
+
+    border:1px solid var(--border);
+    border-radius:10px;
+
+    background:rgba(255,255,255,.02);
+
+    color:#a9bbcf;
+    font-size:12px;
+    font-weight:800;
+}
+
+.payment-method:hover{
+    border-color:var(--border2);
+    color:white;
+}
+
+.payment-note{
+    margin-top:17px;
+    color:var(--muted);
+    font-size:12px;
+    text-align:center;
+}
+
+/* =========================================================
+   FAQ
+========================================================= */
+
+.faq-list{
+    max-width:950px;
+    margin:auto;
+}
+
+.faq{
+    margin-bottom:11px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    overflow:hidden;
+
+    background:rgba(255,255,255,.018);
+}
+
+.faq.open{
+    border-color:var(--border2);
+}
+
+.faq-question{
+    width:100%;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+
+    padding:21px;
+
+    border:0;
+    background:none;
+
+    color:white;
+    text-align:left;
+
+    font-weight:750;
+}
+
+.plus{
+    min-width:28px;
+    font-size:25px;
+    color:var(--blue2);
+    transition:transform .35s;
+}
+
+.faq.open .plus{
+    transform:rotate(45deg);
+}
+
+.faq-answer{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows .4s ease;
+}
+
+.faq-answer-inner{
+    overflow:hidden;
+    padding:0 21px;
+    color:var(--muted);
+    font-size:14px;
+    transition:padding .4s;
+}
+
+.faq.open .faq-answer{
+    grid-template-rows:1fr;
+}
+
+.faq.open .faq-answer-inner{
+    padding:0 21px 21px;
+}
+
+/* =========================================================
+   INFORMATION / POLICIES
+========================================================= */
+
+.policy-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.policy{
+    padding:27px;
+
+    border:1px solid var(--border);
+    border-radius:17px;
+
+    background:rgba(255,255,255,.018);
+}
+
+.policy h3{
+    margin-bottom:11px;
+}
+
+.policy p,
+.policy li{
+    color:var(--muted);
+    font-size:14px;
+}
+
+.policy ul{
+    padding-left:20px;
+}
+
+.policy li{
+    margin:5px 0;
+}
+
+/* =========================================================
+   SOCIAL
+========================================================= */
+
+.social-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+}
+
+.social-card{
+    padding:23px;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:rgba(255,255,255,.018);
+
+    transition:.25s;
+}
+
+.social-card:hover{
+    transform:translateY(-5px);
+    border-color:var(--border2);
+}
+
+.social-icon{
+    font-size:27px;
+    margin-bottom:10px;
+}
+
+.social-card h3{
+    margin-bottom:4px;
+}
+
+.social-card p{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:13px;
+}
+
+.social-link{
+    color:var(--blue2);
+    font-size:12px;
+    font-weight:800;
+}
+
+/* =========================================================
+   CONTACT
+========================================================= */
+
+.contact-container{
+    max-width:850px;
+    margin:auto;
+}
+
+.form-container{
+    padding:38px;
+
+    border:1px solid var(--border);
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(9,22,41,.9),
+            rgba(3,9,18,.96)
+        );
+
+    box-shadow:var(--shadow);
+}
+
+.form-group{
+    margin-bottom:20px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+
+    color:#91a6bc;
+
+    font-size:11px;
+    font-weight:850;
+
+    letter-spacing:1px;
+    text-transform:uppercase;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+    width:100%;
+
+    padding:14px 15px;
+
+    background:rgba(1,5,12,.8);
+
+    border:1px solid var(--border);
+
+    border-radius:9px;
+
+    color:white;
+
+    outline:none;
+
+    transition:border-color .2s,box-shadow .2s;
+}
+
+.form-group textarea{
+    min-height:150px;
+    resize:vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(38,136,255,.08);
+}
+
+.status-msg{
+    display:none;
+
+    margin-top:15px;
+
+    padding:13px;
+
+    border-radius:10px;
+
+    text-align:center;
+
+    background:rgba(83,227,154,.08);
+    color:var(--green);
+
+    font-size:13px;
+    font-weight:750;
+}
+
+.form-note{
+    margin-top:14px;
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+}
+
+/* =========================================================
+   AI BUTTON
+========================================================= */
+
+.ai-button{
+    position:fixed;
+
+    right:25px;
+    bottom:25px;
+
+    z-index:1500;
+
+    width:58px;
+    height:58px;
+
+    display:grid;
+    place-items:center;
+
+    border:1px solid rgba(70,160,255,.4);
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #123e72,
+            #06101e
+        );
+
+    color:white;
+
+    font-size:23px;
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,.5),
+        0 0 35px rgba(30,130,255,.12);
+
+    transition:.25s;
+}
+
+.ai-button:hover{
+    transform:translateY(-4px) scale(1.04);
+}
+
+.ai-panel{
+    position:fixed;
+
+    right:25px;
+    bottom:95px;
+
+    z-index:1500;
+
+    width:min(370px,calc(100% - 30px));
+
+    padding:20px;
+
+    border:1px solid var(--border2);
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8,21,39,.98),
+            rgba(2,7,14,.99)
+        );
+
+    box-shadow:var(--shadow);
+
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(15px) scale(.98);
+
+    transition:.25s;
+}
+
+.ai-panel.open{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0) scale(1);
+}
+
+.ai-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:12px;
+}
+
+.ai-header h3{
+    font-size:16px;
+}
+
+.ai-close{
+    border:0;
+    background:none;
+    color:#7e91a8;
+    font-size:20px;
+}
+
+.ai-message{
+    padding:14px;
+
+    border-radius:12px;
+
+    background:rgba(255,255,255,.035);
+
+    color:var(--muted);
+    font-size:13px;
+}
+
+.ai-status{
+    margin-top:12px;
+
+    color:var(--yellow);
+    font-size:11px;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast{
+    position:fixed;
+
+    right:25px;
+    bottom:95px;
+
+    z-index:5000;
+
+    max-width:350px;
+
+    padding:15px 19px;
+
+    border:1px solid rgba(80,160,240,.3);
+    border-radius:12px;
+
+    background:#0a1b31;
+
+    color:white;
+
+    box-shadow:var(--shadow);
+
+    transform:translateY(120px);
+    opacity:0;
+
+    transition:.35s;
+}
+
+.toast.show{
+    transform:translateY(0);
+    opacity:1;
+}
+
+/* =========================================================
+   TOP BUTTON
+========================================================= */
+
+#topBtn{
+    position:fixed;
+
+    right:25px;
+    bottom:165px;
+
+    z-index:1200;
+
+    width:42px;
+    height:42px;
+
+    display:grid;
+    place-items:center;
+
+    border:1px solid var(--border);
+    border-radius:50%;
+
+    background:#091a30;
+    color:white;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translateY(10px);
+
+    transition:.3s;
+}
+
+#topBtn.show{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0);
+}
+
+/* =========================================================
+   REVEAL
+========================================================= */
+
+.reveal{
+    opacity:0;
+    transform:translateY(24px);
+
+    transition:
+        opacity .7s ease,
+        transform .7s ease;
+}
+
+.reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+    padding:60px 20px;
+
+    text-align:center;
+
+    border-top:1px solid var(--border);
+
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+.footer-logo{
+    color:white;
+    font-size:21px;
+    font-weight:950;
+    margin-bottom:8px;
+}
+
+.footer-logo span{
+    color:var(--blue2);
+}
+
+.footer-links{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:18px;
+    margin:20px 0;
+}
+
+.footer-links a:hover{
+    color:white;
+}
+
+.footer-socials{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:20px 0;
+}
+
+.footer-socials a{
+    padding:8px 13px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:11px;
+}
+
+.footer-socials a:hover{
+    border-color:var(--border2);
+    color:white;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:1000px){
+
+    .nav-links{
+        position:absolute;
+        top:78px;
+        left:15px;
+        right:15px;
+
+        display:none;
+        flex-direction:column;
+        align-items:stretch;
+        gap:3px;
+
+        padding:10px;
+
+        border:1px solid var(--border);
+        border-radius:14px;
+
+        background:rgba(3,9,18,.98);
+        box-shadow:var(--shadow);
+    }
+
+    .nav-links.open{
+        display:flex;
+    }
+
+    .nav-links a{
+        padding:13px;
+    }
+
+    .menu-btn{
+        display:block;
+    }
+
+    .grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .hero-stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .graphics{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .social-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .status-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .payment-methods{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:650px){
+
+    section{
+        padding:80px 0;
+    }
+
+    .hero{
+        min-height:90vh;
+        padding:115px 18px 70px;
+    }
+
+    .hero h1{
+        font-size:clamp(45px,15vw,75px);
+        letter-spacing:-4px;
+    }
+
+    .hero-buttons{
+        flex-direction:column;
+    }
+
+    .hero-buttons .btn{
+        width:100%;
+    }
+
+    .grid,
+    .price-grid,
+    .policy-grid,
+    .status-grid,
+    .feature-list{
+        grid-template-columns:1fr;
+    }
+
+    .graphics,
+    .social-grid,
+    .hero-stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .payment-methods{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .form-container{
+        padding:24px;
+    }
+
+    .philosophy{
+        padding:35px 22px;
+    }
+
+    .ai-button{
+        right:16px;
+        bottom:16px;
+    }
+
+    .ai-panel{
+        right:15px;
+        bottom:85px;
+    }
+
+    #topBtn{
+        right:16px;
+        bottom:88px;
+    }
+
+    .toast{
+        left:15px;
+        right:15px;
+        bottom:85px;
+        max-width:none;
+    }
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        scroll-behavior:auto !important;
+        transition-duration:.01ms !important;
+    }
+}
+</style>
 </head>
 
+<body class="locked">
 
-<body>
+<!-- =========================================================
+     BACKGROUND
+========================================================= -->
+
+<div class="background">
+    <div class="background-grid"></div>
+    <div class="background-glow"></div>
+    <div class="background-glow two"></div>
+    <div class="background-glow three"></div>
+</div>
 
 
-    <!-- =========================
-         NAVIGATION
-         ========================= -->
+<!-- =========================================================
+     SECURITY VERIFICATION
+========================================================= -->
 
-    <nav>
+<div id="securityScreen">
 
-        <h2>
-            Ventorea Studios
-        </h2>
+    <div class="security-box">
 
-        <div>
+        <div class="security-logo">
+            VENTOREA <span>STUDIOS</span>
+        </div>
 
-            <a href="#">
-                Home
-            </a>
+        <div class="security-icon">
+            🔐
+        </div>
 
-            <a href="#about">
-                About
-            </a>
+        <h1>
+            Secure Access
+        </h1>
 
-            <a href="#games">
-                Games
-            </a>
+        <p>
+            Verify access before entering the Ventorea Studios website.
+            This is a client-side verification screen.
+        </p>
 
-            <a href="#game">
-                About the Game
-            </a>
+        <button
+            id="verifyBtn"
+            class="btn full sound">
 
-            <a href="#learn-more">
-                Learn More
-            </a>
+            Verify & Enter
 
-            <a href="#status">
-                Development
-            </a>
+        </button>
 
-            <a href="#philosophy">
-                Philosophy
-            </a>
-
-            <a href="#updates">
-                Updates
-            </a>
-
-            <a href="#policy">
-                Policy
-            </a>
-
-            <a href="#community">
-                Community
-            </a>
-
-            <a href="#privacy">
-                Privacy
-            </a>
-
-            <a href="#faq">
-                FAQ
-            </a>
-
-            <a href="#social">
-                Social
-            </a>
-
-            <a href="#contact">
-                Contact
-            </a>
+        <div
+            id="verifyStatus"
+            class="verify-status">
 
         </div>
 
-    </nav>
+    </div>
+
+</div>
 
 
+<!-- =========================================================
+     NAVIGATION
+========================================================= -->
 
-    <!-- =========================
-         HERO
-         ========================= -->
+<nav id="navbar">
 
-    <header class="hero">
+    <a href="#home" class="logo sound">
+        VENTOREA <span>STUDIOS</span>
+    </a>
 
-        <div class="hero-content">
+    <button
+        class="menu-btn sound"
+        id="menuBtn"
+        aria-label="Open navigation menu"
+        aria-expanded="false">
 
-            <img
-                src="Ventorea Studios image.jpeg"
-                alt="Ventorea Studios Logo"
-                class="studio-logo"
-            >
+        ☰
 
-            <p>
-                INDEPENDENT GAME DEVELOPMENT STUDIO
-            </p>
+    </button>
 
-            <h1>
-                Real life, reimagined.
-            </h1>
+    <div class="nav-links" id="navLinks">
 
-            <p>
-                We create immersive worlds built around realism,
-                freedom, and meaningful player experiences.
-            </p>
+        <a href="#home" class="sound">Home</a>
+        <a href="#about" class="sound">RSL</a>
+        <a href="#features" class="sound">Features</a>
+        <a href="#graphics" class="sound">Graphics</a>
+        <a href="#roadmap" class="sound">Roadmap</a>
+        <a href="#pricing" class="sound">Pricing</a>
+        <a href="#faq" class="sound">FAQ</a>
+        <a href="#social" class="sound">Social</a>
+
+        <a
+            href="#contact"
+            class="nav-contact sound">
+
+            Contact
+
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<header class="hero" id="home">
+
+    <div class="hero-content reveal">
+
+        <div class="hero-badge">
+            RSL • IN DEVELOPMENT
+        </div>
+
+        <h1>
+            <span>
+                REALISTIC<br>
+                SIMULATION LIFE
+            </span>
+        </h1>
+
+        <p class="hero-description">
+
+            A connected open-world life simulation built around one idea:
+
+            <strong>
+                If it exists in real life, it should exist in the game.
+            </strong>
+
+        </p>
+
+        <div class="hero-buttons">
 
             <a
                 href="#about"
-                class="button"
-            >
-                Discover Ventorea
-            </a>
+                class="btn sound">
 
-            <br>
-            <br>
+                Explore RSL
+
+            </a>
 
             <a
-                href="#contact"
-                class="button"
-            >
-                Contact Us
+                href="#roadmap"
+                class="btn secondary sound">
+
+                View Roadmap
+
             </a>
 
         </div>
 
-    </header>
+        <div class="hero-stats">
 
-
-
-    <!-- =========================
-         ABOUT
-         ========================= -->
-
-    <section id="about">
-
-        <div class="section-title">
-
-            <h2>
-                About Ventorea
-            </h2>
-
-            <p>
-                Building worlds that feel alive.
-            </p>
-
-        </div>
-
-
-        <div class="cards">
-
-            <div class="card">
-
-                <h3>
-                    Realism
-                </h3>
-
-                <p>
-                    Our games are designed around believable systems
-                    inspired by the real world.
-                </p>
-
+            <div class="hero-stat">
+                <strong>🌎</strong>
+                <span>Living World</span>
             </div>
 
-
-            <div class="card">
-
-                <h3>
-                    Freedom
-                </h3>
-
-                <p>
-                    Players should be free to make their own choices
-                    and create their own stories.
-                </p>
-
+            <div class="hero-stat">
+                <strong>🚗</strong>
+                <span>Vehicle Simulation</span>
             </div>
 
+            <div class="hero-stat">
+                <strong>🎮</strong>
+                <span>PC & Console Planned</span>
+            </div>
 
-            <div class="card">
-
-                <h3>
-                    Living Worlds
-                </h3>
-
-                <p>
-                    Every system should interact with the world
-                    instead of existing separately.
-                </p>
-
+            <div class="hero-stat">
+                <strong>🧪</strong>
+                <span>Currently Testing</span>
             </div>
 
         </div>
 
-    </section>
+    </div>
 
+</header>
 
 
-    <!-- =========================
-         GAMES
-         ========================= -->
+<!-- =========================================================
+     ABOUT
+========================================================= -->
 
-    <section id="games">
+<section id="about">
 
-        <div class="section-title">
+<div class="container">
 
-            <h2>
-                Our Games
-            </h2>
+<div class="section-header reveal">
 
-            <p>
-                Experiences currently being developed by
-                Ventorea Studios.
-            </p>
+<span class="section-tag">
+ABOUT RSL
+</span>
 
-        </div>
+<h2 class="section-title">
+More than an open world.
+</h2>
 
+<p class="section-description">
+RSL is being designed as a living simulation where transportation,
+people, economy, weather and everyday systems connect together.
+</p>
 
-        <div class="cards">
+</div>
 
-            <div class="card">
 
-                <h3>
-                    Life Simulation
-                </h3>
+<div class="grid">
 
-                <p>
-                    A massive life simulation experience where players
-                    can build careers, own property, travel, interact
-                    with others, and create their own lives.
-                </p>
+<article class="card highlight reveal">
 
-                <br>
+<div class="card-icon">🌎</div>
 
-                <a
-                    href="#learn-more"
-                    class="button"
-                >
-                    Learn More
-                </a>
+<h3>A Living World</h3>
 
-            </div>
+<p>
+The world is designed to feel active and connected,
+with NPCs, services, transportation and environmental
+systems working together.
+</p>
 
+</article>
 
-            <div class="card">
 
-                <h3>
-                    In Development
-                </h3>
+<article class="card reveal">
 
-                <p>
-                    Our main project is currently in development,
-                    with a focus on building its world, systems,
-                    gameplay, and overall direction.
-                </p>
+<div class="card-icon">👥</div>
 
-            </div>
+<h3>NPCs</h3>
 
+<p>
+NPCs are intended to have routines, interactions and
+reactions to events happening around them.
+</p>
 
-            <div class="card">
+</article>
 
-                <h3>
-                    Future
-                </h3>
 
-                <p>
-                    Additional projects may be considered as
-                    Ventorea Studios grows and development progresses.
-                </p>
+<article class="card reveal">
 
-            </div>
+<div class="card-icon">💼</div>
 
-        </div>
+<h3>Jobs & Economy</h3>
 
-    </section>
+<p>
+Work, income, spending, services and other economic
+systems can become part of everyday gameplay.
+</p>
 
+</article>
 
 
-    <!-- =========================
-         ABOUT THE GAME
-         ========================= -->
+<article class="card reveal">
 
-    <section id="game">
+<div class="card-icon">🌦️</div>
 
-        <div class="section-title">
+<h3>Environment</h3>
 
-            <h2>
-                About the Game
-            </h2>
+<p>
+Weather and environmental conditions are intended to
+influence the world instead of simply being visuals.
+</p>
 
-            <p>
-                A life simulation built around realism,
-                freedom, and a world that continues to live around you.
-            </p>
+</article>
 
-        </div>
 
+<article class="card reveal">
 
-        <p class="game-description">
+<div class="card-icon">🏙️</div>
 
-            Our goal is to create a living virtual world where
-            players can experience everyday life while having the
-            freedom to create their own story.
+<h3>Everyday Life</h3>
 
-            The world is designed around interconnected systems,
-            meaning the actions of players and the world itself
-            can affect what happens around them.
+<p>
+Transportation, shopping, services and normal daily
+activities can all become part of the simulation.
+</p>
 
-        </p>
+</article>
 
 
-        <div class="cards">
+<article class="card reveal">
 
-            <div class="card">
+<div class="card-icon">🎯</div>
 
-                <h3>
-                    Live Your Own Life
-                </h3>
+<h3>Your Choice</h3>
 
-                <p>
-                    Create your own character and build a life your way.
-                    Choose where you live, what you do, where you work,
-                    and how you spend your time.
-                </p>
+<p>
+RSL is intended to give players freedom without
+forcing everyone into the same style of gameplay.
+</p>
 
-            </div>
+</article>
 
+</div>
 
-            <div class="card">
+</div>
 
-                <h3>
-                    Build a Career
-                </h3>
+</section>
 
-                <p>
-                    Start from the beginning and work your way toward
-                    your goals. Build a career, earn money, manage your
-                    finances, and create your own future.
-                </p>
 
-            </div>
+<!-- =========================================================
+     PHILOSOPHY
+========================================================= -->
 
+<section>
 
-            <div class="card">
+<div class="container">
 
-                <h3>
-                    Own Property
-                </h3>
+<div class="philosophy reveal">
 
-                <p>
-                    Buy homes, apartments, businesses, and other
-                    properties as you progress through your life.
-                </p>
+<blockquote>
+“If it exists in real life,
+it should exist in the game.”
+</blockquote>
 
-            </div>
+<cite>
+— Ventorea Studios • RSL Design Philosophy
+</cite>
 
+</div>
 
-            <div class="card">
+</div>
 
-                <h3>
-                    Explore the World
-                </h3>
+</section>
 
-                <p>
-                    Travel through cities and different environments,
-                    use transportation, visit airports, and experience
-                    a world designed to feel connected.
-                </p>
 
-            </div>
+<!-- =========================================================
+     FEATURES
+========================================================= -->
 
+<section id="features">
 
-            <div class="card">
+<div class="container">
 
-                <h3>
-                    Living Systems
-                </h3>
+<div class="section-header reveal">
 
-                <p>
-                    The planned world includes interconnected systems
-                    such as jobs, education, transportation, weather,
-                    finances, emergency services, law enforcement,
-                    and other aspects of everyday life.
-                </p>
+<span class="section-tag">
+SYSTEMS
+</span>
 
-            </div>
+<h2 class="section-title">
+Built around simulation.
+</h2>
 
+<p class="section-description">
+RSL is planned around interconnected systems instead of treating
+every feature as an isolated mechanic.
+</p>
 
-            <div class="card">
+</div>
 
-                <h3>
-                    Dynamic NPCs
-                </h3>
 
-                <p>
-                    NPCs are planned to behave as part of the world,
-                    creating interactions and situations that can change
-                    depending on what happens around them.
-                </p>
+<div class="feature-list">
 
-            </div>
+<div class="feature-row reveal">
+<div class="feature-number">01</div>
+<div>
+<h3>🚗 Vehicle Simulation</h3>
+<p>
+Vehicles can have individual damage, repairs, handling
+and consequences from collisions.
+</p>
+</div>
+</div>
 
-        </div>
 
+<div class="feature-row reveal">
+<div class="feature-number">02</div>
+<div>
+<h3>🛠️ Damage & Repairs</h3>
+<p>
+After a crash, the game can identify damaged parts and
+show what needs to be repaired.
+</p>
+</div>
+</div>
 
-        <div
-            class="section-title"
-            style="margin-top: 90px;"
-        >
 
-            <h2>
-                What Is The Goal?
-            </h2>
+<div class="feature-row reveal">
+<div class="feature-number">03</div>
+<div>
+<h3>👤 NPC Accidents</h3>
+<p>
+NPC collisions can create situations involving damage,
+responsibility and potential compensation.
+</p>
+</div>
+</div>
 
-            <p>
-                There is no single way to play.
-            </p>
 
-        </div>
+<div class="feature-row reveal">
+<div class="feature-number">04</div>
+<div>
+<h3>💰 Economy</h3>
+<p>
+A planned economy can connect jobs, income, spending
+and services.
+</p>
+</div>
+</div>
 
 
-        <p class="game-goal">
+<div class="feature-row reveal">
+<div class="feature-number">05</div>
+<div>
+<h3>🚦 Transportation</h3>
+<p>
+Roads, traffic and transportation are planned as
+important parts of the world.
+</p>
+</div>
+</div>
 
-            The goal is to create your own life.
 
-            You decide what you want to become, how you want to live,
-            and what choices you make along the way.
+<div class="feature-row reveal">
+<div class="feature-number">06</div>
+<div>
+<h3>🌦️ Dynamic Weather</h3>
+<p>
+Environmental conditions can affect how the world looks
+and potentially how it behaves.
+</p>
+</div>
+</div>
 
-            Whether you want to build a successful career,
-            own businesses and property, travel the world,
-            or simply experience everyday life,
-            the choice is yours.
 
-        </p>
+<div class="feature-row reveal">
+<div class="feature-number">07</div>
+<div>
+<h3>🏠 Everyday Activities</h3>
+<p>
+Everyday services and activities can become interactive
+parts of the world.
+</p>
+</div>
+</div>
 
 
-        <div
-            class="section-title"
-            style="margin-top: 90px;"
-        >
+<div class="feature-row reveal">
+<div class="feature-number">08</div>
+<div>
+<h3>🎨 Customization</h3>
+<p>
+Players are planned to have control over their character,
+vehicles and other parts of their experience.
+</p>
+</div>
+</div>
 
-            <h2>
-                Release
-            </h2>
+</div>
 
-            <p>
-                Development is currently in progress.
-            </p>
+</div>
 
-        </div>
+</section>
 
 
-        <div class="release-box">
+<!-- =========================================================
+     VEHICLES
+========================================================= -->
 
-            <h3>
-                Release: Not Announced
-            </h3>
+<section>
 
-            <p>
-                Ventorea Studios does not currently have a confirmed
-                release date or release window.
+<div class="container">
 
-                A release window will be announced when development
-                reaches a stage where we can provide a reliable estimate.
-            </p>
+<div class="section-header reveal">
 
-        </div>
+<span class="section-tag">
+VEHICLES
+</span>
 
-    </section>
+<h2 class="section-title">
+Drive differently.
+</h2>
 
+<p class="section-description">
+Vehicles are intended to feel like part of the simulation,
+not disposable tools.
+</p>
 
+</div>
 
-    <!-- =========================
-         LEARN MORE
-         ========================= -->
 
-    <section id="learn-more">
+<div class="grid">
 
-        <div class="section-title">
+<article class="card reveal">
 
-            <h2>
-                Learn More
-            </h2>
+<div class="card-icon">🚘</div>
 
-            <p>
-                Take a closer look at the vision behind Ventorea's
-                life simulation experience.
-            </p>
+<h3>Original Vehicles First</h3>
 
-        </div>
+<p>
+Early versions can use fictional vehicle designs so
+development isn't dependent on expensive licensing.
+</p>
 
+</article>
 
-        <p class="learn-more-description">
 
-            Ventorea's main game is being designed as a connected
-            virtual world where everyday life, player decisions,
-            and world systems can influence one another.
+<article class="card reveal">
 
-            The goal is not simply to create a game where you complete
-            missions. The goal is to create a world where you can
-            decide what kind of life you want to live.
+<div class="card-icon">💥</div>
 
-        </p>
+<h3>Realistic Damage</h3>
 
+<p>
+Crashes can damage individual components and provide
+information about what needs repair.
+</p>
 
-        <div class="learn-more-list">
+</article>
 
 
-            <div class="learn-more-card">
+<article class="card reveal">
 
-                <h3>
-                    Character & Identity
-                </h3>
+<div class="card-icon">🔧</div>
 
-                <p>
-                    Players will be able to create and develop their
-                    own characters and shape their lives through
-                    personal choices, careers, relationships,
-                    activities, and progression.
-                </p>
+<h3>Repair System</h3>
 
-            </div>
+<p>
+Damaged vehicles are intended to require repairs rather
+than simply resetting after an accident.
+</p>
 
+</article>
 
-            <div class="learn-more-card">
+</div>
 
-                <h3>
-                    Careers & Economy
-                </h3>
+</div>
 
-                <p>
-                    The game is planned to include careers, income,
-                    spending, finances, businesses, property,
-                    and other systems designed to create a connected
-                    economic experience.
-                </p>
+</section>
 
-            </div>
 
+<!-- =========================================================
+     GRAPHICS
+========================================================= -->
 
-            <div class="learn-more-card">
+<section id="graphics">
 
-                <h3>
-                    Cities & Transportation
-                </h3>
+<div class="container">
 
-                <p>
-                    Players will be able to explore cities and
-                    environments while using different forms of
-                    transportation. Airports and travel systems
-                    are also part of the planned world.
-                </p>
+<div class="section-header reveal">
 
-            </div>
+<span class="section-tag">
+GRAPHICS
+</span>
 
+<h2 class="section-title">
+Your hardware. Your choice.
+</h2>
 
-            <div class="learn-more-card">
+<p class="section-description">
+The planned PC system can recommend a graphics preset based on
+hardware. Console players receive a stable default configuration.
+</p>
 
-                <h3>
-                    NPCs & World Activity
-                </h3>
+</div>
 
-                <p>
-                    NPCs are planned to form part of the living world,
-                    with activities and behaviors that can change
-                    depending on the environment and events around them.
-                </p>
 
-            </div>
+<div class="graphics">
 
+<article class="graphics-card low reveal">
+<div class="graphics-dot"></div>
+<h3>🔴 Low</h3>
+<p>Designed for lower-end hardware.</p>
+</article>
 
-            <div class="learn-more-card">
+<article class="graphics-card medium reveal">
+<div class="graphics-dot"></div>
+<h3>🟡 Medium</h3>
+<p>Balanced visual quality and performance.</p>
+</article>
 
-                <h3>
-                    Weather & Environment
-                </h3>
+<article class="graphics-card high reveal">
+<div class="graphics-dot"></div>
+<h3>🟢 High</h3>
+<p>Higher visual quality for stronger systems.</p>
+</article>
 
-                <p>
-                    Weather and environmental conditions are planned
-                    to be part of the world and may interact with
-                    different systems and activities.
-                </p>
+<article class="graphics-card ultra reveal">
+<div class="graphics-dot"></div>
+<h3>🔵 Ultra</h3>
+<p>Maximum planned visual quality.</p>
+</article>
 
-            </div>
+</div>
 
 
-            <div class="learn-more-card">
+<div class="card reveal" style="margin-top:20px;text-align:center;">
 
-                <h3>
-                    Emergency Services
-                </h3>
+<h3>
+⚠️ Performance protection
+</h3>
 
-                <p>
-                    Emergency services and law enforcement are planned
-                    parts of the world, helping create a more believable
-                    and interconnected environment.
-                </p>
+<p style="margin-top:8px;">
 
-            </div>
+On consoles, the game is planned to use stable graphics settings
+by default. If demanding settings become available, a warning can
+appear before confirmation.
 
+</p>
 
-            <div class="learn-more-card">
+</div>
 
-                <h3>
-                    Multiplayer
-                </h3>
+</div>
 
-                <p>
-                    Multiplayer is currently planned. Specific
-                    multiplayer features, player limits, and technical
-                    requirements have not been finalized.
-                </p>
+</section>
 
-            </div>
 
+<!-- =========================================================
+     ROADMAP
+========================================================= -->
 
-            <div class="learn-more-card">
+<section id="roadmap">
 
-                <h3>
-                    Continuous Development
-                </h3>
+<div class="container">
 
-                <p>
-                    Ventorea Studios plans to continue developing the
-                    game as the project grows. New systems, features,
-                    improvements, and additional content may be added
-                    throughout development and after release.
-                </p>
+<div class="section-header reveal">
 
-            </div>
+<span class="section-tag">
+DEVELOPMENT
+</span>
 
+<h2 class="section-title">
+The road to RSL.
+</h2>
 
-        </div>
+<p class="section-description">
+RSL is being planned in stages so the project can be tested before release.
+</p>
 
-    </section>
+</div>
 
 
+<div class="timeline">
 
-    <!-- =========================
-         DEVELOPMENT STATUS
-         ========================= -->
+<div class="timeline-item reveal">
+<div class="timeline-number">1</div>
+<div>
+<h3>🟡 Development</h3>
+<p>Build and test the core world and simulation systems.</p>
+</div>
+</div>
 
-    <section id="status">
+<div class="timeline-item reveal">
+<div class="timeline-number">2</div>
+<div>
+<h3>🔵 Demo / Trial</h3>
+<p>
+Release an early playable version for testing and feedback.
+</p>
+</div>
+</div>
 
-        <div class="section-title">
+<div class="timeline-item reveal">
+<div class="timeline-number">3</div>
+<div>
+<h3>⚪ Gameplay Trailer</h3>
+<p>
+Showcase the world, gameplay systems and overall direction.
+</p>
+</div>
+</div>
 
-            <h2>
-                Development Status
-            </h2>
+<div class="timeline-item reveal">
+<div class="timeline-number">4</div>
+<div>
+<h3>⚪ Pre-order</h3>
+<p>
+Pre-orders are planned only after the project reaches
+a suitable stage.
+</p>
+</div>
+</div>
 
-            <p>
-                Follow the current progress of Ventorea's main project.
-            </p>
+<div class="timeline-item reveal">
+<div class="timeline-number">5</div>
+<div>
+<h3>⚪ Release</h3>
+<p>
+Launch the full game and continue improving it after release.
+</p>
+</div>
+</div>
 
-        </div>
+</div>
 
+</div>
 
-        <div class="status-box">
+</section>
 
-            <div class="status-header">
 
-                <h3>
-                    Ventorea Life Simulation
-                </h3>
+<!-- =========================================================
+     STATUS
+========================================================= -->
 
-                <span class="status-indicator">
-                    ● IN DEVELOPMENT
-                </span>
+<section>
 
-            </div>
+<div class="container">
 
+<div class="section-header reveal">
 
-            <div class="status-list">
+<span class="section-tag">
+CURRENT STATUS
+</span>
 
-                <div class="status-item">
+<h2 class="section-title">
+Where things stand.
+</h2>
 
-                    <span>
-                        World Design
-                    </span>
+</div>
 
-                    <span class="status-development">
-                        In Development
-                    </span>
 
-                </div>
+<div class="status-grid">
 
+<div class="status-card reveal">
+<span class="status-name">RSL Development</span>
+<span class="status-pill status-development">IN DEVELOPMENT</span>
+</div>
 
-                <div class="status-item">
+<div class="status-card reveal">
+<span class="status-name">Demo / Trial</span>
+<span class="status-pill status-planned">PLANNED</span>
+</div>
 
-                    <span>
-                        Life Systems
-                    </span>
+<div class="status-card reveal">
+<span class="status-name">Gameplay Trailer</span>
+<span class="status-pill status-planned">PLANNED</span>
+</div>
 
-                    <span class="status-development">
-                        In Development
-                    </span>
+<div class="status-card reveal">
+<span class="status-name">Pre-orders</span>
+<span class="status-pill status-coming">COMING SOON</span>
+</div>
 
-                </div>
+<div class="status-card reveal">
+<span class="status-name">PC Release</span>
+<span class="status-pill status-coming">COMING SOON</span>
+</div>
 
+<div class="status-card reveal">
+<span class="status-name">Console Release</span>
+<span class="status-pill status-planned">PLANNED</span>
+</div>
 
-                <div class="status-item">
+</div>
 
-                    <span>
-                        NPC Systems
-                    </span>
+</div>
 
-                    <span class="status-planned">
-                        Planned
-                    </span>
+</section>
 
-                </div>
 
+<!-- =========================================================
+     PRICING
+========================================================= -->
 
-                <div class="status-item">
+<section id="pricing">
 
-                    <span>
-                        Multiplayer
-                    </span>
+<div class="container">
 
-                    <span class="status-planned">
-                        Planned
-                    </span>
+<div class="section-header reveal">
 
-                </div>
+<span class="section-tag">
+EDITIONS
+</span>
 
+<h2 class="section-title">
+Choose your edition.
+</h2>
 
-                <div class="status-item">
+<p class="section-description">
+These are planned prices and may change before release.
+</p>
 
-                    <span>
-                        Release Date
-                    </span>
+</div>
 
-                    <span class="status-announced">
-                        Not Announced
-                    </span>
 
-                </div>
+<div class="price-grid">
 
+<article class="price-card featured reveal">
 
-                <div class="status-item">
+<span class="price-badge">
+STANDARD EDITION
+</span>
 
-                    <span>
-                        Platform
-                    </span>
+<div class="price">
+$20
+</div>
 
-                    <span class="status-announced">
-                        To Be Announced
-                    </span>
+<p class="price-sub">
+Planned normal price.
+</p>
 
-                </div>
+<ul class="price-list">
 
-            </div>
+<li>Core RSL experience</li>
+<li>Main simulation systems</li>
+<li>Planned future updates</li>
+<li>Standard edition content</li>
 
-        </div>
+</ul>
 
-    </section>
+<button
+class="btn sound full"
+onclick="showToast('Pre-orders are not open yet.')">
 
+Pre-order — Coming Soon
 
+</button>
 
-    <!-- =========================
-         PHILOSOPHY
-         ========================= -->
+</article>
 
-    <section
-        id="philosophy"
-        class="philosophy"
-    >
 
-        <div class="section-title">
+<article class="price-card reveal">
 
-            <h2>
-                Our Philosophy
-            </h2>
+<span class="price-badge">
+ULTIMATE EDITION
+</span>
 
-        </div>
+<div class="price">
+$50
+</div>
 
+<p class="price-sub">
+Planned premium edition.
+</p>
 
-        <p class="quote">
+<ul class="price-list">
 
-            "If it exists in real life, it should exist in the game
-            whenever practical."
+<li>Everything in Standard</li>
+<li>Planned Ultimate bonuses</li>
+<li>Additional content may be announced</li>
+<li>Premium edition content</li>
 
-        </p>
+</ul>
 
+<button
+class="btn secondary sound full"
+onclick="showToast('Ultimate pre-orders are not open yet.')">
 
-        <p>
+Coming Soon
 
-            This principle guides the systems we design
-            and the worlds we create.
+</button>
 
-        </p>
+</article>
 
-    </section>
+</div>
 
 
+<div class="offer reveal">
 
-    <!-- =========================
-         DEVELOPMENT UPDATES
-         ========================= -->
+⚡ <strong>Planned launch offer:</strong>
+$5 for the first 72 hours of launch, then the planned Standard
+Edition price returns to $20.
 
-    <section id="updates">
+<br><br>
 
-        <div class="section-title">
+This offer is planned and is not currently active.
 
-            <h2>
-                Development Updates
-            </h2>
+</div>
 
-            <p>
-                Follow the journey as Ventorea Studios grows.
-            </p>
 
-        </div>
+<!-- PAYMENT -->
 
+<div class="payment-box reveal">
 
-        <div class="update-card">
+<h3>
+💳 Planned payment methods
+</h3>
 
-            <div class="update-date">
-                AUGUST 2026
-            </div>
+<p style="color:var(--muted);font-size:13px;margin-top:7px;">
+The future checkout is planned to support major debit and credit
+card networks. Payment processing is not active on this test website.
+</p>
 
-            <h3>
-                Ventorea Studios Website
-            </h3>
+<div class="payment-methods">
 
-            <p>
-                The official Ventorea Studios website is being
-                developed alongside the early stages of the studio
-                and its main game project.
+<div class="payment-method">
+VISA
+</div>
 
-                More development updates will be added here as
-                progress continues.
-            </p>
+<div class="payment-method">
+MASTERCARD
+</div>
 
-        </div>
+<div class="payment-method">
+AMEX
+</div>
 
-    </section>
+<div class="payment-method">
+DISCOVER
+</div>
 
+<div class="payment-method">
+JCB
+</div>
 
+</div>
 
-    <!-- =========================
-         POLICY
-         ========================= -->
+<p class="payment-note">
 
-    <section id="policy">
+Prepaid cards and unsupported stored-value cards may not be accepted
+by the future payment processor. The final supported methods will be
+confirmed when real checkout is implemented.
 
-        <div class="section-title">
+</p>
 
-            <h2>
-                Studio Policy
-            </h2>
+<button
+class="btn secondary sound"
+style="width:100%;margin-top:18px;"
+onclick="showToast('Secure checkout is not active yet.')">
 
-            <p>
-                Standards that guide our games,
-                community, and development.
-            </p>
+Open Secure Checkout — Coming Soon
 
-            <p>
-                Last Updated: August 2026
-            </p>
+</button>
 
-        </div>
+</div>
 
 
-        <div class="cards">
+<div
+class="card reveal"
+style="max-width:1000px;margin:20px auto 0;text-align:center;">
 
-            <div class="card">
+<h3>
+🎮 Platform subscriptions
+</h3>
 
-                <h3>
-                    Fair Play
-                </h3>
+<p style="color:var(--muted);margin-top:8px;font-size:14px;">
 
-                <p>
-                    We aim to provide a fair experience for everyone.
-                    Exploiting bugs, abusing systems, or intentionally
-                    disrupting other players is not supported.
-                </p>
+If RSL becomes available through a platform subscription,
+access may depend on that platform's subscription rules.
 
-            </div>
+</p>
 
+</div>
 
-            <div class="card">
 
-                <h3>
-                    Respect
-                </h3>
+<div
+class="card reveal"
+style="max-width:1000px;margin:20px auto 0;text-align:center;">
 
-                <p>
-                    Players and members of the community are expected
-                    to treat others with respect and help maintain a
-                    welcoming environment.
-                </p>
+<h3>
+📱 Mobile
+</h3>
 
-            </div>
+<p style="color:var(--muted);margin-top:8px;font-size:14px;">
 
+Mobile is currently not recommended because RSL is expected to require
+significant storage and hardware resources.
 
-            <div class="card">
+</p>
 
-                <h3>
-                    Game Integrity
-                </h3>
+</div>
 
-                <p>
-                    Our systems are designed to protect the integrity
-                    of the game and provide a consistent experience
-                    for the community.
-                </p>
+</div>
 
-            </div>
+</section>
 
-        </div>
 
-    </section>
+<!-- =========================================================
+     FAQ
+========================================================= -->
 
+<section id="faq">
 
+<div class="container">
 
-    <!-- =========================
-         VIOLATIONS
-         ========================= -->
+<div class="section-header reveal">
 
-    <section id="violations">
+<span class="section-tag">
+FAQ
+</span>
 
-        <div class="section-title">
+<h2 class="section-title">
+Questions?
+</h2>
 
-            <h2>
-                Violations
-            </h2>
+<p class="section-description">
+Open a question to learn more.
+</p>
 
-            <p>
-                Actions that may result in restrictions
-                or other enforcement measures.
-            </p>
+</div>
 
-        </div>
 
+<div class="faq-list">
 
-        <div class="cards">
 
-            <div class="card">
+<div class="faq reveal">
 
-                <h3>
-                    Exploiting
-                </h3>
+<button class="faq-question sound">
 
-                <p>
-                    Using bugs, glitches, unauthorized software,
-                    or other methods to gain an unfair advantage
-                    may result in enforcement action.
-                </p>
+When will RSL release?
 
-            </div>
+<span class="plus">+</span>
 
+</button>
 
-            <div class="card">
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
-                <h3>
-                    Disruption
-                </h3>
+There is currently no final release date. RSL is still in development
+and the schedule will depend on development progress.
 
-                <p>
-                    Intentionally disrupting other players,
-                    servers, or game systems may result
-                    in restrictions.
-                </p>
+</div>
+</div>
 
-            </div>
+</div>
 
 
-            <div class="card">
+<div class="faq reveal">
 
-                <h3>
-                    Unauthorized Access
-                </h3>
+<button class="faq-question sound">
 
-                <p>
-                    Attempting to access accounts, systems,
-                    servers, or information without authorization
-                    is prohibited.
-                </p>
+Will there be a demo or trial?
 
-            </div>
+<span class="plus">+</span>
 
-        </div>
+</button>
 
-    </section>
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
+A demo or trial version is planned before the final release so the
+project can be tested and players can provide feedback.
 
+</div>
+</div>
 
-    <!-- =========================
-         PRIVACY POLICY
-         ========================= -->
+</div>
 
-    <section id="privacy">
 
-        <div class="section-title">
+<div class="faq reveal">
 
-            <h2>
-                Privacy Policy
-            </h2>
+<button class="faq-question sound">
 
-            <p>
-                How Ventorea Studios intends to handle information
-                and protect the privacy of our users and community.
-            </p>
+When will pre-orders open?
 
-            <p>
-                Last Updated: August 2026
-            </p>
+<span class="plus">+</span>
 
-        </div>
+</button>
 
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
-        <div class="cards">
+Pre-orders are planned for a later stage and are not currently available.
 
-            <div class="card">
+</div>
+</div>
 
-                <h3>
-                    Information We Collect
-                </h3>
+</div>
 
-                <p>
-                    Ventorea Studios may collect information that
-                    you voluntarily provide when contacting us,
-                    participating in our community, or using our
-                    services.
-                </p>
 
-            </div>
+<div class="faq reveal">
 
+<button class="faq-question sound">
 
-            <div class="card">
+Will RSL use real car brands?
 
-                <h3>
-                    How We Use Information
-                </h3>
+<span class="plus">+</span>
 
-                <p>
-                    Information may be used to respond to requests,
-                    provide support, improve our services, communicate
-                    with our community, and maintain the security
-                    of our systems.
-                </p>
+</button>
 
-            </div>
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
+Early versions can use fictional vehicles. Real-world vehicles may be
+considered later if licensing becomes practical.
 
-            <div class="card">
+</div>
+</div>
 
-                <h3>
-                    Information Protection
-                </h3>
+</div>
 
-                <p>
-                    We aim to use reasonable measures to protect
-                    information from unauthorized access, disclosure,
-                    alteration, or destruction.
-                </p>
 
-            </div>
+<div class="faq reveal">
 
+<button class="faq-question sound">
 
-            <div class="card">
+Why fictional vehicles?
 
-                <h3>
-                    Third-Party Services
-                </h3>
+<span class="plus">+</span>
 
-                <p>
-                    Our website, games, or services may use third-party
-                    platforms and services. Their own privacy policies
-                    may apply when you interact with those services.
-                </p>
+</button>
 
-            </div>
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
+Real vehicle brands can require licensing agreements. Fictional vehicles
+allow development to continue without depending on those agreements.
 
-            <div class="card">
+</div>
+</div>
 
-                <h3>
-                    Children's Privacy
-                </h3>
+</div>
 
-                <p>
-                    We do not intentionally collect personal information
-                    from children when such collection is prohibited by
-                    applicable laws.
-                </p>
 
-            </div>
+<div class="faq reveal">
 
+<button class="faq-question sound">
 
-            <div class="card">
+Will RSL be like GTA?
 
-                <h3>
-                    Policy Updates
-                </h3>
+<span class="plus">+</span>
 
-                <p>
-                    This Privacy Policy may be updated as Ventorea
-                    Studios develops new services, features, and
-                    systems. Important changes may be announced
-                    through our official channels.
-                </p>
+</button>
 
-            </div>
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
-        </div>
+RSL is intended to focus on realistic life simulation rather than being
+primarily a crime sandbox. Driving, work, transportation, NPCs and
+everyday systems are central to the concept.
 
-    </section>
+</div>
+</div>
 
+</div>
 
 
-    <!-- =========================
-         COMMUNITY GUIDELINES
-         ========================= -->
+<div class="faq reveal">
 
-    <section id="community">
+<button class="faq-question sound">
 
-        <div class="section-title">
+Why isn't mobile recommended?
 
-            <h2>
-                Community Guidelines
-            </h2>
+<span class="plus">+</span>
 
-            <p>
-                Guidelines for keeping the Ventorea Studios
-                community safe, respectful, and enjoyable.
-            </p>
+</button>
 
-            <p>
-                Last Updated: August 2026
-            </p>
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
-        </div>
+The intended simulation depth and expected hardware and storage
+requirements may make mobile devices a poor fit.
 
+</div>
+</div>
 
-        <div class="cards">
+</div>
 
-            <div class="card">
 
-                <h3>
-                    Respect Others
-                </h3>
+<div class="faq reveal">
 
-                <p>
-                    Treat other players, community members,
-                    developers, and staff with respect.
-                    Harassment, bullying, threats, or targeted
-                    abuse are not tolerated.
-                </p>
+<button class="faq-question sound">
 
-            </div>
+Is this website official?
 
+<span class="plus">+</span>
 
-            <div class="card">
+</button>
 
-                <h3>
-                    No Cheating
-                </h3>
+<div class="faq-answer">
+<div class="faq-answer-inner">
 
-                <p>
-                    Do not use unauthorized software, exploits,
-                    cheats, or other methods intended to gain
-                    an unfair advantage or bypass game systems.
-                </p>
+This page is a Ventorea Studios test website for presenting the RSL
+project and its planned direction. Features, prices and release plans
+may change.
 
-            </div>
+</div>
+</div>
 
+</div>
 
-            <div class="card">
+</div>
 
-                <h3>
-                    No Disruption
-                </h3>
+</div>
 
-                <p>
-                    Do not intentionally disrupt games, servers,
-                    communities, or other players' experiences.
-                </p>
+</section>
 
-            </div>
 
+<!-- =========================================================
+     POLICIES
+========================================================= -->
 
-            <div class="card">
+<section id="policies">
 
-                <h3>
-                    Keep It Appropriate
-                </h3>
+<div class="container">
 
-                <p>
-                    Do not share content that is illegal, excessively
-                    violent, sexually explicit, hateful, or otherwise
-                    inappropriate for the community.
-                </p>
+<div class="section-header reveal">
 
-            </div>
+<span class="section-tag">
+INFORMATION
+</span>
 
+<h2 class="section-title">
+Policies & guidelines.
+</h2>
 
-            <div class="card">
+<p class="section-description">
+Preliminary website and project information for this test build.
+</p>
 
-                <h3>
-                    No Unauthorized Access
-                </h3>
+</div>
 
-                <p>
-                    Do not attempt to access another person's account,
-                    private information, servers, systems, or other
-                    resources without authorization.
-                </p>
 
-            </div>
+<div class="policy-grid">
 
 
-            <div class="card">
+<article class="policy reveal">
 
-                <h3>
-                    Follow Platform Rules
-                </h3>
+<h3>
+🔒 Privacy Policy
+</h3>
 
-                <p>
-                    When using third-party platforms or services,
-                    community members are also expected to follow
-                    the rules and policies of those platforms.
-                </p>
+<p>
 
-            </div>
+This test website does not intentionally transmit contact form
+information to a server. The current form operates locally in the browser.
 
+If a production backend is added later, the privacy policy will be updated
+before personal information is collected through that service.
 
-            <div class="card">
+</p>
 
-                <h3>
-                    Reporting
-                </h3>
+</article>
 
-                <p>
-                    If you encounter behavior that violates these
-                    guidelines, you may report it through the
-                    available Ventorea Studios support or
-                    reporting channels.
-                </p>
 
-            </div>
+<article class="policy reveal">
 
+<h3>
+🛡️ Community Guidelines
+</h3>
 
-            <div class="card">
+<ul>
 
-                <h3>
-                    Enforcement
-                </h3>
+<li>Respect other community members.</li>
+<li>No harassment or threats.</li>
+<li>No hateful conduct.</li>
+<li>No malicious links or spam.</li>
+<li>Do not impersonate Ventorea Studios.</li>
+<li>Do not intentionally disrupt community services.</li>
 
-                <p>
-                    Violations may result in warnings, content removal,
-                    temporary restrictions, suspension, or permanent
-                    removal from certain Ventorea Studios services,
-                    depending on the severity of the violation.
-                </p>
+</ul>
 
-            </div>
+</article>
 
-        </div>
 
-    </section>
+<article class="policy reveal">
 
+<h3>
+📜 Terms of Service
+</h3>
 
+<p>
 
-    <!-- =========================
-         FAQ
-         ========================= -->
+Ventorea Studios and RSL are under development.
+Features, pricing, platforms, release plans and other project details
+may change before launch.
 
-    <section id="faq">
+Access to future services may be subject to additional terms.
 
-        <div class="section-title">
+</p>
 
-            <h2>
-                Frequently Asked Questions
-            </h2>
+</article>
 
-            <p>
-                Some of the most common questions about Ventorea.
-            </p>
 
-        </div>
+<article class="policy reveal">
 
+<h3>
+🛡️ Security
+</h3>
 
-        <div class="faq-container">
+<p>
 
+The access screen on this test website is a visual client-side
+verification layer. It should not be considered authentication or
+production-grade security.
 
-            <div class="faq-item">
+Real account security will require server-side systems.
 
-                <h3>
-                    What is Ventorea Studios?
-                </h3>
+</p>
 
-                <p>
-                    Ventorea Studios is an independent game development
-                    studio focused on creating immersive experiences
-                    built around realism, freedom, and interconnected
-                    systems.
-                </p>
+</article>
 
-            </div>
 
+<article class="policy reveal">
 
-            <div class="faq-item">
+<h3>
+🎮 Platform Notice
+</h3>
 
-                <h3>
-                    What is Ventorea's main game?
-                </h3>
+<p>
 
-                <p>
-                    Ventorea's main project is a large-scale life
-                    simulation focused on realism, freedom, and
-                    interconnected systems.
-                </p>
+PlayStation, Xbox, Nintendo and other platform names and trademarks
+belong to their respective owners. Future platform availability would
+be subject to applicable requirements and agreements.
 
-            </div>
+</p>
 
+</article>
 
-            <div class="faq-item">
 
-                <h3>
-                    Is Ventorea Studios easy to hack?
-                </h3>
+<article class="policy reveal">
 
-                <p>
-                    Security is taken seriously. Ventorea Studios aims
-                    to use reasonable security measures to protect its
-                    services, systems, and users. No online service can
-                    honestly guarantee that it can never be attacked.
-                </p>
+<h3>
+💳 Payments
+</h3>
 
-            </div>
+<p>
 
+No real payment is processed through this test website.
+Any future checkout will use a secure third-party payment processor
+and will be subject to its supported payment methods.
 
-            <div class="faq-item">
+</p>
 
-                <h3>
-                    What platforms will the game support?
-                </h3>
+</article>
 
-                <p>
-                    Platforms have not been officially announced yet.
-                    The game may support PC, consoles, or multiple
-                    platforms depending on development and technical
-                    decisions.
-                </p>
+</div>
 
-            </div>
+</div>
 
+</section>
 
-            <div class="faq-item">
 
-                <h3>
-                    Will there be a trailer?
-                </h3>
+<!-- =========================================================
+     SOCIAL MEDIA
+========================================================= -->
 
-                <p>
-                    Ventorea Studios plans to share official trailers,
-                    gameplay footage, or other videos when there is
-                    enough development progress to show the project
-                    properly.
-                </p>
+<section id="social">
 
-            </div>
+<div class="container">
 
+<div class="section-header reveal">
 
-            <div class="faq-item">
+<span class="section-tag">
+CONNECT
+</span>
 
-                <h3>
-                    Will there be a playable trial or demo?
-                </h3>
+<h2 class="section-title">
+Find Ventorea online.
+</h2>
 
-                <p>
-                    A playable demo or trial has not been confirmed yet.
-                    If Ventorea Studios decides to release one, more
-                    information will be announced through official
-                    channels.
-                </p>
+<p class="section-description">
 
-            </div>
+Follow the project as development continues. Social links can be
+connected to the official accounts when each account is ready.
 
+</p>
 
-            <div class="faq-item">
+</div>
 
-                <h3>
-                    When will the game release?
-                </h3>
 
-                <p>
-                    There is currently no confirmed release date
-                    or release window. A release window will be
-                    announced when development reaches a stage
-                    where a reliable estimate can be provided.
-                </p>
+<div class="social-grid">
 
-            </div>
 
+<article class="social-card reveal">
 
-            <div class="faq-item">
+<div class="social-icon">
+📸
+</div>
 
-                <h3>
-                    Will the game be multiplayer?
-                </h3>
+<h3>Instagram</h3>
 
-                <p>
-                    Multiplayer is currently planned, but specific
-                    multiplayer features and requirements have not
-                    been finalized.
-                </p>
+<p>
+Visual updates, development posts and announcements.
+</p>
 
-            </div>
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'Instagram')">
 
+@VentoreaStudios →
 
-            <div class="faq-item">
+</a>
 
-                <h3>
-                    Will the game support cross-platform play?
-                </h3>
+</article>
 
-                <p>
-                    Cross-platform play has not been confirmed yet.
-                    This will depend on the final platforms and
-                    multiplayer technology used by the game.
-                </p>
 
-            </div>
+<article class="social-card reveal">
 
+<div class="social-icon">
+🎵
+</div>
 
-            <div class="faq-item">
+<h3>TikTok</h3>
 
-                <h3>
-                    Will the game be free?
-                </h3>
+<p>
+Short development clips and RSL content.
+</p>
 
-                <p>
-                    Pricing has not been announced yet.
-                </p>
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'TikTok')">
 
-            </div>
+@VentoreaStudios →
 
+</a>
 
-            <div class="faq-item">
+</article>
 
-                <h3>
-                    Will players be able to customize their characters?
-                </h3>
 
-                <p>
-                    Character creation and customization are planned
-                    parts of the life simulation experience.
-                </p>
+<article class="social-card reveal">
 
-            </div>
+<div class="social-icon">
+▶️
+</div>
 
+<h3>YouTube</h3>
 
-            <div class="faq-item">
+<p>
+Trailers, gameplay and development videos.
+</p>
 
-                <h3>
-                    Will there be jobs and careers?
-                </h3>
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'YouTube')">
 
-                <p>
-                    Yes. Careers and employment are planned to be
-                    important parts of the game's life simulation
-                    systems.
-                </p>
+Ventorea Studios →
 
-            </div>
+</a>
 
+</article>
 
-            <div class="faq-item">
 
-                <h3>
-                    Will players be able to own businesses and property?
-                </h3>
+<article class="social-card reveal">
 
-                <p>
-                    Yes. Owning homes, apartments, businesses,
-                    and other properties is part of the planned
-                    gameplay experience.
-                </p>
+<div class="social-icon">
+𝕏
+</div>
 
-            </div>
+<h3>X</h3>
 
+<p>
+Announcements, updates and project news.
+</p>
 
-            <div class="faq-item">
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'X')">
 
-                <h3>
-                    Will there be vehicles and transportation?
-                </h3>
+@VentoreaStudios →
 
-                <p>
-                    Transportation is planned as part of the game,
-                    allowing players to move around the world and
-                    experience different forms of travel.
-                </p>
+</a>
 
-            </div>
+</article>
 
 
-            <div class="faq-item">
+<article class="social-card reveal">
 
-                <h3>
-                    Will the world have NPCs?
-                </h3>
+<div class="social-icon">
+💬
+</div>
 
-                <p>
-                    Yes. Dynamic NPCs are planned to help create
-                    a living world where people and activities
-                    interact with the player and their surroundings.
-                </p>
+<h3>Discord</h3>
 
-            </div>
+<p>
+Community discussions and development feedback.
+</p>
 
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'Discord')">
 
-            <div class="faq-item">
+Join Community →
 
-                <h3>
-                    Will the game receive updates?
-                </h3>
+</a>
 
-                <p>
-                    Ventorea Studios intends to continue improving
-                    the game throughout development and potentially
-                    after release with new features, improvements,
-                    and content.
-                </p>
+</article>
 
-            </div>
 
+<article class="social-card reveal">
 
-            <div class="faq-item">
+<div class="social-icon">
+💼
+</div>
 
-                <h3>
-                    How can I contact Ventorea Studios?
-                </h3>
+<h3>LinkedIn</h3>
 
-                <p>
-                    You can use the contact form on this website or
-                    email Ventorea Studios directly at
-                    realityforgeoffcial@gmail.com.
-                </p>
+<p>
+Studio and professional development updates.
+</p>
 
-            </div>
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'LinkedIn')">
 
+Ventorea Studios →
 
-        </div>
+</a>
 
-    </section>
+</article>
 
 
+<article class="social-card reveal">
 
-    <!-- =========================
-         SOCIAL MEDIA
-         ========================= -->
+<div class="social-icon">
+🟠
+</div>
 
-    <section
-        id="social"
-        class="social-media"
-    >
+<h3>Reddit</h3>
 
-        <div class="section-title">
+<p>
+Community discussion and RSL ideas.
+</p>
 
-            <h2>
-                Social Media Accounts
-            </h2>
+<a
+href="#"
+class="social-link sound"
+onclick="comingSoon(event,'Reddit')">
 
-            <p>
-                Follow Ventorea Studios for updates,
-                announcements, development news, and more.
-            </p>
+r/VentoreaStudios →
 
-        </div>
+</a>
 
+</article>
 
-        <div class="social-links">
 
+<article class="social-card reveal">
 
-            <!-- INSTAGRAM -->
+<div class="social-icon">
+🌐
+</div>
 
-            <a
-                class="social-card"
-                href="https://www.instagram.com/ventoreastudios/"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+<h3>Website</h3>
 
-                <h3>
-                    Instagram
-                </h3>
+<p>
+The central home for Ventorea Studios.
+</p>
 
-                <p>
-                    @ventoreastudios
-                </p>
+<a
+href="#home"
+class="social-link sound">
 
-            </a>
+ventorea.studios →
 
+</a>
 
-            <!-- FACEBOOK -->
+</article>
 
-            <a
-                class="social-card"
-                href="https://www.facebook.com/VentoreaStudios"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+</div>
 
-                <h3>
-                    Facebook
-                </h3>
+</div>
 
-                <p>
-                    VentoreaStudios
-                </p>
+</section>
 
-            </a>
 
+<!-- =========================================================
+     CONTACT
+========================================================= -->
 
-            <!-- TIKTOK -->
+<section id="contact">
 
-            <a
-                class="social-card"
-                href="https://www.tiktok.com/@ventoreastudio"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+<div class="container">
 
-                <h3>
-                    TikTok
-                </h3>
+<div class="contact-container">
 
-                <p>
-                    @ventoreastudio
-                </p>
+<div class="section-header reveal">
 
-            </a>
+<span class="section-tag">
+CONTACT
+</span>
 
+<h2 class="section-title">
+Talk to Ventorea.
+</h2>
 
-            <!-- LINKEDIN -->
+<p class="section-description">
 
-            <a
-                class="social-card"
-                href="https://www.linkedin.com/search/results/companies/?keywords=Ventorea%20Studios"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+Have feedback, a suggestion, a bug report or a partnership idea?
+Send a message through the test form.
 
-                <h3>
-                    LinkedIn
-                </h3>
+</p>
 
-                <p>
-                    Ventorea Studios
-                </p>
+</div>
 
-            </a>
 
+<div class="form-container reveal">
 
-            <!-- X -->
+<form id="contactForm">
 
-            <a
-                class="social-card"
-                href="https://x.com/VentoreaStudios"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
 
-                <h3>
-                    X
-                </h3>
+<div class="form-group">
 
-                <p>
-                    @VentoreaStudios
-                </p>
+<label for="name">
+Name
+</label>
 
-            </a>
+<input
+type="text"
+id="name"
+required
+maxlength="80"
+placeholder="Your name">
 
+</div>
 
-            <!-- YOUTUBE -->
 
-            <a
-                class="social-card"
-                href="https://www.youtube.com/@VentoreaStudio"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+<div class="form-group">
 
-                <h3>
-                    YouTube
-                </h3>
+<label for="email">
+Email
+</label>
 
-                <p>
-                    @VentoreaStudio
-                </p>
+<input
+type="email"
+id="email"
+required
+maxlength="120"
+placeholder="you@example.com">
 
-            </a>
+</div>
 
 
-            <!-- BLUESKY -->
+<div class="form-group">
 
-            <a
-                class="social-card"
-                href="https://bsky.app/profile/ventoreastudio.bsky.social"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
+<label for="topic">
+Topic
+</label>
 
-                <h3>
-                    Bluesky
-                </h3>
+<select id="topic">
 
-                <p>
-                    @ventoreastudio.bsky.social
-                </p>
+<option>General</option>
+<option>RSL feedback</option>
+<option>Bug report</option>
+<option>Game suggestion</option>
+<option>Business / partnership</option>
+<option>Community</option>
+<option>Website</option>
 
-            </a>
+</select>
 
+</div>
 
-        </div>
 
-    </section>
+<div class="form-group">
 
+<label for="message">
+Message
+</label>
 
+<textarea
+id="message"
+required
+maxlength="1500"
+placeholder="Write your message..."></textarea>
 
-    <!-- =========================
-         CONTACT
-         ========================= -->
+</div>
 
-    <section id="contact">
 
-        <div class="contact">
+<button
+type="submit"
+class="btn sound full">
 
-            <div class="section-title">
+Submit Message
 
-                <h2>
-                    Contact Ventorea Studios
-                </h2>
+</button>
 
-                <p>
-                    Have a question, suggestion,
-                    or need help? Send us a message.
-                </p>
 
-            </div>
+<div
+id="statusMsg"
+class="status-msg">
+</div>
 
 
-            <form
-                class="contact-form"
-                action="mailto:realityforgeoffcial@gmail.com"
-                method="post"
-                enctype="text/plain"
-            >
+<p class="form-note">
 
+🔊 A confirmation sound will play when the test submission succeeds.
 
-                <div class="form-group">
+<br>
 
-                    <label for="name">
-                        Name
-                    </label>
+This is currently a test form. No email is actually sent until a
+backend service is connected.
 
-                    <input
-                        type="text"
-                        id="name"
-                        name="Name"
-                        placeholder="Your name"
-                    >
+</p>
 
-                </div>
+</form>
 
+</div>
 
-                <div class="form-group">
+</div>
 
-                    <label for="email">
-                        Email
-                    </label>
+</div>
 
-                    <input
-                        type="email"
-                        id="email"
-                        name="Email"
-                        placeholder="your@email.com"
-                    >
+</section>
 
-                </div>
 
+<!-- =========================================================
+     FOOTER
+========================================================= -->
 
-                <div class="form-group">
+<footer>
 
-                    <label for="subject">
-                        Subject
-                    </label>
+<div class="footer-logo">
+VENTOREA <span>STUDIOS</span>
+</div>
 
-                    <input
-                        type="text"
-                        id="subject"
-                        name="Subject"
-                        placeholder="What is your message about?"
-                    >
+<p>
+Building future worlds.
+</p>
 
-                </div>
 
+<div class="footer-links">
 
-                <div class="form-group">
+<a href="#about" class="sound">RSL</a>
+<a href="#features" class="sound">Features</a>
+<a href="#pricing" class="sound">Pricing</a>
+<a href="#faq" class="sound">FAQ</a>
+<a href="#policies" class="sound">Policies</a>
+<a href="#social" class="sound">Social</a>
+<a href="#contact" class="sound">Contact</a>
 
-                    <label for="message">
-                        Message
-                    </label>
+</div>
 
-                    <textarea
-                        id="message"
-                        name="Message"
-                        placeholder="Write your message here..."
-                    ></textarea>
 
-                </div>
+<div class="footer-socials">
 
+<a href="#" onclick="comingSoon(event,'Instagram')">
+Instagram
+</a>
 
-                <button
-                    type="submit"
-                    class="button"
-                >
-                    Send Message
-                </button>
+<a href="#" onclick="comingSoon(event,'TikTok')">
+TikTok
+</a>
 
+<a href="#" onclick="comingSoon(event,'YouTube')">
+YouTube
+</a>
 
-            </form>
+<a href="#" onclick="comingSoon(event,'X')">
+X
+</a>
 
+<a href="#" onclick="comingSoon(event,'Discord')">
+Discord
+</a>
 
-            <div class="contact-email">
+<a href="#" onclick="comingSoon(event,'Reddit')">
+Reddit
+</a>
 
-                Or email us directly:
+</div>
 
-                <a href="mailto:realityforgeoffcial@gmail.com">
-                    realityforgeoffcial@gmail.com
-                </a>
 
-            </div>
+<p>
+© 2026 Ventorea Studios. Test website.
+</p>
 
-        </div>
+</footer>
 
-    </section>
 
+<!-- =========================================================
+     AI
+========================================================= -->
 
+<div
+class="ai-panel"
+id="aiPanel">
 
-    <!-- =========================
-         FOOTER
-         ========================= -->
+<div class="ai-header">
 
-    <footer>
+<h3>
+🤖 Ventorea AI
+</h3>
 
-        <p>
-            © 2026
-            <strong>Ventorea Studios</strong>.
-            All rights reserved.
-        </p>
+<button
+class="ai-close sound"
+id="aiClose">
 
+×
+</button>
 
-        <div class="footer-links">
+</div>
 
-            <a href="#about">
-                About
-            </a>
 
-            <a href="#game">
-                About the Game
-            </a>
+<div class="ai-message">
 
-            <a href="#learn-more">
-                Learn More
-            </a>
+Hey! I'm the future Ventorea AI assistant.
 
-            <a href="#status">
-                Development
-            </a>
+</div>
 
-            <a href="#updates">
-                Updates
-            </a>
+<div class="ai-status">
 
-            <a href="#policy">
-                Studio Policy
-            </a>
+● AI services are currently offline — coming later.
 
-            <a href="#community">
-                Community Guidelines
-            </a>
+</div>
 
-            <a href="#privacy">
-                Privacy Policy
-            </a>
+<button
+class="btn secondary sound full"
+style="margin-top:15px;"
+onclick="showToast('Ventorea AI is not connected yet.')">
 
-            <a href="#faq">
-                FAQ
-            </a>
+Try AI
 
-            <a href="#social">
-                Social Media
-            </a>
+</button>
 
-            <a href="#contact">
-                Contact
-            </a>
+</div>
 
-        </div>
 
+<button
+class="ai-button sound"
+id="aiButton"
+aria-label="Open Ventorea AI">
 
-        <p>
-            Real life, reimagined.
-        </p>
+🤖
 
-    </footer>
+</button>
 
+
+<!-- =========================================================
+     TOAST / TOP
+========================================================= -->
+
+<div
+class="toast"
+id="toast">
+</div>
+
+
+<button
+id="topBtn"
+class="sound"
+aria-label="Back to top">
+
+↑
+
+</button>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+/* =========================================================
+   AUDIO ENGINE
+========================================================= */
+
+const AudioContextClass =
+    window.AudioContext ||
+    window.webkitAudioContext;
+
+let audioContext = null;
+
+
+function initAudio(){
+
+    if(!AudioContextClass) return;
+
+    if(!audioContext){
+        audioContext = new AudioContextClass();
+    }
+
+    if(audioContext.state === "suspended"){
+        audioContext.resume();
+    }
+
+}
+
+
+function beep(
+    frequency = 620,
+    duration = .08,
+    volume = .08,
+    type = "sine"
+){
+
+    try{
+
+        initAudio();
+
+        if(!audioContext) return;
+
+        const now =
+            audioContext.currentTime;
+
+        const oscillator =
+            audioContext.createOscillator();
+
+        const gain =
+            audioContext.createGain();
+
+        oscillator.type = type;
+
+        oscillator.frequency.setValueAtTime(
+            frequency,
+            now
+        );
+
+        oscillator.frequency.exponentialRampToValueAtTime(
+            frequency * .72,
+            now + duration
+        );
+
+        gain.gain.setValueAtTime(
+            volume,
+            now
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            .001,
+            now + duration
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start(now);
+        oscillator.stop(now + duration);
+
+    }catch(error){}
+
+}
+
+
+function playClickSound(){
+
+    beep(
+        720,
+        .075,
+        .09,
+        "sine"
+    );
+
+}
+
+
+function playSuccessSound(){
+
+    try{
+
+        initAudio();
+
+        if(!audioContext) return;
+
+        const now =
+            audioContext.currentTime;
+
+        const notes = [
+            523.25,
+            659.25,
+            783.99
+        ];
+
+        notes.forEach(
+            (frequency,index) => {
+
+                const oscillator =
+                    audioContext.createOscillator();
+
+                const gain =
+                    audioContext.createGain();
+
+                const start =
+                    now + index * .09;
+
+                oscillator.type =
+                    "triangle";
+
+                oscillator.frequency.value =
+                    frequency;
+
+                gain.gain.setValueAtTime(
+                    .001,
+                    start
+                );
+
+                gain.gain.exponentialRampToValueAtTime(
+                    .11,
+                    start + .015
+                );
+
+                gain.gain.exponentialRampToValueAtTime(
+                    .001,
+                    start + .25
+                );
+
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+
+                oscillator.start(start);
+                oscillator.stop(start + .27);
+
+            }
+        );
+
+    }catch(error){}
+
+}
+
+
+/* =========================================================
+   CLICK SOUNDS
+========================================================= */
+
+function attachSounds(){
+
+    document
+    .querySelectorAll(".sound")
+    .forEach(element => {
+
+        if(element.dataset.soundAttached){
+            return;
+        }
+
+        element.dataset.soundAttached = "true";
+
+        element.addEventListener(
+            "click",
+            playClickSound
+        );
+
+    });
+
+}
+
+attachSounds();
+
+
+/* =========================================================
+   SECURITY SCREEN
+========================================================= */
+
+const securityScreen =
+    document.getElementById("securityScreen");
+
+const verifyBtn =
+    document.getElementById("verifyBtn");
+
+const verifyStatus =
+    document.getElementById("verifyStatus");
+
+
+verifyBtn.addEventListener(
+    "click",
+    () => {
+
+        initAudio();
+
+        beep(
+            520,
+            .08,
+            .1
+        );
+
+        verifyBtn.disabled = true;
+
+        verifyBtn.textContent =
+            "Verifying...";
+
+        verifyStatus.textContent =
+            "Checking access...";
+
+        setTimeout(
+            () => {
+
+                beep(
+                    880,
+                    .1,
+                    .1
+                );
+
+                verifyStatus.textContent =
+                    "Access verified.";
+
+                verifyBtn.textContent =
+                    "Access Granted ✓";
+
+            },
+            650
+        );
+
+        setTimeout(
+            () => {
+
+                securityScreen.classList.add(
+                    "hidden"
+                );
+
+                document.body.classList.remove(
+                    "locked"
+                );
+
+                document
+                .querySelector(".hero-content")
+                ?.classList.add("visible");
+
+                playSuccessSound();
+
+            },
+            1100
+        );
+
+    }
+);
+
+
+/* =========================================================
+   MOUSE COLOR MOVEMENT
+========================================================= */
+
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+window.addEventListener(
+    "mousemove",
+    event => {
+
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+
+        const x =
+            (event.clientX / window.innerWidth) * 100;
+
+        const y =
+            (event.clientY / window.innerHeight) * 100;
+
+        document.documentElement.style.setProperty(
+            "--mx",
+            `${x}%`
+        );
+
+        document.documentElement.style.setProperty(
+            "--my",
+            `${y}%`
+        );
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+/* =========================================================
+   MOBILE NAVIGATION
+========================================================= */
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const navLinks =
+    document.getElementById("navLinks");
+
+
+menuBtn.addEventListener(
+    "click",
+    () => {
+
+        const open =
+            navLinks.classList.toggle("open");
+
+        menuBtn.setAttribute(
+            "aria-expanded",
+            open
+        );
+
+        menuBtn.textContent =
+            open ? "✕" : "☰";
+
+    }
+);
+
+
+navLinks
+.querySelectorAll("a")
+.forEach(link => {
+
+    link.addEventListener(
+        "click",
+        () => {
+
+            navLinks.classList.remove("open");
+
+            menuBtn.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            menuBtn.textContent = "☰";
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   FAQ
+========================================================= */
+
+document
+.querySelectorAll(".faq-question")
+.forEach(question => {
+
+    question.addEventListener(
+        "click",
+        () => {
+
+            const faq =
+                question.closest(".faq");
+
+            const currentlyOpen =
+                faq.classList.contains("open");
+
+
+            document
+            .querySelectorAll(".faq.open")
+            .forEach(item => {
+
+                if(item !== faq){
+                    item.classList.remove("open");
+                }
+
+            });
+
+
+            if(!currentlyOpen){
+                faq.classList.add("open");
+            }else{
+                faq.classList.remove("open");
+            }
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimeout;
+
+
+function showToast(message){
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.textContent =
+        message;
+
+    toast.classList.add("show");
+
+    clearTimeout(toastTimeout);
+
+    toastTimeout =
+        setTimeout(
+            () => {
+
+                toast.classList.remove("show");
+
+            },
+            3200
+        );
+
+}
+
+
+/* =========================================================
+   SOCIAL PLACEHOLDER
+========================================================= */
+
+function comingSoon(
+    event,
+    platform
+){
+
+    event.preventDefault();
+
+    beep(
+        580,
+        .08,
+        .08
+    );
+
+    showToast(
+        `${platform} link will be connected when the account is ready.`
+    );
+
+}
+
+
+/* =========================================================
+   CONTACT FORM
+========================================================= */
+
+const contactForm =
+    document.getElementById("contactForm");
+
+const statusMsg =
+    document.getElementById("statusMsg");
+
+
+contactForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+        const name =
+            document
+            .getElementById("name")
+            .value
+            .trim();
+
+        const email =
+            document
+            .getElementById("email")
+            .value
+            .trim();
+
+        const message =
+            document
+            .getElementById("message")
+            .value
+            .trim();
+
+
+        if(!name || !email || !message){
+
+            beep(
+                220,
+                .12,
+                .11,
+                "square"
+            );
+
+            statusMsg.textContent =
+                "Please complete all required fields.";
+
+            statusMsg.style.display =
+                "block";
+
+            statusMsg.style.color =
+                "var(--red)";
+
+            return;
+
+        }
+
+
+        /* Confirmation beep */
+
+        playSuccessSound();
+
+
+        statusMsg.textContent =
+            `Thanks, ${name}! Your test message was recorded locally.`;
+
+        statusMsg.style.display =
+            "block";
+
+        statusMsg.style.color =
+            "var(--green)";
+
+
+        showToast(
+            "Message submitted successfully in test mode."
+        );
+
+
+        contactForm.reset();
+
+    }
+);
+
+
+/* =========================================================
+   AI PANEL
+========================================================= */
+
+const aiButton =
+    document.getElementById("aiButton");
+
+const aiPanel =
+    document.getElementById("aiPanel");
+
+const aiClose =
+    document.getElementById("aiClose");
+
+
+aiButton.addEventListener(
+    "click",
+    () => {
+
+        aiPanel.classList.toggle("open");
+
+    }
+);
+
+
+aiClose.addEventListener(
+    "click",
+    () => {
+
+        aiPanel.classList.remove("open");
+
+    }
+);
+
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+const revealElements =
+    document.querySelectorAll(".reveal");
+
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(entry => {
+
+                if(entry.isIntersecting){
+
+                    entry.target.classList.add(
+                        "visible"
+                    );
+
+                    revealObserver.unobserve(
+                        entry.target
+                    );
+
+                }
+
+            });
+
+        },
+        {
+            threshold:.08
+        }
+    );
+
+
+revealElements.forEach(
+    element =>
+        revealObserver.observe(element)
+);
+
+
+/* =========================================================
+   BACK TO TOP
+========================================================= */
+
+const topBtn =
+    document.getElementById("topBtn");
+
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        if(window.scrollY > 700){
+
+            topBtn.classList.add("show");
+
+        }else{
+
+            topBtn.classList.remove("show");
+
+        }
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+topBtn.addEventListener(
+    "click",
+    () => {
+
+        window.scrollTo({
+            top:0,
+            behavior:"smooth"
+        });
+
+    }
+);
+
+
+/* =========================================================
+   ESCAPE
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(event.key === "Escape"){
+
+            navLinks.classList.remove("open");
+
+            menuBtn.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+            menuBtn.textContent = "☰";
+
+            aiPanel.classList.remove("open");
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ANCHOR SAFETY
+========================================================= */
+
+document
+.querySelectorAll('a[href^="#"]')
+.forEach(link => {
+
+    link.addEventListener(
+        "click",
+        event => {
+
+            const targetID =
+                link.getAttribute("href");
+
+            if(targetID === "#"){
+
+                event.preventDefault();
+
+            }
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   RE-ATTACH SOUNDS TO DYNAMIC ELEMENTS
+========================================================= */
+
+attachSounds();
+
+</script>
 
 </body>
-
 </html>
 ```
