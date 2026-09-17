@@ -1,4259 +1,1904 @@
-```html
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<meta name="description" content="Ventorea Studios — creators of Realistic Simulation Life (RSL).">
-<meta name="theme-color" content="#01040a">
-
-<title>Ventorea Studios | Realistic Simulation Life</title>
-
-<style>
-:root{
-    --bg:#01040a;
-    --bg2:#030914;
-    --card:#07101e;
-    --card2:#0a1729;
-
-    --blue:#2688ff;
-    --blue2:#55a9ff;
-    --cyan:#65d9ff;
-
-    --white:#fff;
-    --text:#edf6ff;
-    --muted:#879bb2;
-
-    --green:#50e29a;
-    --yellow:#ffd45c;
-    --red:#ff6675;
-
-    --border:rgba(120,180,240,.11);
-    --border2:rgba(70,150,255,.38);
-
-    --shadow:0 25px 90px rgba(0,0,0,.55);
-
-    --mx:50%;
-    --my:50%;
-}
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-html{
-    scroll-behavior:smooth;
-    scroll-padding-top:82px;
-}
-
-body{
-    background:#01040a;
-    color:var(--text);
-    font-family:Inter,Arial,Helvetica,sans-serif;
-    line-height:1.65;
-    overflow-x:hidden;
-}
-
-body.locked{
-    overflow:hidden;
-}
-
-button,
-input,
-textarea,
-select{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-a{
-    color:inherit;
-    text-decoration:none;
-}
-
-.container{
-    width:min(1450px,94%);
-    margin:auto;
-}
-
-section{
-    position:relative;
-    padding:120px 0;
-}
-
-section::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:50%;
-    transform:translateX(-50%);
-    width:85%;
-    height:1px;
-    background:linear-gradient(
-        90deg,
-        transparent,
-        rgba(70,150,255,.18),
-        transparent
-    );
-}
-
-.section-header{
-    max-width:900px;
-    margin:0 auto 60px;
-    text-align:center;
-}
-
-.section-tag{
-    display:inline-block;
-    margin-bottom:15px;
-    color:var(--blue2);
-    font-size:11px;
-    font-weight:900;
-    letter-spacing:3px;
-    text-transform:uppercase;
-}
-
-.section-title{
-    font-size:clamp(38px,5vw,68px);
-    line-height:1;
-    letter-spacing:-3px;
-    margin-bottom:20px;
-}
-
-.section-description{
-    max-width:760px;
-    margin:auto;
-    color:var(--muted);
-    font-size:16px;
-}
-
-.blue{
-    color:var(--blue2);
-}
-
-/* =========================================================
-   CURSOR BACKGROUND
-========================================================= */
-
-.background{
-    position:fixed;
-    inset:0;
-    z-index:-20;
-    pointer-events:none;
-    overflow:hidden;
-    background:#01040a;
-}
-
-.background::before{
-    content:"";
-    position:absolute;
-    inset:-30%;
-    background:
-        radial-gradient(
-            circle 550px at var(--mx) var(--my),
-            rgba(0,110,255,.16),
-            transparent 70%
-        );
-    transition:
-        background .18s ease;
-}
-
-.background-grid{
-    position:absolute;
-    inset:0;
-
-    background-image:
-        linear-gradient(
-            rgba(80,150,220,.025) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(80,150,220,.025) 1px,
-            transparent 1px
-        );
-
-    background-size:70px 70px;
-
-    mask-image:linear-gradient(
-        to bottom,
-        black,
-        transparent 95%
-    );
-}
-
-.background-glow{
-    position:absolute;
-    width:650px;
-    height:650px;
-    border-radius:50%;
-    filter:blur(140px);
-    opacity:.09;
-    background:#006eff;
-    top:-300px;
-    left:-250px;
-    animation:floatGlow 18s infinite alternate ease-in-out;
-}
-
-.background-glow.two{
-    width:550px;
-    height:550px;
-    right:-250px;
-    top:35%;
-    background:#0044ff;
-    animation-duration:23s;
-}
-
-.background-glow.three{
-    width:500px;
-    height:500px;
-    left:35%;
-    bottom:-350px;
-    background:#5900ff;
-    opacity:.045;
-}
-
-@keyframes floatGlow{
-    from{
-        transform:translate(0,0);
-    }
-    to{
-        transform:translate(180px,130px);
-    }
-}
-
-/* =========================================================
-   ACCESS SCREEN
-========================================================= */
-
-#securityScreen{
-    position:fixed;
-    inset:0;
-    z-index:10000;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(15,65,125,.25),
-            transparent 50%
-        ),
-        #01040a;
-
-    transition:
-        opacity .7s ease,
-        visibility .7s ease;
-}
-
-#securityScreen.hidden{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-}
-
-.security-box{
-    width:min(500px,90%);
-    padding:45px 35px;
-
-    text-align:center;
-
-    border:1px solid rgba(80,160,255,.2);
-    border-radius:24px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(10,24,44,.96),
-            rgba(2,7,15,.98)
-        );
-
-    box-shadow:
-        0 30px 120px rgba(0,0,0,.8),
-        0 0 80px rgba(20,100,255,.08);
-}
-
-.security-logo{
-    font-size:24px;
-    font-weight:950;
-    letter-spacing:-1px;
-    margin-bottom:25px;
-}
-
-.security-logo span{
-    color:var(--blue2);
-}
-
-.security-icon{
-    width:70px;
-    height:70px;
-    margin:0 auto 20px;
-
-    display:grid;
-    place-items:center;
-
-    border-radius:50%;
-
-    background:rgba(38,136,255,.1);
-    border:1px solid rgba(38,136,255,.3);
-
-    font-size:30px;
-
-    box-shadow:0 0 40px rgba(38,136,255,.12);
-}
-
-.security-box h1{
-    font-size:28px;
-    margin-bottom:10px;
-}
-
-.security-box p{
-    color:var(--muted);
-    font-size:14px;
-    margin-bottom:25px;
-}
-
-.verify-status{
-    min-height:20px;
-    margin-top:15px;
-    color:var(--muted);
-    font-size:12px;
-}
-
-/* =========================================================
-   NAV
-========================================================= */
-
-#navbar{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:78px;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:0 3%;
-
-    background:rgba(1,4,10,.78);
-    backdrop-filter:blur(22px);
-
-    border-bottom:1px solid var(--border);
-
-    z-index:2000;
-}
-
-.logo{
-    font-size:20px;
-    font-weight:950;
-    letter-spacing:-.7px;
-    white-space:nowrap;
-}
-
-.logo span{
-    color:var(--blue2);
-}
-
-.nav-links{
-    display:flex;
-    align-items:center;
-    gap:19px;
-}
-
-.nav-links a{
-    color:#8295aa;
-    font-size:13px;
-    font-weight:700;
-    transition:.2s;
-}
-
-.nav-links a:hover{
-    color:white;
-}
-
-.nav-contact{
-    padding:9px 16px;
-    border-radius:8px;
-    background:var(--blue);
-    color:white !important;
-}
-
-.menu-btn{
-    display:none;
-    border:0;
-    background:none;
-    color:white;
-    font-size:27px;
-}
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-
-    border:1px solid var(--blue);
-    background:var(--blue);
-    color:white;
-
-    padding:13px 24px;
-    border-radius:9px;
-
-    font-size:14px;
-    font-weight:800;
-
-    transition:
-        transform .2s,
-        box-shadow .2s,
-        background .2s,
-        border-color .2s;
-}
-
-.btn:hover{
-    transform:translateY(-3px);
-    box-shadow:0 15px 40px rgba(38,136,255,.28);
-}
-
-.btn.secondary{
-    background:rgba(255,255,255,.025);
-    border-color:#263d56;
-    color:#b9c9da;
-}
-
-.btn.secondary:hover{
-    background:rgba(255,255,255,.07);
-    border-color:#3b5876;
-}
-
-.btn.full{
-    width:100%;
-}
-
-/* =========================================================
-   HERO
-========================================================= */
-
-.hero{
-    min-height:100vh;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-
-    padding:150px 20px 100px;
-}
-
-.hero-content{
-    width:min(1100px,100%);
-}
-
-.hero-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:9px;
-
-    padding:8px 17px;
-
-    border:1px solid rgba(100,170,230,.24);
-    border-radius:999px;
-
-    background:rgba(15,50,90,.18);
-
-    color:var(--blue2);
-
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:2.5px;
-
-    margin-bottom:27px;
-}
-
-.hero-badge::before{
-    content:"";
-    width:7px;
-    height:7px;
-    border-radius:50%;
-    background:var(--green);
-    box-shadow:0 0 13px var(--green);
-}
-
-.hero h1{
-    font-size:clamp(55px,9vw,120px);
-    line-height:.88;
-    letter-spacing:-7px;
-    margin-bottom:30px;
-}
-
-.hero h1 span{
-    background:
-        linear-gradient(
-            90deg,
-            #fff,
-            #4d9aff,
-            #83d6ff,
-            #fff
-        );
-
-    background-size:220% auto;
-
-    -webkit-background-clip:text;
-    background-clip:text;
-
-    color:transparent;
-
-    animation:titleShift 7s linear infinite;
-}
-
-@keyframes titleShift{
-    to{
-        background-position:220% center;
-    }
-}
-
-.hero-description{
-    max-width:850px;
-    margin:auto;
-    color:#91a7bd;
-    font-size:clamp(16px,2vw,20px);
-}
-
-.hero-description strong{
-    color:#dbeaff;
-}
-
-.hero-buttons{
-    display:flex;
-    justify-content:center;
-    gap:14px;
-    margin-top:36px;
-    flex-wrap:wrap;
-}
-
-.hero-stats{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-    margin-top:60px;
-}
-
-.hero-stat{
-    padding:20px;
-
-    border:1px solid var(--border);
-    border-radius:15px;
-
-    background:rgba(255,255,255,.018);
-    backdrop-filter:blur(12px);
-
-    transition:.25s;
-}
-
-.hero-stat:hover{
-    border-color:var(--border2);
-    transform:translateY(-4px);
-}
-
-.hero-stat strong{
-    display:block;
-    font-size:22px;
-}
-
-.hero-stat span{
-    color:var(--muted);
-    font-size:12px;
-}
-
-/* =========================================================
-   CARDS
-========================================================= */
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:18px;
-}
-
-.card{
-    position:relative;
-
-    padding:28px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(9,22,41,.92),
-            rgba(3,9,18,.95)
-        );
-
-    border:1px solid var(--border);
-    border-radius:19px;
-
-    box-shadow:var(--shadow);
-
-    transition:
-        transform .3s,
-        border-color .3s,
-        background .3s;
-}
-
-.card:hover{
-    transform:translateY(-6px);
-    border-color:var(--border2);
-}
-
-.card-icon{
-    font-size:32px;
-    margin-bottom:13px;
-}
-
-.card h3{
-    margin-bottom:9px;
-    font-size:19px;
-}
-
-.card p{
-    color:var(--muted);
-    font-size:14px;
-}
-
-.highlight{
-    border-color:rgba(70,150,255,.28);
-}
-
-/* =========================================================
-   PHILOSOPHY
-========================================================= */
-
-.philosophy{
-    max-width:1050px;
-    margin:auto;
-
-    padding:60px;
-
-    text-align:center;
-
-    border:1px solid rgba(70,150,255,.22);
-    border-radius:25px;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(40,120,255,.1),
-            transparent 65%
-        );
-
-    box-shadow:var(--shadow);
-}
-
-.philosophy blockquote{
-    font-size:clamp(28px,4vw,48px);
-    line-height:1.12;
-    font-weight:900;
-    letter-spacing:-1.5px;
-}
-
-.philosophy cite{
-    display:block;
-    margin-top:22px;
-    color:var(--blue2);
-    font-size:13px;
-    font-style:normal;
-}
-
-/* =========================================================
-   FEATURES
-========================================================= */
-
-.feature-list{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:18px;
-}
-
-.feature-row{
-    display:flex;
-    gap:18px;
-    align-items:flex-start;
-
-    padding:23px;
-
-    border:1px solid var(--border);
-    border-radius:17px;
-
-    background:rgba(255,255,255,.018);
-
-    transition:.25s;
-}
-
-.feature-row:hover{
-    border-color:var(--border2);
-    transform:translateY(-4px);
-}
-
-.feature-number{
-    min-width:42px;
-    height:42px;
-
-    display:grid;
-    place-items:center;
-
-    border-radius:50%;
-
-    background:rgba(49,140,255,.12);
-    color:var(--blue2);
-
-    font-weight:900;
-}
-
-.feature-row h3{
-    margin-bottom:5px;
-}
-
-.feature-row p{
-    color:var(--muted);
-    font-size:14px;
-}
-
-/* =========================================================
-   GRAPHICS
-========================================================= */
-
-.graphics{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-}
-
-.graphics-card{
-    padding:28px;
-    text-align:center;
-
-    border:1px solid var(--border);
-    border-radius:18px;
-
-    background:rgba(255,255,255,.018);
-
-    transition:.25s;
-}
-
-.graphics-card:hover{
-    transform:translateY(-5px);
-    border-color:var(--border2);
-}
-
-.graphics-dot{
-    width:18px;
-    height:18px;
-    margin:0 auto 15px;
-    border-radius:50%;
-}
-
-.low .graphics-dot{
-    background:#ff5151;
-    box-shadow:0 0 18px rgba(255,81,81,.55);
-}
-
-.medium .graphics-dot{
-    background:#ffd34e;
-    box-shadow:0 0 18px rgba(255,211,78,.5);
-}
-
-.high .graphics-dot{
-    background:#4fe28c;
-    box-shadow:0 0 18px rgba(79,226,140,.5);
-}
-
-.ultra .graphics-dot{
-    background:#59a8ff;
-    box-shadow:0 0 18px rgba(89,168,255,.6);
-}
-
-.graphics-card p{
-    color:var(--muted);
-    font-size:13px;
-    margin-top:7px;
-}
-
-/* =========================================================
-   ROADMAP
-========================================================= */
-
-.timeline{
-    display:grid;
-    gap:14px;
-    max-width:950px;
-    margin:auto;
-}
-
-.timeline-item{
-    display:flex;
-    align-items:flex-start;
-    gap:18px;
-
-    padding:22px;
-
-    border:1px solid var(--border);
-    border-radius:16px;
-
-    background:rgba(255,255,255,.018);
-
-    transition:.25s;
-}
-
-.timeline-item:hover{
-    border-color:var(--border2);
-    transform:translateX(5px);
-}
-
-.timeline-number{
-    min-width:42px;
-    height:42px;
-
-    display:grid;
-    place-items:center;
-
-    border-radius:50%;
-
-    background:rgba(49,140,255,.13);
-    color:#9dceff;
-
-    font-weight:900;
-}
-
-.timeline-item h3{
-    margin-bottom:4px;
-}
-
-.timeline-item p{
-    color:var(--muted);
-    font-size:14px;
-}
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-.status-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:14px;
-}
-
-.status-card{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-
-    padding:20px 22px;
-
-    border:1px solid var(--border);
-    border-radius:14px;
-
-    background:rgba(255,255,255,.018);
-}
-
-.status-name{
-    font-weight:750;
-}
-
-.status-pill{
-    padding:5px 10px;
-    border-radius:999px;
-    font-size:10px;
-    font-weight:900;
-    white-space:nowrap;
-}
-
-.status-planned{
-    background:rgba(255,209,90,.1);
-    color:var(--yellow);
-}
-
-.status-development{
-    background:rgba(85,227,154,.1);
-    color:var(--green);
-}
-
-.status-coming{
-    background:rgba(49,140,255,.1);
-    color:var(--blue2);
-}
-
-/* =========================================================
-   PRICING
-========================================================= */
-
-.price-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:22px;
-    max-width:1000px;
-    margin:auto;
-}
-
-.price-card{
-    padding:34px;
-
-    border:1px solid var(--border);
-    border-radius:21px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(10,24,44,.94),
-            rgba(3,9,18,.96)
-        );
-
-    box-shadow:var(--shadow);
-}
-
-.price-card.featured{
-    border-color:rgba(49,140,255,.42);
-    box-shadow:
-        var(--shadow),
-        0 0 60px rgba(30,120,255,.07);
-}
-
-.price-badge{
-    display:inline-block;
-
-    padding:5px 10px;
-    border-radius:999px;
-
-    background:rgba(49,140,255,.12);
-    color:var(--blue2);
-
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:1.5px;
-}
-
-.price{
-    font-size:50px;
-    font-weight:950;
-    margin:12px 0 5px;
-}
-
-.price-sub{
-    color:var(--muted);
-    font-size:13px;
-}
-
-.price-list{
-    margin:25px 0;
-    padding-left:20px;
-    color:#c2d0e1;
-    font-size:14px;
-}
-
-.price-list li{
-    margin:8px 0;
-}
-
-.offer{
-    max-width:1000px;
-    margin:20px auto 0;
-
-    padding:20px;
-
-    text-align:center;
-
-    border:1px solid rgba(255,209,90,.18);
-    border-radius:15px;
-
-    background:rgba(255,209,90,.025);
-
-    color:#d9c98d;
-    font-size:13px;
-}
-
-/* =========================================================
-   PAYMENT
-========================================================= */
-
-.payment-box{
-    max-width:1000px;
-    margin:25px auto 0;
-
-    padding:30px;
-
-    border:1px solid var(--border);
-    border-radius:20px;
-
-    background:rgba(255,255,255,.018);
-}
-
-.payment-methods{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:10px;
-    margin-top:20px;
-}
-
-.payment-method{
-    padding:14px;
-    text-align:center;
-
-    border:1px solid var(--border);
-    border-radius:10px;
-
-    background:rgba(255,255,255,.02);
-
-    color:#a9bbcf;
-    font-size:12px;
-    font-weight:800;
-}
-
-.payment-method:hover{
-    border-color:var(--border2);
-    color:white;
-}
-
-.payment-note{
-    margin-top:17px;
-    color:var(--muted);
-    font-size:12px;
-    text-align:center;
-}
-
-/* =========================================================
-   FAQ
-========================================================= */
-
-.faq-list{
-    max-width:950px;
-    margin:auto;
-}
-
-.faq{
-    margin-bottom:11px;
-
-    border:1px solid var(--border);
-    border-radius:14px;
-
-    overflow:hidden;
-
-    background:rgba(255,255,255,.018);
-}
-
-.faq.open{
-    border-color:var(--border2);
-}
-
-.faq-question{
-    width:100%;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-
-    padding:21px;
-
-    border:0;
-    background:none;
-
-    color:white;
-    text-align:left;
-
-    font-weight:750;
-}
-
-.plus{
-    min-width:28px;
-    font-size:25px;
-    color:var(--blue2);
-    transition:transform .35s;
-}
-
-.faq.open .plus{
-    transform:rotate(45deg);
-}
-
-.faq-answer{
-    display:grid;
-    grid-template-rows:0fr;
-    transition:grid-template-rows .4s ease;
-}
-
-.faq-answer-inner{
-    overflow:hidden;
-    padding:0 21px;
-    color:var(--muted);
-    font-size:14px;
-    transition:padding .4s;
-}
-
-.faq.open .faq-answer{
-    grid-template-rows:1fr;
-}
-
-.faq.open .faq-answer-inner{
-    padding:0 21px 21px;
-}
-
-/* =========================================================
-   INFORMATION / POLICIES
-========================================================= */
-
-.policy-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:18px;
-}
-
-.policy{
-    padding:27px;
-
-    border:1px solid var(--border);
-    border-radius:17px;
-
-    background:rgba(255,255,255,.018);
-}
-
-.policy h3{
-    margin-bottom:11px;
-}
-
-.policy p,
-.policy li{
-    color:var(--muted);
-    font-size:14px;
-}
-
-.policy ul{
-    padding-left:20px;
-}
-
-.policy li{
-    margin:5px 0;
-}
-
-/* =========================================================
-   SOCIAL
-========================================================= */
-
-.social-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:14px;
-}
-
-.social-card{
-    padding:23px;
-
-    border:1px solid var(--border);
-    border-radius:16px;
-
-    background:rgba(255,255,255,.018);
-
-    transition:.25s;
-}
-
-.social-card:hover{
-    transform:translateY(-5px);
-    border-color:var(--border2);
-}
-
-.social-icon{
-    font-size:27px;
-    margin-bottom:10px;
-}
-
-.social-card h3{
-    margin-bottom:4px;
-}
-
-.social-card p{
-    color:var(--muted);
-    font-size:12px;
-    margin-bottom:13px;
-}
-
-.social-link{
-    color:var(--blue2);
-    font-size:12px;
-    font-weight:800;
-}
-
-/* =========================================================
-   CONTACT
-========================================================= */
-
-.contact-container{
-    max-width:850px;
-    margin:auto;
-}
-
-.form-container{
-    padding:38px;
-
-    border:1px solid var(--border);
-    border-radius:20px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(9,22,41,.9),
-            rgba(3,9,18,.96)
-        );
-
-    box-shadow:var(--shadow);
-}
-
-.form-group{
-    margin-bottom:20px;
-}
-
-.form-group label{
-    display:block;
-    margin-bottom:8px;
-
-    color:#91a6bc;
-
-    font-size:11px;
-    font-weight:850;
-
-    letter-spacing:1px;
-    text-transform:uppercase;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select{
-    width:100%;
-
-    padding:14px 15px;
-
-    background:rgba(1,5,12,.8);
-
-    border:1px solid var(--border);
-
-    border-radius:9px;
-
-    color:white;
-
-    outline:none;
-
-    transition:border-color .2s,box-shadow .2s;
-}
-
-.form-group textarea{
-    min-height:150px;
-    resize:vertical;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus{
-    border-color:var(--blue);
-    box-shadow:0 0 0 3px rgba(38,136,255,.08);
-}
-
-.status-msg{
-    display:none;
-
-    margin-top:15px;
-
-    padding:13px;
-
-    border-radius:10px;
-
-    text-align:center;
-
-    background:rgba(83,227,154,.08);
-    color:var(--green);
-
-    font-size:13px;
-    font-weight:750;
-}
-
-.form-note{
-    margin-top:14px;
-    text-align:center;
-    color:var(--muted);
-    font-size:11px;
-}
-
-/* =========================================================
-   AI BUTTON
-========================================================= */
-
-.ai-button{
-    position:fixed;
-
-    right:25px;
-    bottom:25px;
-
-    z-index:1500;
-
-    width:58px;
-    height:58px;
-
-    display:grid;
-    place-items:center;
-
-    border:1px solid rgba(70,160,255,.4);
-    border-radius:50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #123e72,
-            #06101e
-        );
-
-    color:white;
-
-    font-size:23px;
-
-    box-shadow:
-        0 10px 40px rgba(0,0,0,.5),
-        0 0 35px rgba(30,130,255,.12);
-
-    transition:.25s;
-}
-
-.ai-button:hover{
-    transform:translateY(-4px) scale(1.04);
-}
-
-.ai-panel{
-    position:fixed;
-
-    right:25px;
-    bottom:95px;
-
-    z-index:1500;
-
-    width:min(370px,calc(100% - 30px));
-
-    padding:20px;
-
-    border:1px solid var(--border2);
-    border-radius:18px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(8,21,39,.98),
-            rgba(2,7,14,.99)
-        );
-
-    box-shadow:var(--shadow);
-
-    opacity:0;
-    pointer-events:none;
-    transform:translateY(15px) scale(.98);
-
-    transition:.25s;
-}
-
-.ai-panel.open{
-    opacity:1;
-    pointer-events:auto;
-    transform:translateY(0) scale(1);
-}
-
-.ai-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    margin-bottom:12px;
-}
-
-.ai-header h3{
-    font-size:16px;
-}
-
-.ai-close{
-    border:0;
-    background:none;
-    color:#7e91a8;
-    font-size:20px;
-}
-
-.ai-message{
-    padding:14px;
-
-    border-radius:12px;
-
-    background:rgba(255,255,255,.035);
-
-    color:var(--muted);
-    font-size:13px;
-}
-
-.ai-status{
-    margin-top:12px;
-
-    color:var(--yellow);
-    font-size:11px;
-}
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-.toast{
-    position:fixed;
-
-    right:25px;
-    bottom:95px;
-
-    z-index:5000;
-
-    max-width:350px;
-
-    padding:15px 19px;
-
-    border:1px solid rgba(80,160,240,.3);
-    border-radius:12px;
-
-    background:#0a1b31;
-
-    color:white;
-
-    box-shadow:var(--shadow);
-
-    transform:translateY(120px);
-    opacity:0;
-
-    transition:.35s;
-}
-
-.toast.show{
-    transform:translateY(0);
-    opacity:1;
-}
-
-/* =========================================================
-   TOP BUTTON
-========================================================= */
-
-#topBtn{
-    position:fixed;
-
-    right:25px;
-    bottom:165px;
-
-    z-index:1200;
-
-    width:42px;
-    height:42px;
-
-    display:grid;
-    place-items:center;
-
-    border:1px solid var(--border);
-    border-radius:50%;
-
-    background:#091a30;
-    color:white;
-
-    opacity:0;
-    pointer-events:none;
-
-    transform:translateY(10px);
-
-    transition:.3s;
-}
-
-#topBtn.show{
-    opacity:1;
-    pointer-events:auto;
-    transform:translateY(0);
-}
-
-/* =========================================================
-   REVEAL
-========================================================= */
-
-.reveal{
-    opacity:0;
-    transform:translateY(24px);
-
-    transition:
-        opacity .7s ease,
-        transform .7s ease;
-}
-
-.reveal.visible{
-    opacity:1;
-    transform:translateY(0);
-}
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-footer{
-    padding:60px 20px;
-
-    text-align:center;
-
-    border-top:1px solid var(--border);
-
-    color:var(--muted);
-
-    font-size:13px;
-}
-
-.footer-logo{
-    color:white;
-    font-size:21px;
-    font-weight:950;
-    margin-bottom:8px;
-}
-
-.footer-logo span{
-    color:var(--blue2);
-}
-
-.footer-links{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:18px;
-    margin:20px 0;
-}
-
-.footer-links a:hover{
-    color:white;
-}
-
-.footer-socials{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:12px;
-    margin:20px 0;
-}
-
-.footer-socials a{
-    padding:8px 13px;
-    border:1px solid var(--border);
-    border-radius:8px;
-    font-size:11px;
-}
-
-.footer-socials a:hover{
-    border-color:var(--border2);
-    color:white;
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media(max-width:1000px){
-
-    .nav-links{
-        position:absolute;
-        top:78px;
-        left:15px;
-        right:15px;
-
-        display:none;
-        flex-direction:column;
-        align-items:stretch;
-        gap:3px;
-
-        padding:10px;
-
-        border:1px solid var(--border);
-        border-radius:14px;
-
-        background:rgba(3,9,18,.98);
-        box-shadow:var(--shadow);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ventorea Studios | The step before reality.</title>
+
+  <meta
+    name="description"
+    content="Ventorea Studios is building RSL, Realistic Simulation Life, an open-world life simulation focused on realism, immersion, and a living world."
+  >
+
+  <meta name="theme-color" content="#050b18">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .nav-links.open{
-        display:flex;
+    html {
+      scroll-behavior: smooth;
     }
 
-    .nav-links a{
-        padding:13px;
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #050b18;
+      color: #f4f7ff;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    .menu-btn{
-        display:block;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(0, 110, 255, 0.14), transparent 30%),
+        radial-gradient(circle at 85% 25%, rgba(0, 170, 255, 0.08), transparent 30%),
+        radial-gradient(circle at 50% 90%, rgba(30, 80, 255, 0.08), transparent 35%);
+      pointer-events: none;
     }
 
-    .grid{
-        grid-template-columns:1fr 1fr;
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
     }
 
-    .hero-stats{
-        grid-template-columns:1fr 1fr;
+    a {
+      text-decoration: none;
+      color: inherit;
     }
 
-    .graphics{
-        grid-template-columns:1fr 1fr;
+    button,
+    input {
+      font: inherit;
     }
 
-    .social-grid{
-        grid-template-columns:1fr 1fr;
+    .container {
+      width: min(1180px, 92%);
+      margin: auto;
     }
 
-    .status-grid{
-        grid-template-columns:1fr 1fr;
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: rgba(5, 11, 24, 0.78);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
 
-    .payment-methods{
-        grid-template-columns:repeat(3,1fr);
-    }
-}
-
-@media(max-width:650px){
-
-    section{
-        padding:80px 0;
+    .nav {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .hero{
-        min-height:90vh;
-        padding:115px 18px 70px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
     }
 
-    .hero h1{
-        font-size:clamp(45px,15vw,75px);
-        letter-spacing:-4px;
+    .brand-mark {
+      width: 43px;
+      height: 43px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(80,160,255,0.55);
+      background: rgba(30,120,255,0.08);
+      color: #70b7ff;
+      font-size: 21px;
+      font-weight: 900;
+      box-shadow: 0 0 30px rgba(0,120,255,0.13);
     }
 
-    .hero-buttons{
-        flex-direction:column;
+    .brand-text small {
+      display: block;
+      color: #71819e;
+      font-size: 9px;
+      letter-spacing: 2px;
+      margin-top: -3px;
     }
 
-    .hero-buttons .btn{
-        width:100%;
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
     }
 
-    .grid,
-    .price-grid,
-    .policy-grid,
-    .status-grid,
-    .feature-list{
-        grid-template-columns:1fr;
+    nav a {
+      color: #aebbd0;
+      font-size: 14px;
+      transition: 0.2s;
     }
 
-    .graphics,
-    .social-grid,
-    .hero-stats{
-        grid-template-columns:1fr 1fr;
+    nav a:hover {
+      color: white;
     }
 
-    .payment-methods{
-        grid-template-columns:1fr 1fr;
+    .nav-contact {
+      padding: 10px 16px;
+      border: 1px solid rgba(80,160,255,0.45);
+      border-radius: 10px;
+      background: rgba(40,130,255,0.09);
+      color: white;
     }
 
-    .form-container{
-        padding:24px;
+    .menu-btn {
+      display: none;
+      border: none;
+      background: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
     }
 
-    .philosophy{
-        padding:35px 22px;
+    /* =========================
+       HERO
+    ========================= */
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 110px;
     }
 
-    .ai-button{
-        right:16px;
-        bottom:16px;
+    .hero-content {
+      max-width: 850px;
     }
 
-    .ai-panel{
-        right:15px;
-        bottom:85px;
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(80,160,255,0.25);
+      background: rgba(40,120,255,0.07);
+      color: #79bcff;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 24px;
     }
 
-    #topBtn{
-        right:16px;
-        bottom:88px;
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4bd68c;
+      box-shadow: 0 0 12px #4bd68c;
     }
 
-    .toast{
-        left:15px;
-        right:15px;
-        bottom:85px;
-        max-width:none;
+    h1 {
+      font-size: clamp(54px, 9vw, 110px);
+      line-height: 0.92;
+      letter-spacing: -5px;
+      margin-bottom: 28px;
     }
-}
 
-@media(prefers-reduced-motion:reduce){
-
-    *,
-    *::before,
-    *::after{
-        animation-duration:.01ms !important;
-        animation-iteration-count:1 !important;
-        scroll-behavior:auto !important;
-        transition-duration:.01ms !important;
+    .gradient-text {
+      background: linear-gradient(90deg, #ffffff, #75b7ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
-}
-</style>
+
+    .hero p {
+      max-width: 680px;
+      color: #9eacc1;
+      font-size: 19px;
+      margin-bottom: 34px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 13px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 22px;
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #1677ff;
+      border-color: #1677ff;
+      color: white;
+      box-shadow: 0 10px 35px rgba(22,119,255,0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      background: #2a86ff;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.04);
+      color: #d8e2f0;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 50px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 25px;
+    }
+
+    .stat span {
+      color: #71819e;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* =========================
+       SECTIONS
+    ========================= */
+
+    section {
+      padding: 110px 0;
+    }
+
+    .section-label {
+      color: #62adff;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 18px;
+    }
+
+    .section-description {
+      color: #8998ae;
+      max-width: 680px;
+      font-size: 16px;
+    }
+
+    /* =========================
+       STUDIO
+    ========================= */
+
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .studio-card {
+      padding: 36px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .quote {
+      font-size: 29px;
+      line-height: 1.2;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .muted {
+      color: #8190a6;
+    }
+
+    /* =========================
+       RSL
+    ========================= */
+
+    .rsl-box {
+      padding: 65px;
+      border-radius: 28px;
+      border: 1px solid rgba(80,160,255,0.18);
+      background:
+        radial-gradient(circle at 80% 20%, rgba(0,130,255,0.22), transparent 35%),
+        linear-gradient(135deg, rgba(20,45,90,0.5), rgba(5,12,25,0.8));
+      overflow: hidden;
+    }
+
+    .rsl-name {
+      font-size: clamp(55px, 9vw, 100px);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -5px;
+    }
+
+    .rsl-subtitle {
+      color: #76b8ff;
+      font-size: 18px;
+      margin: 12px 0 22px;
+    }
+
+    .rsl-box p {
+      max-width: 700px;
+      color: #9aaac0;
+    }
+
+    /* =========================
+       FEATURES
+    ========================= */
+
+    .features-grid {
+      margin-top: 45px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature {
+      padding: 27px;
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.025);
+      transition: 0.25s;
+    }
+
+    .feature:hover {
+      transform: translateY(-4px);
+      border-color: rgba(80,160,255,0.25);
+      background: rgba(50,120,255,0.05);
+    }
+
+    .feature-icon {
+      width: 43px;
+      height: 43px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: rgba(40,130,255,0.1);
+      color: #70b7ff;
+      margin-bottom: 17px;
+      font-size: 19px;
+    }
+
+    .feature h3 {
+      font-size: 17px;
+      margin-bottom: 7px;
+    }
+
+    .feature p {
+      color: #7f8da2;
+      font-size: 14px;
+    }
+
+    /* =========================
+       CITIES
+    ========================= */
+
+    .cities-grid {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .city {
+      min-height: 210px;
+      padding: 25px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .city span {
+      color: #6facdf;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .city h3 {
+      font-size: 25px;
+      margin-top: 5px;
+    }
+
+    /* =========================
+       DEVELOPMENT
+    ========================= */
+
+    .development-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .progress-box {
+      margin-top: 35px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      color: #9baac0;
+      font-size: 13px;
+      margin-bottom: 9px;
+    }
+
+    .progress {
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 35%;
+      height: 100%;
+      background: #2987ff;
+      border-radius: inherit;
+    }
+
+    .roadmap {
+      display: grid;
+      gap: 12px;
+    }
+
+    .roadmap-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 17px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 13px;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .roadmap-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #52647d;
+      flex-shrink: 0;
+    }
+
+    .roadmap-item.active .roadmap-dot {
+      background: #3fd890;
+      box-shadow: 0 0 12px rgba(63,216,144,0.6);
+    }
+
+    /* =========================
+       PRICING
+    ========================= */
+
+    .pricing-grid {
+      margin-top: 45px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .price-card {
+      padding: 32px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.025);
+    }
+
+    .price-card.featured {
+      border-color: rgba(50,140,255,0.5);
+      background: linear-gradient(150deg, rgba(30,110,255,0.12), rgba(255,255,255,0.025));
+    }
+
+    .price {
+      font-size: 42px;
+      font-weight: 800;
+      margin: 14px 0 20px;
+    }
+
+    .price-list {
+      list-style: none;
+      margin: 25px 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .price-list li {
+      color: #9ba9bd;
+      font-size: 14px;
+    }
+
+    .price-list li::before {
+      content: "✓";
+      color: #4ba3ff;
+      margin-right: 9px;
+    }
+
+    /* =========================
+       FAQ
+    ========================= */
+
+    .faq {
+      max-width: 850px;
+      margin-top: 40px;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .faq-question {
+      width: 100%;
+      border: none;
+      background: none;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 0;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      color: #8492a7;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-answer p {
+      padding-bottom: 22px;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    .faq-plus {
+      font-size: 24px;
+      color: #6baeff;
+      transition: 0.2s;
+    }
+
+    .faq-item.open .faq-plus {
+      transform: rotate(45deg);
+    }
+
+    /* =========================
+       AI
+    ========================= */
+
+    .ai-box {
+      max-width: 850px;
+      margin-top: 40px;
+      border: 1px solid rgba(70,150,255,0.18);
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(20,50,100,0.08);
+    }
+
+    .ai-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ai-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #48d98c;
+    }
+
+    .chat {
+      height: 330px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 11px 14px;
+      border-radius: 13px;
+      font-size: 14px;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.06);
+      color: #aab7c9;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: #1475ef;
+      color: white;
+    }
+
+    .chat-form {
+      display: flex;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .chat-form input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      outline: none;
+      background: rgba(255,255,255,0.05);
+      color: white;
+    }
+
+    .chat-form button {
+      padding: 0 18px;
+      border: none;
+      border-radius: 10px;
+      background: #1677ff;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* =========================
+       CONTACT
+    ========================= */
+
+    .contact-box {
+      padding: 55px;
+      border-radius: 25px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.025);
+      text-align: center;
+    }
+
+    .contact-box p {
+      max-width: 600px;
+      margin: 0 auto 25px;
+      color: #8998ae;
+    }
+
+    .email {
+      display: inline-block;
+      color: #68b1ff;
+      font-size: 18px;
+      margin-bottom: 25px;
+    }
+
+    .socials {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .socials a {
+      padding: 10px 15px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #a3b1c5;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .socials a:hover {
+      color: white;
+      border-color: rgba(90,160,255,0.4);
+      background: rgba(50,130,255,0.07);
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 35px 0;
+      color: #617087;
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 850px) {
+
+      nav {
+        display: none;
+        position: absolute;
+        top: 76px;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        background: rgba(5,11,24,0.98);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      nav a {
+        padding: 10px;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .studio-grid,
+      .development-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cities-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+
+      h1 {
+        letter-spacing: -3px;
+      }
+
+      section {
+        padding: 80px 0;
+      }
+
+      .features-grid,
+      .cities-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .rsl-box,
+      .contact-box {
+        padding: 30px 22px;
+      }
+
+      .hero-stats {
+        gap: 25px;
+      }
+    }
+  </style>
 </head>
 
-<body class="locked">
+<body>
 
-<!-- =========================================================
-     BACKGROUND
-========================================================= -->
+  <!-- HEADER -->
 
-<div class="background">
-    <div class="background-grid"></div>
-    <div class="background-glow"></div>
-    <div class="background-glow two"></div>
-    <div class="background-glow three"></div>
-</div>
+  <header>
+    <div class="container nav">
 
+      <a href="#home" class="brand">
 
-<!-- =========================================================
-     SECURITY VERIFICATION
-========================================================= -->
-
-<div id="securityScreen">
-
-    <div class="security-box">
-
-        <div class="security-logo">
-            VENTOREA <span>STUDIOS</span>
+        <div class="brand-mark">
+          V
         </div>
 
-        <div class="security-icon">
-            🔐
+        <div class="brand-text">
+          Ventorea Studios
+          <small>THE STEP BEFORE REALITY</small>
         </div>
 
-        <h1>
-            Secure Access
-        </h1>
+      </a>
 
-        <p>
-            Verify access before entering the Ventorea Studios website.
-            This is a client-side verification screen.
-        </p>
-
-        <button
-            id="verifyBtn"
-            class="btn full sound">
-
-            Verify & Enter
-
-        </button>
-
-        <div
-            id="verifyStatus"
-            class="verify-status">
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     NAVIGATION
-========================================================= -->
-
-<nav id="navbar">
-
-    <a href="#home" class="logo sound">
-        VENTOREA <span>STUDIOS</span>
-    </a>
-
-    <button
-        class="menu-btn sound"
+      <button
+        class="menu-btn"
         id="menuBtn"
-        aria-label="Open navigation menu"
-        aria-expanded="false">
-
+        aria-label="Open navigation"
+      >
         ☰
+      </button>
 
-    </button>
-
-    <div class="nav-links" id="navLinks">
-
-        <a href="#home" class="sound">Home</a>
-        <a href="#about" class="sound">RSL</a>
-        <a href="#features" class="sound">Features</a>
-        <a href="#graphics" class="sound">Graphics</a>
-        <a href="#roadmap" class="sound">Roadmap</a>
-        <a href="#pricing" class="sound">Pricing</a>
-        <a href="#faq" class="sound">FAQ</a>
-        <a href="#social" class="sound">Social</a>
-
-        <a
-            href="#contact"
-            class="nav-contact sound">
-
-            Contact
-
-        </a>
+      <nav id="nav">
+        <a href="#about">Studio</a>
+        <a href="#rsl">RSL</a>
+        <a href="#features">Features</a>
+        <a href="#development">Development</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact" class="nav-contact">Contact</a>
+      </nav>
 
     </div>
+  </header>
 
-</nav>
 
+  <main>
 
-<!-- =========================================================
-     HERO
-========================================================= -->
+    <!-- HERO -->
 
-<header class="hero" id="home">
+    <section class="hero" id="home">
 
-    <div class="hero-content reveal">
+      <div class="container">
 
-        <div class="hero-badge">
-            RSL • IN DEVELOPMENT
+        <div class="hero-content">
+
+          <div class="eyebrow">
+            <span class="status-dot"></span>
+            Ventorea Studios
+          </div>
+
+          <h1>
+            <span class="gradient-text">
+              The step
+            </span>
+            <br>
+            before reality.
+          </h1>
+
+          <p>
+            We build realistic digital worlds where everyday life,
+            transportation, people, cities, and systems work together.
+          </p>
+
+          <div class="buttons">
+
+            <a href="#rsl" class="btn btn-primary">
+              Explore RSL
+            </a>
+
+            <a href="#development" class="btn btn-secondary">
+              Development Status
+            </a>
+
+          </div>
+
+          <div class="hero-stats">
+
+            <div class="stat">
+              <strong>RSL</strong>
+              <span>Main Project</span>
+            </div>
+
+            <div class="stat">
+              <strong>Open World</strong>
+              <span>Simulation</span>
+            </div>
+
+            <div class="stat">
+              <strong>Realism</strong>
+              <span>Core Principle</span>
+            </div>
+
+          </div>
+
         </div>
 
-        <h1>
-            <span>
-                REALISTIC<br>
-                SIMULATION LIFE
-            </span>
-        </h1>
+      </div>
 
-        <p class="hero-description">
+    </section>
 
-            A connected open-world life simulation built around one idea:
 
-            <strong>
-                If it exists in real life, it should exist in the game.
-            </strong>
+    <!-- STUDIO -->
 
+    <section id="about">
+
+      <div class="container">
+
+        <div class="studio-grid">
+
+          <div>
+
+            <div class="section-label">
+              01 / Studio
+            </div>
+
+            <h2 class="section-title">
+              Building worlds around real life.
+            </h2>
+
+            <p class="section-description">
+              Ventorea Studios focuses on realistic interactive experiences.
+              Our goal is to create systems that connect together and make
+              digital worlds feel alive.
+            </p>
+
+          </div>
+
+          <div class="studio-card">
+
+            <div class="quote">
+              "If it exists in real life,
+              it should exist in the game."
+            </div>
+
+            <p class="muted">
+              Quality over quantity. Every system should have a purpose,
+              interact with other systems, and contribute to the world.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- RSL -->
+
+    <section id="rsl">
+
+      <div class="container">
+
+        <div class="rsl-box">
+
+          <div class="section-label">
+            02 / Main Project
+          </div>
+
+          <div class="rsl-name">
+            RSL
+          </div>
+
+          <div class="rsl-subtitle">
+            Realistic Simulation Life
+          </div>
+
+          <p>
+            RSL is an open-world life simulation built around realistic
+            systems, transportation, cities, careers, relationships,
+            vehicles, weather, and everyday life.
+          </p>
+
+          <div class="buttons" style="margin-top:28px;">
+
+            <a href="#features" class="btn btn-primary">
+              View Systems
+            </a>
+
+            <a href="#pricing" class="btn btn-secondary">
+              View Pricing
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FEATURES -->
+
+    <section id="features">
+
+      <div class="container">
+
+        <div class="section-label">
+          03 / Systems
+        </div>
+
+        <h2 class="section-title">
+          A world built from systems.
+        </h2>
+
+        <p class="section-description">
+          RSL connects different parts of life together instead of treating
+          each feature as an isolated mechanic.
         </p>
 
-        <div class="hero-buttons">
 
-            <a
-                href="#about"
-                class="btn sound">
+        <div class="features-grid">
 
-                Explore RSL
+          <div class="feature">
+            <div class="feature-icon">🚗</div>
+            <h3>Realistic Driving</h3>
+            <p>
+              Traffic rules, AI drivers, fuel, maintenance, weather,
+              manual and automatic driving.
+            </p>
+          </div>
 
-            </a>
+          <div class="feature">
+            <div class="feature-icon">🏙️</div>
+            <h3>Living Cities</h3>
+            <p>
+              Large connected cities with transportation, businesses,
+              services, and everyday activity.
+            </p>
+          </div>
 
-            <a
-                href="#roadmap"
-                class="btn secondary sound">
+          <div class="feature">
+            <div class="feature-icon">👥</div>
+            <h3>NPC Relationships</h3>
+            <p>
+              NPCs have relationships, memories, routines, and reactions
+              to the world around them.
+            </p>
+          </div>
 
-                View Roadmap
+          <div class="feature">
+            <div class="feature-icon">💼</div>
+            <h3>Jobs & Careers</h3>
+            <p>
+              Build a career, work different jobs, run businesses,
+              and manage your finances.
+            </p>
+          </div>
 
-            </a>
+          <div class="feature">
+            <div class="feature-icon">🚇</div>
+            <h3>Transportation</h3>
+            <p>
+              Metro, trains, trams, buses, airports, airlines,
+              ships, and cruises.
+            </p>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">🌦️</div>
+            <h3>Dynamic World</h3>
+            <p>
+              Weather and day-night cycles affect how the world looks
+              and behaves.
+            </p>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">👮</div>
+            <h3>Law & Police</h3>
+            <p>
+              Speed enforcement, police interactions, wanted levels,
+              and prison systems.
+            </p>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">🏫</div>
+            <h3>Education</h3>
+            <p>
+              Schools and education form part of the wider life simulation.
+            </p>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">📱</div>
+            <h3>Personal Devices</h3>
+            <p>
+              Phones, watches, wireless earbuds, charging, and
+              connected personal technology.
+            </p>
+          </div>
 
         </div>
 
-        <div class="hero-stats">
+      </div>
 
-            <div class="hero-stat">
-                <strong>🌎</strong>
-                <span>Living World</span>
-            </div>
+    </section>
 
-            <div class="hero-stat">
-                <strong>🚗</strong>
-                <span>Vehicle Simulation</span>
-            </div>
 
-            <div class="hero-stat">
-                <strong>🎮</strong>
-                <span>PC & Console Planned</span>
-            </div>
+    <!-- CITIES -->
 
-            <div class="hero-stat">
-                <strong>🧪</strong>
-                <span>Currently Testing</span>
-            </div>
+    <section>
+
+      <div class="container">
+
+        <div class="section-label">
+          04 / World
+        </div>
+
+        <h2 class="section-title">
+          One connected world.
+        </h2>
+
+        <p class="section-description">
+          RSL is designed around a connected world inspired by major
+          international cities.
+        </p>
+
+        <div class="cities-grid">
+
+          <div class="city">
+            <span>Egypt</span>
+            <h3>Cairo</h3>
+          </div>
+
+          <div class="city">
+            <span>United Arab Emirates</span>
+            <h3>Dubai</h3>
+          </div>
+
+          <div class="city">
+            <span>Japan</span>
+            <h3>Tokyo</h3>
+          </div>
+
+          <div class="city">
+            <span>France</span>
+            <h3>Paris</h3>
+          </div>
 
         </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- DEVELOPMENT -->
+
+    <section id="development">
+
+      <div class="container">
+
+        <div class="development-grid">
+
+          <div>
+
+            <div class="section-label">
+              05 / Development
+            </div>
+
+            <h2 class="section-title">
+              Built step by step.
+            </h2>
+
+            <p class="section-description">
+              RSL is under development. Systems will continue to evolve
+              as the project grows.
+            </p>
+
+            <div class="progress-box">
+
+              <div class="progress-info">
+                <span>Development Progress</span>
+                <span>In Development</span>
+              </div>
+
+              <div class="progress">
+                <div class="progress-fill"></div>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="roadmap">
+
+            <div class="roadmap-item active">
+              <span class="roadmap-dot"></span>
+
+              <div>
+                <strong>Concept & Vision</strong>
+                <div class="muted">
+                  Active
+                </div>
+              </div>
+
+            </div>
+
+            <div class="roadmap-item active">
+              <span class="roadmap-dot"></span>
+
+              <div>
+                <strong>Core Systems</strong>
+                <div class="muted">
+                  In development
+                </div>
+              </div>
+
+            </div>
+
+            <div class="roadmap-item">
+              <span class="roadmap-dot"></span>
+
+              <div>
+                <strong>World Expansion</strong>
+                <div class="muted">
+                  Planned
+                </div>
+              </div>
+
+            </div>
+
+            <div class="roadmap-item">
+              <span class="roadmap-dot"></span>
+
+              <div>
+                <strong>Online Features</strong>
+                <div class="muted">
+                  Planned
+                </div>
+              </div>
+
+            </div>
+
+            <div class="roadmap-item">
+              <span class="roadmap-dot"></span>
+
+              <div>
+                <strong>Release</strong>
+                <div class="muted">
+                  Not announced
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PRICING -->
+
+    <section id="pricing">
+
+      <div class="container">
+
+        <div class="section-label">
+          06 / Pricing
+        </div>
+
+        <h2 class="section-title">
+          Choose your access.
+        </h2>
+
+        <p class="section-description">
+          Current planned RSL pricing.
+        </p>
+
+
+        <div class="pricing-grid">
+
+          <div class="price-card">
+
+            <h3>Demo</h3>
+
+            <div class="price">
+              $0
+            </div>
+
+            <p class="muted">
+              Try RSL before purchasing the full game.
+            </p>
+
+            <ul class="price-list">
+              <li>Free access</li>
+              <li>Limited experience</li>
+              <li>Introduction to RSL</li>
+            </ul>
+
+            <a href="#contact" class="btn btn-secondary">
+              Stay Updated
+            </a>
+
+          </div>
+
+
+          <div class="price-card">
+
+            <h3>Standard</h3>
+
+            <div class="price">
+              $19.99
+            </div>
+
+            <p class="muted">
+              Full standard RSL experience.
+            </p>
+
+            <ul class="price-list">
+              <li>Full game access</li>
+              <li>Core simulation systems</li>
+              <li>Open-world experience</li>
+            </ul>
+
+            <a href="#contact" class="btn btn-secondary">
+              Coming Later
+            </a>
+
+          </div>
+
+
+          <div class="price-card featured">
+
+            <h3>Ultimate</h3>
+
+            <div class="price">
+              $29.99
+            </div>
+
+            <p class="muted">
+              Expanded access for players who want more.
+            </p>
+
+            <ul class="price-list">
+              <li>Full game access</li>
+              <li>Additional features</li>
+              <li>Planned online features</li>
+              <li>Ultimate access benefits</li>
+            </ul>
+
+            <a href="#contact" class="btn btn-primary">
+              Coming Later
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- AI -->
+
+    <section>
+
+      <div class="container">
+
+        <div class="section-label">
+          07 / Ventorea AI
+        </div>
+
+        <h2 class="section-title">
+          Ask about Ventorea.
+        </h2>
+
+        <p class="section-description">
+          A basic built-in assistant for information about the studio and RSL.
+        </p>
+
+
+        <div class="ai-box">
+
+          <div class="ai-header">
+            <span class="ai-status"></span>
+            <strong>Ventorea Assistant</strong>
+          </div>
+
+          <div class="chat" id="chat">
+
+            <div class="message bot">
+              Hello. I am the Ventorea Assistant.
+              Ask me about RSL, Ventorea Studios,
+              pricing, or development.
+            </div>
+
+          </div>
+
+          <form class="chat-form" id="chatForm">
+
+            <input
+              id="chatInput"
+              type="text"
+              placeholder="Ask something..."
+              autocomplete="off"
+            >
+
+            <button type="submit">
+              Send
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FAQ -->
+
+    <section id="faq">
+
+      <div class="container">
+
+        <div class="section-label">
+          08 / FAQ
+        </div>
+
+        <h2 class="section-title">
+          Frequently asked questions.
+        </h2>
+
+
+        <div class="faq">
+
+          <div class="faq-item">
+
+            <button class="faq-question">
+              What is RSL?
+              <span class="faq-plus">+</span>
+            </button>
+
+            <div class="faq-answer">
+              <p>
+                RSL stands for Realistic Simulation Life.
+                It is an open-world life simulation focused on
+                realistic systems, transportation, cities,
+                careers, relationships, and everyday life.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question">
+              Who is developing RSL?
+              <span class="faq-plus">+</span>
+            </button>
+
+            <div class="faq-answer">
+              <p>
+                RSL is being developed by Ventorea Studios.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question">
+              When will RSL release?
+              <span class="faq-plus">+</span>
+            </button>
+
+            <div class="faq-answer">
+              <p>
+                A final release date has not been announced.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question">
+              How much will RSL cost?
+              <span class="faq-plus">+</span>
+            </button>
+
+            <div class="faq-answer">
+              <p>
+                Current planned pricing is $0 for the Demo,
+                $19.99 for Standard, and $29.99 for Ultimate.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question">
+              Will RSL have multiplayer?
+              <span class="faq-plus">+</span>
+            </button>
+
+            <div class="faq-answer">
+              <p>
+                Online multiplayer is planned for RSL.
+                More details will be announced as development progresses.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question">
+              Is RSL available now?
+              <span class="faq-plus">+</span>
+            </button>
+
+            <div class="faq-answer">
+              <p>
+                RSL is currently under development.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CONTACT -->
+
+    <section id="contact">
+
+      <div class="container">
+
+        <div class="contact-box">
+
+          <div class="section-label">
+            09 / Contact
+          </div>
+
+          <h2 class="section-title">
+            Stay connected.
+          </h2>
+
+          <p>
+            Follow Ventorea Studios for development updates,
+            announcements, and future RSL news.
+          </p>
+
+          <a
+            class="email"
+            href="mailto:ventoreastudios.support@gmail.com"
+          >
+            ventoreastudios.support@gmail.com
+          </a>
+
+
+          <div class="socials">
+
+            <a
+              href="https://www.instagram.com/ventoreastudios"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Instagram
+            </a>
+
+            <a
+              href="https://www.facebook.com/ventoreastudios"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Facebook
+            </a>
+
+            <a
+              href="https://www.tiktok.com/@ventoreastudios"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              TikTok
+            </a>
+
+            <a
+              href="https://www.youtube.com/@ventoreasutdios"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              YouTube
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div class="container footer-inner">
+
+      <div>
+        © 2026 Ventorea Studios. All rights reserved.
+      </div>
+
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms</a>
+        <a href="#">Community Guidelines</a>
+      </div>
 
     </div>
 
-</header>
+  </footer>
 
 
-<!-- =========================================================
-     ABOUT
-========================================================= -->
+  <script>
 
-<section id="about">
+    /* MOBILE MENU */
 
-<div class="container">
+    const menuBtn = document.getElementById("menuBtn");
+    const nav = document.getElementById("nav");
 
-<div class="section-header reveal">
+    menuBtn.addEventListener("click", () => {
+      nav.classList.toggle("active");
+    });
 
-<span class="section-tag">
-ABOUT RSL
-</span>
+    document.querySelectorAll("nav a").forEach(link => {
 
-<h2 class="section-title">
-More than an open world.
-</h2>
-
-<p class="section-description">
-RSL is being designed as a living simulation where transportation,
-people, economy, weather and everyday systems connect together.
-</p>
-
-</div>
-
-
-<div class="grid">
-
-<article class="card highlight reveal">
-
-<div class="card-icon">🌎</div>
-
-<h3>A Living World</h3>
-
-<p>
-The world is designed to feel active and connected,
-with NPCs, services, transportation and environmental
-systems working together.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">👥</div>
-
-<h3>NPCs</h3>
-
-<p>
-NPCs are intended to have routines, interactions and
-reactions to events happening around them.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">💼</div>
-
-<h3>Jobs & Economy</h3>
-
-<p>
-Work, income, spending, services and other economic
-systems can become part of everyday gameplay.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">🌦️</div>
-
-<h3>Environment</h3>
-
-<p>
-Weather and environmental conditions are intended to
-influence the world instead of simply being visuals.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">🏙️</div>
-
-<h3>Everyday Life</h3>
-
-<p>
-Transportation, shopping, services and normal daily
-activities can all become part of the simulation.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">🎯</div>
-
-<h3>Your Choice</h3>
-
-<p>
-RSL is intended to give players freedom without
-forcing everyone into the same style of gameplay.
-</p>
-
-</article>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     PHILOSOPHY
-========================================================= -->
-
-<section>
-
-<div class="container">
-
-<div class="philosophy reveal">
-
-<blockquote>
-“If it exists in real life,
-it should exist in the game.”
-</blockquote>
-
-<cite>
-— Ventorea Studios • RSL Design Philosophy
-</cite>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     FEATURES
-========================================================= -->
-
-<section id="features">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-SYSTEMS
-</span>
-
-<h2 class="section-title">
-Built around simulation.
-</h2>
-
-<p class="section-description">
-RSL is planned around interconnected systems instead of treating
-every feature as an isolated mechanic.
-</p>
-
-</div>
-
-
-<div class="feature-list">
-
-<div class="feature-row reveal">
-<div class="feature-number">01</div>
-<div>
-<h3>🚗 Vehicle Simulation</h3>
-<p>
-Vehicles can have individual damage, repairs, handling
-and consequences from collisions.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">02</div>
-<div>
-<h3>🛠️ Damage & Repairs</h3>
-<p>
-After a crash, the game can identify damaged parts and
-show what needs to be repaired.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">03</div>
-<div>
-<h3>👤 NPC Accidents</h3>
-<p>
-NPC collisions can create situations involving damage,
-responsibility and potential compensation.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">04</div>
-<div>
-<h3>💰 Economy</h3>
-<p>
-A planned economy can connect jobs, income, spending
-and services.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">05</div>
-<div>
-<h3>🚦 Transportation</h3>
-<p>
-Roads, traffic and transportation are planned as
-important parts of the world.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">06</div>
-<div>
-<h3>🌦️ Dynamic Weather</h3>
-<p>
-Environmental conditions can affect how the world looks
-and potentially how it behaves.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">07</div>
-<div>
-<h3>🏠 Everyday Activities</h3>
-<p>
-Everyday services and activities can become interactive
-parts of the world.
-</p>
-</div>
-</div>
-
-
-<div class="feature-row reveal">
-<div class="feature-number">08</div>
-<div>
-<h3>🎨 Customization</h3>
-<p>
-Players are planned to have control over their character,
-vehicles and other parts of their experience.
-</p>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     VEHICLES
-========================================================= -->
-
-<section>
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-VEHICLES
-</span>
-
-<h2 class="section-title">
-Drive differently.
-</h2>
-
-<p class="section-description">
-Vehicles are intended to feel like part of the simulation,
-not disposable tools.
-</p>
-
-</div>
-
-
-<div class="grid">
-
-<article class="card reveal">
-
-<div class="card-icon">🚘</div>
-
-<h3>Original Vehicles First</h3>
-
-<p>
-Early versions can use fictional vehicle designs so
-development isn't dependent on expensive licensing.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">💥</div>
-
-<h3>Realistic Damage</h3>
-
-<p>
-Crashes can damage individual components and provide
-information about what needs repair.
-</p>
-
-</article>
-
-
-<article class="card reveal">
-
-<div class="card-icon">🔧</div>
-
-<h3>Repair System</h3>
-
-<p>
-Damaged vehicles are intended to require repairs rather
-than simply resetting after an accident.
-</p>
-
-</article>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     GRAPHICS
-========================================================= -->
-
-<section id="graphics">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-GRAPHICS
-</span>
-
-<h2 class="section-title">
-Your hardware. Your choice.
-</h2>
-
-<p class="section-description">
-The planned PC system can recommend a graphics preset based on
-hardware. Console players receive a stable default configuration.
-</p>
-
-</div>
-
-
-<div class="graphics">
-
-<article class="graphics-card low reveal">
-<div class="graphics-dot"></div>
-<h3>🔴 Low</h3>
-<p>Designed for lower-end hardware.</p>
-</article>
-
-<article class="graphics-card medium reveal">
-<div class="graphics-dot"></div>
-<h3>🟡 Medium</h3>
-<p>Balanced visual quality and performance.</p>
-</article>
-
-<article class="graphics-card high reveal">
-<div class="graphics-dot"></div>
-<h3>🟢 High</h3>
-<p>Higher visual quality for stronger systems.</p>
-</article>
-
-<article class="graphics-card ultra reveal">
-<div class="graphics-dot"></div>
-<h3>🔵 Ultra</h3>
-<p>Maximum planned visual quality.</p>
-</article>
-
-</div>
-
-
-<div class="card reveal" style="margin-top:20px;text-align:center;">
-
-<h3>
-⚠️ Performance protection
-</h3>
-
-<p style="margin-top:8px;">
-
-On consoles, the game is planned to use stable graphics settings
-by default. If demanding settings become available, a warning can
-appear before confirmation.
-
-</p>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     ROADMAP
-========================================================= -->
-
-<section id="roadmap">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-DEVELOPMENT
-</span>
-
-<h2 class="section-title">
-The road to RSL.
-</h2>
-
-<p class="section-description">
-RSL is being planned in stages so the project can be tested before release.
-</p>
-
-</div>
-
-
-<div class="timeline">
-
-<div class="timeline-item reveal">
-<div class="timeline-number">1</div>
-<div>
-<h3>🟡 Development</h3>
-<p>Build and test the core world and simulation systems.</p>
-</div>
-</div>
-
-<div class="timeline-item reveal">
-<div class="timeline-number">2</div>
-<div>
-<h3>🔵 Demo / Trial</h3>
-<p>
-Release an early playable version for testing and feedback.
-</p>
-</div>
-</div>
-
-<div class="timeline-item reveal">
-<div class="timeline-number">3</div>
-<div>
-<h3>⚪ Gameplay Trailer</h3>
-<p>
-Showcase the world, gameplay systems and overall direction.
-</p>
-</div>
-</div>
-
-<div class="timeline-item reveal">
-<div class="timeline-number">4</div>
-<div>
-<h3>⚪ Pre-order</h3>
-<p>
-Pre-orders are planned only after the project reaches
-a suitable stage.
-</p>
-</div>
-</div>
-
-<div class="timeline-item reveal">
-<div class="timeline-number">5</div>
-<div>
-<h3>⚪ Release</h3>
-<p>
-Launch the full game and continue improving it after release.
-</p>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     STATUS
-========================================================= -->
-
-<section>
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-CURRENT STATUS
-</span>
-
-<h2 class="section-title">
-Where things stand.
-</h2>
-
-</div>
-
-
-<div class="status-grid">
-
-<div class="status-card reveal">
-<span class="status-name">RSL Development</span>
-<span class="status-pill status-development">IN DEVELOPMENT</span>
-</div>
-
-<div class="status-card reveal">
-<span class="status-name">Demo / Trial</span>
-<span class="status-pill status-planned">PLANNED</span>
-</div>
-
-<div class="status-card reveal">
-<span class="status-name">Gameplay Trailer</span>
-<span class="status-pill status-planned">PLANNED</span>
-</div>
-
-<div class="status-card reveal">
-<span class="status-name">Pre-orders</span>
-<span class="status-pill status-coming">COMING SOON</span>
-</div>
-
-<div class="status-card reveal">
-<span class="status-name">PC Release</span>
-<span class="status-pill status-coming">COMING SOON</span>
-</div>
-
-<div class="status-card reveal">
-<span class="status-name">Console Release</span>
-<span class="status-pill status-planned">PLANNED</span>
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     PRICING
-========================================================= -->
-
-<section id="pricing">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-EDITIONS
-</span>
-
-<h2 class="section-title">
-Choose your edition.
-</h2>
-
-<p class="section-description">
-These are planned prices and may change before release.
-</p>
-
-</div>
-
-
-<div class="price-grid">
-
-<article class="price-card featured reveal">
-
-<span class="price-badge">
-STANDARD EDITION
-</span>
-
-<div class="price">
-$20
-</div>
-
-<p class="price-sub">
-Planned normal price.
-</p>
-
-<ul class="price-list">
-
-<li>Core RSL experience</li>
-<li>Main simulation systems</li>
-<li>Planned future updates</li>
-<li>Standard edition content</li>
-
-</ul>
-
-<button
-class="btn sound full"
-onclick="showToast('Pre-orders are not open yet.')">
-
-Pre-order — Coming Soon
-
-</button>
-
-</article>
-
-
-<article class="price-card reveal">
-
-<span class="price-badge">
-ULTIMATE EDITION
-</span>
-
-<div class="price">
-$50
-</div>
-
-<p class="price-sub">
-Planned premium edition.
-</p>
-
-<ul class="price-list">
-
-<li>Everything in Standard</li>
-<li>Planned Ultimate bonuses</li>
-<li>Additional content may be announced</li>
-<li>Premium edition content</li>
-
-</ul>
-
-<button
-class="btn secondary sound full"
-onclick="showToast('Ultimate pre-orders are not open yet.')">
-
-Coming Soon
-
-</button>
-
-</article>
-
-</div>
-
-
-<div class="offer reveal">
-
-⚡ <strong>Planned launch offer:</strong>
-$5 for the first 72 hours of launch, then the planned Standard
-Edition price returns to $20.
-
-<br><br>
-
-This offer is planned and is not currently active.
-
-</div>
-
-
-<!-- PAYMENT -->
-
-<div class="payment-box reveal">
-
-<h3>
-💳 Planned payment methods
-</h3>
-
-<p style="color:var(--muted);font-size:13px;margin-top:7px;">
-The future checkout is planned to support major debit and credit
-card networks. Payment processing is not active on this test website.
-</p>
-
-<div class="payment-methods">
-
-<div class="payment-method">
-VISA
-</div>
-
-<div class="payment-method">
-MASTERCARD
-</div>
-
-<div class="payment-method">
-AMEX
-</div>
-
-<div class="payment-method">
-DISCOVER
-</div>
-
-<div class="payment-method">
-JCB
-</div>
-
-</div>
-
-<p class="payment-note">
-
-Prepaid cards and unsupported stored-value cards may not be accepted
-by the future payment processor. The final supported methods will be
-confirmed when real checkout is implemented.
-
-</p>
-
-<button
-class="btn secondary sound"
-style="width:100%;margin-top:18px;"
-onclick="showToast('Secure checkout is not active yet.')">
-
-Open Secure Checkout — Coming Soon
-
-</button>
-
-</div>
-
-
-<div
-class="card reveal"
-style="max-width:1000px;margin:20px auto 0;text-align:center;">
-
-<h3>
-🎮 Platform subscriptions
-</h3>
-
-<p style="color:var(--muted);margin-top:8px;font-size:14px;">
-
-If RSL becomes available through a platform subscription,
-access may depend on that platform's subscription rules.
-
-</p>
-
-</div>
-
-
-<div
-class="card reveal"
-style="max-width:1000px;margin:20px auto 0;text-align:center;">
-
-<h3>
-📱 Mobile
-</h3>
-
-<p style="color:var(--muted);margin-top:8px;font-size:14px;">
-
-Mobile is currently not recommended because RSL is expected to require
-significant storage and hardware resources.
-
-</p>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     FAQ
-========================================================= -->
-
-<section id="faq">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-FAQ
-</span>
-
-<h2 class="section-title">
-Questions?
-</h2>
-
-<p class="section-description">
-Open a question to learn more.
-</p>
-
-</div>
-
-
-<div class="faq-list">
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-When will RSL release?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-There is currently no final release date. RSL is still in development
-and the schedule will depend on development progress.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-Will there be a demo or trial?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-A demo or trial version is planned before the final release so the
-project can be tested and players can provide feedback.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-When will pre-orders open?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-Pre-orders are planned for a later stage and are not currently available.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-Will RSL use real car brands?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-Early versions can use fictional vehicles. Real-world vehicles may be
-considered later if licensing becomes practical.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-Why fictional vehicles?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-Real vehicle brands can require licensing agreements. Fictional vehicles
-allow development to continue without depending on those agreements.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-Will RSL be like GTA?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-RSL is intended to focus on realistic life simulation rather than being
-primarily a crime sandbox. Driving, work, transportation, NPCs and
-everyday systems are central to the concept.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-Why isn't mobile recommended?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-The intended simulation depth and expected hardware and storage
-requirements may make mobile devices a poor fit.
-
-</div>
-</div>
-
-</div>
-
-
-<div class="faq reveal">
-
-<button class="faq-question sound">
-
-Is this website official?
-
-<span class="plus">+</span>
-
-</button>
-
-<div class="faq-answer">
-<div class="faq-answer-inner">
-
-This page is a Ventorea Studios test website for presenting the RSL
-project and its planned direction. Features, prices and release plans
-may change.
-
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     POLICIES
-========================================================= -->
-
-<section id="policies">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-INFORMATION
-</span>
-
-<h2 class="section-title">
-Policies & guidelines.
-</h2>
-
-<p class="section-description">
-Preliminary website and project information for this test build.
-</p>
-
-</div>
-
-
-<div class="policy-grid">
-
-
-<article class="policy reveal">
-
-<h3>
-🔒 Privacy Policy
-</h3>
-
-<p>
-
-This test website does not intentionally transmit contact form
-information to a server. The current form operates locally in the browser.
-
-If a production backend is added later, the privacy policy will be updated
-before personal information is collected through that service.
-
-</p>
-
-</article>
-
-
-<article class="policy reveal">
-
-<h3>
-🛡️ Community Guidelines
-</h3>
-
-<ul>
-
-<li>Respect other community members.</li>
-<li>No harassment or threats.</li>
-<li>No hateful conduct.</li>
-<li>No malicious links or spam.</li>
-<li>Do not impersonate Ventorea Studios.</li>
-<li>Do not intentionally disrupt community services.</li>
-
-</ul>
-
-</article>
-
-
-<article class="policy reveal">
-
-<h3>
-📜 Terms of Service
-</h3>
-
-<p>
-
-Ventorea Studios and RSL are under development.
-Features, pricing, platforms, release plans and other project details
-may change before launch.
-
-Access to future services may be subject to additional terms.
-
-</p>
-
-</article>
-
-
-<article class="policy reveal">
-
-<h3>
-🛡️ Security
-</h3>
-
-<p>
-
-The access screen on this test website is a visual client-side
-verification layer. It should not be considered authentication or
-production-grade security.
-
-Real account security will require server-side systems.
-
-</p>
-
-</article>
-
-
-<article class="policy reveal">
-
-<h3>
-🎮 Platform Notice
-</h3>
-
-<p>
-
-PlayStation, Xbox, Nintendo and other platform names and trademarks
-belong to their respective owners. Future platform availability would
-be subject to applicable requirements and agreements.
-
-</p>
-
-</article>
-
-
-<article class="policy reveal">
-
-<h3>
-💳 Payments
-</h3>
-
-<p>
-
-No real payment is processed through this test website.
-Any future checkout will use a secure third-party payment processor
-and will be subject to its supported payment methods.
-
-</p>
-
-</article>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     SOCIAL MEDIA
-========================================================= -->
-
-<section id="social">
-
-<div class="container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-CONNECT
-</span>
-
-<h2 class="section-title">
-Find Ventorea online.
-</h2>
-
-<p class="section-description">
-
-Follow the project as development continues. Social links can be
-connected to the official accounts when each account is ready.
-
-</p>
-
-</div>
-
-
-<div class="social-grid">
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-📸
-</div>
-
-<h3>Instagram</h3>
-
-<p>
-Visual updates, development posts and announcements.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'Instagram')">
-
-@VentoreaStudios →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-🎵
-</div>
-
-<h3>TikTok</h3>
-
-<p>
-Short development clips and RSL content.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'TikTok')">
-
-@VentoreaStudios →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-▶️
-</div>
-
-<h3>YouTube</h3>
-
-<p>
-Trailers, gameplay and development videos.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'YouTube')">
-
-Ventorea Studios →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-𝕏
-</div>
-
-<h3>X</h3>
-
-<p>
-Announcements, updates and project news.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'X')">
-
-@VentoreaStudios →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-💬
-</div>
-
-<h3>Discord</h3>
-
-<p>
-Community discussions and development feedback.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'Discord')">
-
-Join Community →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-💼
-</div>
-
-<h3>LinkedIn</h3>
-
-<p>
-Studio and professional development updates.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'LinkedIn')">
-
-Ventorea Studios →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-🟠
-</div>
-
-<h3>Reddit</h3>
-
-<p>
-Community discussion and RSL ideas.
-</p>
-
-<a
-href="#"
-class="social-link sound"
-onclick="comingSoon(event,'Reddit')">
-
-r/VentoreaStudios →
-
-</a>
-
-</article>
-
-
-<article class="social-card reveal">
-
-<div class="social-icon">
-🌐
-</div>
-
-<h3>Website</h3>
-
-<p>
-The central home for Ventorea Studios.
-</p>
-
-<a
-href="#home"
-class="social-link sound">
-
-ventorea.studios →
-
-</a>
-
-</article>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     CONTACT
-========================================================= -->
-
-<section id="contact">
-
-<div class="container">
-
-<div class="contact-container">
-
-<div class="section-header reveal">
-
-<span class="section-tag">
-CONTACT
-</span>
-
-<h2 class="section-title">
-Talk to Ventorea.
-</h2>
-
-<p class="section-description">
-
-Have feedback, a suggestion, a bug report or a partnership idea?
-Send a message through the test form.
-
-</p>
-
-</div>
-
-
-<div class="form-container reveal">
-
-<form id="contactForm">
-
-
-<div class="form-group">
-
-<label for="name">
-Name
-</label>
-
-<input
-type="text"
-id="name"
-required
-maxlength="80"
-placeholder="Your name">
-
-</div>
-
-
-<div class="form-group">
-
-<label for="email">
-Email
-</label>
-
-<input
-type="email"
-id="email"
-required
-maxlength="120"
-placeholder="you@example.com">
-
-</div>
-
-
-<div class="form-group">
-
-<label for="topic">
-Topic
-</label>
-
-<select id="topic">
-
-<option>General</option>
-<option>RSL feedback</option>
-<option>Bug report</option>
-<option>Game suggestion</option>
-<option>Business / partnership</option>
-<option>Community</option>
-<option>Website</option>
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label for="message">
-Message
-</label>
-
-<textarea
-id="message"
-required
-maxlength="1500"
-placeholder="Write your message..."></textarea>
-
-</div>
-
-
-<button
-type="submit"
-class="btn sound full">
-
-Submit Message
-
-</button>
-
-
-<div
-id="statusMsg"
-class="status-msg">
-</div>
-
-
-<p class="form-note">
-
-🔊 A confirmation sound will play when the test submission succeeds.
-
-<br>
-
-This is currently a test form. No email is actually sent until a
-backend service is connected.
-
-</p>
-
-</form>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================================================
-     FOOTER
-========================================================= -->
-
-<footer>
-
-<div class="footer-logo">
-VENTOREA <span>STUDIOS</span>
-</div>
-
-<p>
-Building future worlds.
-</p>
-
-
-<div class="footer-links">
-
-<a href="#about" class="sound">RSL</a>
-<a href="#features" class="sound">Features</a>
-<a href="#pricing" class="sound">Pricing</a>
-<a href="#faq" class="sound">FAQ</a>
-<a href="#policies" class="sound">Policies</a>
-<a href="#social" class="sound">Social</a>
-<a href="#contact" class="sound">Contact</a>
-
-</div>
-
-
-<div class="footer-socials">
-
-<a href="#" onclick="comingSoon(event,'Instagram')">
-Instagram
-</a>
-
-<a href="#" onclick="comingSoon(event,'TikTok')">
-TikTok
-</a>
-
-<a href="#" onclick="comingSoon(event,'YouTube')">
-YouTube
-</a>
-
-<a href="#" onclick="comingSoon(event,'X')">
-X
-</a>
-
-<a href="#" onclick="comingSoon(event,'Discord')">
-Discord
-</a>
-
-<a href="#" onclick="comingSoon(event,'Reddit')">
-Reddit
-</a>
-
-</div>
-
-
-<p>
-© 2026 Ventorea Studios. Test website.
-</p>
-
-</footer>
-
-
-<!-- =========================================================
-     AI
-========================================================= -->
-
-<div
-class="ai-panel"
-id="aiPanel">
-
-<div class="ai-header">
-
-<h3>
-🤖 Ventorea AI
-</h3>
-
-<button
-class="ai-close sound"
-id="aiClose">
-
-×
-</button>
-
-</div>
-
-
-<div class="ai-message">
-
-Hey! I'm the future Ventorea AI assistant.
-
-</div>
-
-<div class="ai-status">
-
-● AI services are currently offline — coming later.
-
-</div>
-
-<button
-class="btn secondary sound full"
-style="margin-top:15px;"
-onclick="showToast('Ventorea AI is not connected yet.')">
-
-Try AI
-
-</button>
-
-</div>
-
-
-<button
-class="ai-button sound"
-id="aiButton"
-aria-label="Open Ventorea AI">
-
-🤖
-
-</button>
-
-
-<!-- =========================================================
-     TOAST / TOP
-========================================================= -->
-
-<div
-class="toast"
-id="toast">
-</div>
-
-
-<button
-id="topBtn"
-class="sound"
-aria-label="Back to top">
-
-↑
-
-</button>
-
-
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
-
-<script>
-
-/* =========================================================
-   AUDIO ENGINE
-========================================================= */
-
-const AudioContextClass =
-    window.AudioContext ||
-    window.webkitAudioContext;
-
-let audioContext = null;
-
-
-function initAudio(){
-
-    if(!AudioContextClass) return;
-
-    if(!audioContext){
-        audioContext = new AudioContextClass();
-    }
-
-    if(audioContext.state === "suspended"){
-        audioContext.resume();
-    }
-
-}
-
-
-function beep(
-    frequency = 620,
-    duration = .08,
-    volume = .08,
-    type = "sine"
-){
-
-    try{
-
-        initAudio();
-
-        if(!audioContext) return;
-
-        const now =
-            audioContext.currentTime;
-
-        const oscillator =
-            audioContext.createOscillator();
-
-        const gain =
-            audioContext.createGain();
-
-        oscillator.type = type;
-
-        oscillator.frequency.setValueAtTime(
-            frequency,
-            now
-        );
-
-        oscillator.frequency.exponentialRampToValueAtTime(
-            frequency * .72,
-            now + duration
-        );
-
-        gain.gain.setValueAtTime(
-            volume,
-            now
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            .001,
-            now + duration
-        );
-
-        oscillator.connect(gain);
-        gain.connect(audioContext.destination);
-
-        oscillator.start(now);
-        oscillator.stop(now + duration);
-
-    }catch(error){}
-
-}
-
-
-function playClickSound(){
-
-    beep(
-        720,
-        .075,
-        .09,
-        "sine"
-    );
-
-}
-
-
-function playSuccessSound(){
-
-    try{
-
-        initAudio();
-
-        if(!audioContext) return;
-
-        const now =
-            audioContext.currentTime;
-
-        const notes = [
-            523.25,
-            659.25,
-            783.99
-        ];
-
-        notes.forEach(
-            (frequency,index) => {
-
-                const oscillator =
-                    audioContext.createOscillator();
-
-                const gain =
-                    audioContext.createGain();
-
-                const start =
-                    now + index * .09;
-
-                oscillator.type =
-                    "triangle";
-
-                oscillator.frequency.value =
-                    frequency;
-
-                gain.gain.setValueAtTime(
-                    .001,
-                    start
-                );
-
-                gain.gain.exponentialRampToValueAtTime(
-                    .11,
-                    start + .015
-                );
-
-                gain.gain.exponentialRampToValueAtTime(
-                    .001,
-                    start + .25
-                );
-
-                oscillator.connect(gain);
-                gain.connect(audioContext.destination);
-
-                oscillator.start(start);
-                oscillator.stop(start + .27);
-
-            }
-        );
-
-    }catch(error){}
-
-}
-
-
-/* =========================================================
-   CLICK SOUNDS
-========================================================= */
-
-function attachSounds(){
-
-    document
-    .querySelectorAll(".sound")
-    .forEach(element => {
-
-        if(element.dataset.soundAttached){
-            return;
-        }
-
-        element.dataset.soundAttached = "true";
-
-        element.addEventListener(
-            "click",
-            playClickSound
-        );
+      link.addEventListener("click", () => {
+        nav.classList.remove("active");
+      });
 
     });
 
-}
 
-attachSounds();
+    /* FAQ */
 
+    document.querySelectorAll(".faq-question").forEach(button => {
 
-/* =========================================================
-   SECURITY SCREEN
-========================================================= */
+      button.addEventListener("click", () => {
 
-const securityScreen =
-    document.getElementById("securityScreen");
+        const item = button.parentElement;
 
-const verifyBtn =
-    document.getElementById("verifyBtn");
+        document.querySelectorAll(".faq-item").forEach(other => {
 
-const verifyStatus =
-    document.getElementById("verifyStatus");
+          if (other !== item) {
+            other.classList.remove("open");
+          }
 
-
-verifyBtn.addEventListener(
-    "click",
-    () => {
-
-        initAudio();
-
-        beep(
-            520,
-            .08,
-            .1
-        );
-
-        verifyBtn.disabled = true;
-
-        verifyBtn.textContent =
-            "Verifying...";
-
-        verifyStatus.textContent =
-            "Checking access...";
-
-        setTimeout(
-            () => {
-
-                beep(
-                    880,
-                    .1,
-                    .1
-                );
-
-                verifyStatus.textContent =
-                    "Access verified.";
-
-                verifyBtn.textContent =
-                    "Access Granted ✓";
-
-            },
-            650
-        );
-
-        setTimeout(
-            () => {
-
-                securityScreen.classList.add(
-                    "hidden"
-                );
-
-                document.body.classList.remove(
-                    "locked"
-                );
-
-                document
-                .querySelector(".hero-content")
-                ?.classList.add("visible");
-
-                playSuccessSound();
-
-            },
-            1100
-        );
-
-    }
-);
-
-
-/* =========================================================
-   MOUSE COLOR MOVEMENT
-========================================================= */
-
-let mouseX = window.innerWidth / 2;
-let mouseY = window.innerHeight / 2;
-
-window.addEventListener(
-    "mousemove",
-    event => {
-
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-
-        const x =
-            (event.clientX / window.innerWidth) * 100;
-
-        const y =
-            (event.clientY / window.innerHeight) * 100;
-
-        document.documentElement.style.setProperty(
-            "--mx",
-            `${x}%`
-        );
-
-        document.documentElement.style.setProperty(
-            "--my",
-            `${y}%`
-        );
-
-    },
-    {
-        passive:true
-    }
-);
-
-
-/* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
-
-const menuBtn =
-    document.getElementById("menuBtn");
-
-const navLinks =
-    document.getElementById("navLinks");
-
-
-menuBtn.addEventListener(
-    "click",
-    () => {
-
-        const open =
-            navLinks.classList.toggle("open");
-
-        menuBtn.setAttribute(
-            "aria-expanded",
-            open
-        );
-
-        menuBtn.textContent =
-            open ? "✕" : "☰";
-
-    }
-);
-
-
-navLinks
-.querySelectorAll("a")
-.forEach(link => {
-
-    link.addEventListener(
-        "click",
-        () => {
-
-            navLinks.classList.remove("open");
-
-            menuBtn.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-            menuBtn.textContent = "☰";
-
-        }
-    );
-
-});
-
-
-/* =========================================================
-   FAQ
-========================================================= */
-
-document
-.querySelectorAll(".faq-question")
-.forEach(question => {
-
-    question.addEventListener(
-        "click",
-        () => {
-
-            const faq =
-                question.closest(".faq");
-
-            const currentlyOpen =
-                faq.classList.contains("open");
-
-
-            document
-            .querySelectorAll(".faq.open")
-            .forEach(item => {
-
-                if(item !== faq){
-                    item.classList.remove("open");
-                }
-
-            });
-
-
-            if(!currentlyOpen){
-                faq.classList.add("open");
-            }else{
-                faq.classList.remove("open");
-            }
-
-        }
-    );
-
-});
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-let toastTimeout;
-
-
-function showToast(message){
-
-    const toast =
-        document.getElementById("toast");
-
-    toast.textContent =
-        message;
-
-    toast.classList.add("show");
-
-    clearTimeout(toastTimeout);
-
-    toastTimeout =
-        setTimeout(
-            () => {
-
-                toast.classList.remove("show");
-
-            },
-            3200
-        );
-
-}
-
-
-/* =========================================================
-   SOCIAL PLACEHOLDER
-========================================================= */
-
-function comingSoon(
-    event,
-    platform
-){
-
-    event.preventDefault();
-
-    beep(
-        580,
-        .08,
-        .08
-    );
-
-    showToast(
-        `${platform} link will be connected when the account is ready.`
-    );
-
-}
-
-
-/* =========================================================
-   CONTACT FORM
-========================================================= */
-
-const contactForm =
-    document.getElementById("contactForm");
-
-const statusMsg =
-    document.getElementById("statusMsg");
-
-
-contactForm.addEventListener(
-    "submit",
-    event => {
-
-        event.preventDefault();
-
-        const name =
-            document
-            .getElementById("name")
-            .value
-            .trim();
-
-        const email =
-            document
-            .getElementById("email")
-            .value
-            .trim();
-
-        const message =
-            document
-            .getElementById("message")
-            .value
-            .trim();
-
-
-        if(!name || !email || !message){
-
-            beep(
-                220,
-                .12,
-                .11,
-                "square"
-            );
-
-            statusMsg.textContent =
-                "Please complete all required fields.";
-
-            statusMsg.style.display =
-                "block";
-
-            statusMsg.style.color =
-                "var(--red)";
-
-            return;
-
-        }
-
-
-        /* Confirmation beep */
-
-        playSuccessSound();
-
-
-        statusMsg.textContent =
-            `Thanks, ${name}! Your test message was recorded locally.`;
-
-        statusMsg.style.display =
-            "block";
-
-        statusMsg.style.color =
-            "var(--green)";
-
-
-        showToast(
-            "Message submitted successfully in test mode."
-        );
-
-
-        contactForm.reset();
-
-    }
-);
-
-
-/* =========================================================
-   AI PANEL
-========================================================= */
-
-const aiButton =
-    document.getElementById("aiButton");
-
-const aiPanel =
-    document.getElementById("aiPanel");
-
-const aiClose =
-    document.getElementById("aiClose");
-
-
-aiButton.addEventListener(
-    "click",
-    () => {
-
-        aiPanel.classList.toggle("open");
-
-    }
-);
-
-
-aiClose.addEventListener(
-    "click",
-    () => {
-
-        aiPanel.classList.remove("open");
-
-    }
-);
-
-
-/* =========================================================
-   SCROLL REVEAL
-========================================================= */
-
-const revealElements =
-    document.querySelectorAll(".reveal");
-
-
-const revealObserver =
-    new IntersectionObserver(
-        entries => {
-
-            entries.forEach(entry => {
-
-                if(entry.isIntersecting){
-
-                    entry.target.classList.add(
-                        "visible"
-                    );
-
-                    revealObserver.unobserve(
-                        entry.target
-                    );
-
-                }
-
-            });
-
-        },
-        {
-            threshold:.08
-        }
-    );
-
-
-revealElements.forEach(
-    element =>
-        revealObserver.observe(element)
-);
-
-
-/* =========================================================
-   BACK TO TOP
-========================================================= */
-
-const topBtn =
-    document.getElementById("topBtn");
-
-
-window.addEventListener(
-    "scroll",
-    () => {
-
-        if(window.scrollY > 700){
-
-            topBtn.classList.add("show");
-
-        }else{
-
-            topBtn.classList.remove("show");
-
-        }
-
-    },
-    {
-        passive:true
-    }
-);
-
-
-topBtn.addEventListener(
-    "click",
-    () => {
-
-        window.scrollTo({
-            top:0,
-            behavior:"smooth"
         });
 
+        item.classList.toggle("open");
+
+      });
+
+    });
+
+
+    /* VENTOREA AI */
+
+    const chatForm = document.getElementById("chatForm");
+    const chatInput = document.getElementById("chatInput");
+    const chat = document.getElementById("chat");
+
+
+    function addMessage(text, type) {
+
+      const message = document.createElement("div");
+
+      message.className = `message ${type}`;
+      message.textContent = text;
+
+      chat.appendChild(message);
+
+      chat.scrollTop = chat.scrollHeight;
     }
-);
 
 
-/* =========================================================
-   ESCAPE
-========================================================= */
+    function getAIResponse(input) {
 
-document.addEventListener(
-    "keydown",
-    event => {
+      const message = input.toLowerCase().trim();
 
-        if(event.key === "Escape"){
 
-            navLinks.classList.remove("open");
+      if (
+        message.includes("what is rsl") ||
+        message.includes("what's rsl")
+      ) {
+        return "RSL stands for Realistic Simulation Life. It is an open-world life simulation focused on realistic systems and everyday life.";
+      }
 
-            menuBtn.setAttribute(
-                "aria-expanded",
-                "false"
-            );
 
-            menuBtn.textContent = "☰";
+      if (message.includes("rsl")) {
+        return "RSL is Ventorea Studios' main project, focused on realistic open-world life simulation.";
+      }
 
-            aiPanel.classList.remove("open");
 
-        }
+      if (
+        message.includes("ventorea") ||
+        message.includes("studio")
+      ) {
+        return "Ventorea Studios is the studio developing RSL, Realistic Simulation Life.";
+      }
 
+
+      if (
+        message.includes("price") ||
+        message.includes("cost")
+      ) {
+        return "Current planned pricing is $0 for the Demo, $19.99 for Standard, and $29.99 for Ultimate.";
+      }
+
+
+      if (
+        message.includes("release") ||
+        message.includes("release date")
+      ) {
+        return "RSL is currently under development. Ventorea Studios has not announced a final release date.";
+      }
+
+
+      if (
+        message.includes("multiplayer") ||
+        message.includes("online")
+      ) {
+        return "Online multiplayer is planned for RSL. More details will be announced as development progresses.";
+      }
+
+
+      if (
+        message.includes("city") ||
+        message.includes("cities")
+      ) {
+        return "RSL is designed around a connected world inspired by cities such as Cairo, Dubai, Tokyo, and Paris.";
+      }
+
+
+      if (
+        message.includes("driving") ||
+        message.includes("car")
+      ) {
+        return "RSL includes realistic driving, traffic rules, AI drivers, fuel, maintenance, weather, and manual or automatic driving.";
+      }
+
+
+      if (
+        message.includes("hello") ||
+        message.includes("hi") ||
+        message.includes("hey")
+      ) {
+        return "Hello. Welcome to Ventorea Studios. What would you like to know about RSL?";
+      }
+
+
+      if (message.includes("who are you")) {
+        return "I am the basic Ventorea Assistant. I provide information about Ventorea Studios and RSL.";
+      }
+
+
+      return "I do not have an answer for that yet. Try asking about RSL, pricing, development, multiplayer, cities, driving, or Ventorea Studios.";
     }
-);
 
 
-/* =========================================================
-   ANCHOR SAFETY
-========================================================= */
+    chatForm.addEventListener("submit", event => {
 
-document
-.querySelectorAll('a[href^="#"]')
-.forEach(link => {
+      event.preventDefault();
 
-    link.addEventListener(
-        "click",
-        event => {
+      const input = chatInput.value.trim();
 
-            const targetID =
-                link.getAttribute("href");
+      if (!input) {
+        return;
+      }
 
-            if(targetID === "#"){
+      addMessage(input, "user");
 
-                event.preventDefault();
+      chatInput.value = "";
 
-            }
+      setTimeout(() => {
 
-        }
+        const response = getAIResponse(input);
+
+        addMessage(response, "bot");
+
+      }, 350);
+
+    });
+
+
+    /* SCROLL ANIMATIONS */
+
+    const observer = new IntersectionObserver(
+      entries => {
+
+        entries.forEach(entry => {
+
+          if (entry.isIntersecting) {
+
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.08
+      }
     );
 
-});
 
+    document
+      .querySelectorAll(
+        ".feature, .city, .price-card, .studio-card, .roadmap-item, .rsl-box"
+      )
+      .forEach(element => {
 
-/* =========================================================
-   RE-ATTACH SOUNDS TO DYNAMIC ELEMENTS
-========================================================= */
+        element.style.opacity = "0";
+        element.style.transform = "translateY(18px)";
+        element.style.transition =
+          "opacity 0.6s ease, transform 0.6s ease";
 
-attachSounds();
+        observer.observe(element);
 
-</script>
+      });
+
+  </script>
 
 </body>
 </html>
-```
