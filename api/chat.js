@@ -1,9 +1,11 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -44,13 +46,13 @@ Do not invent unreleased features, release dates, partnerships, funding, player 
     const data = await response.json();
     if (!response.ok) {
       console.error('Gemini API error:', data);
-      return res.status(502).json({ error: data?.error?.message || 'The Gemini AI service could not answer right now.' });
+      return res.status(502).json({ error: data?.error?.message || `Gemini returned HTTP ${response.status}.` });
     }
 
     const content = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || 'I could not generate a response right now.';
     return res.status(200).json({ content });
   } catch (error) {
     console.error('Ventorea AI error:', error);
-    return res.status(500).json({ error: 'The Gemini AI service is temporarily unavailable.' });
+    return res.status(500).json({ error: `Backend request failed: ${error?.message || 'unknown server error'}` });
   }
 }
