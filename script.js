@@ -1,7 +1,7 @@
 const menu=document.getElementById('menu');const nav=document.getElementById('navLinks');if(menu)menu.addEventListener('click',()=>nav.classList.toggle('open'));document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
 const launcher=document.getElementById('aiLauncher'),panel=document.getElementById('aiPanel'),close=document.getElementById('aiClose'),messages=document.getElementById('aiMessages'),form=document.getElementById('aiForm'),input=document.getElementById('aiInput');
 const chat=[];
-const AI_ENDPOINT='https://ventorea-studios-erqckzthf-youssef-0148.vercel.app/api/chat';
+const AI_ENDPOINT='https://ventorea-studios-q9yuyjr2u-youssef-0148.vercel.app/api/chat';
 function aiOpen(){panel.classList.add('open');setTimeout(()=>input.focus(),100)}function aiClose(){panel.classList.remove('open')}launcher.onclick=aiOpen;close.onclick=aiClose;
 function add(text,type){const p=document.createElement('p');p.className=type;p.textContent=text;messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p}
 async function sendToAI(){const q=input.value.trim();if(!q)return;add(q,'user');chat.push({role:'user',content:q});input.value='';const loading=add('Thinking…','bot');
