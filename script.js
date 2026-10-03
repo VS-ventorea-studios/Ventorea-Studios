@@ -1,9 +1,10 @@
 const menu=document.getElementById('menu');const nav=document.getElementById('navLinks');if(menu)menu.addEventListener('click',()=>nav.classList.toggle('open'));document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
 const launcher=document.getElementById('aiLauncher'),panel=document.getElementById('aiPanel'),close=document.getElementById('aiClose'),messages=document.getElementById('aiMessages'),form=document.getElementById('aiForm'),input=document.getElementById('aiInput');
 const chat=[];
+const AI_ENDPOINT='https://ventorea-studios-iqmwm9tyn-youssef-0148.vercel.app/api/chat';
 function aiOpen(){panel.classList.add('open');setTimeout(()=>input.focus(),100)}function aiClose(){panel.classList.remove('open')}launcher.onclick=aiOpen;close.onclick=aiClose;
 function add(text,type){const p=document.createElement('p');p.className=type;p.textContent=text;messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p}
 async function sendToAI(){const q=input.value.trim();if(!q)return;add(q,'user');chat.push({role:'user',content:q});input.value='';const loading=add('Thinking…','bot');
-try{const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chat})});const data=await response.json();loading.remove();if(!response.ok)throw new Error(data.error||'Request failed');add(data.content,'bot');chat.push({role:'assistant',content:data.content});}catch(error){loading.remove();add('The AI is not connected yet. The site owner needs to finish the private API setup.','bot');console.error(error)}}
+try{const response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chat})});const data=await response.json();loading.remove();if(!response.ok)throw new Error(data.error||'Request failed');add(data.content,'bot');chat.push({role:'assistant',content:data.content});}catch(error){loading.remove();add('I could not reach Ventorea AI right now. Please try again in a moment.','bot');console.error(error)}}
 form.addEventListener('submit',e=>{e.preventDefault();sendToAI()});
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(o=>{if(o!==d)o.removeAttribute('open')})}));
