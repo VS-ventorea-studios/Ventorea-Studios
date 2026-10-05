@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', model: 'gemini-3.8-flash', fallback: 'gemini-3.8-flash-lite', keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
+  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', model: 'gemini-3.8-flash', fallback: 'gemini-3.5-flash-lite', keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const models = ['gemini-3.8-flash', 'gemini-3.8-flash-lite'];
+    const models = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
     let lastError = null;
 
     for (const model of models) {
