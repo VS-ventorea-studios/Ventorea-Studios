@@ -106,3 +106,45 @@ document.addEventListener('keydown',event=>{
   const support=document.getElementById('supportModal');
   if(support?.classList.contains('open'))document.getElementById('supportClose')?.click();
 });
+
+// Subtle animated starfield for the dark-blue live background.
+(()=>{
+  const canvas=document.getElementById('ambientCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d',{alpha:true});
+  if(!ctx) return;
+  let width=0,height=0,dpr=1,raf=0;
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let particles=[];
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    width=window.innerWidth;height=window.innerHeight;
+    canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const count=Math.min(85,Math.max(28,Math.floor(width*height/19000)));
+    particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*1.5,a:.15+Math.random()*.55,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));
+    draw(0);
+  }
+  function draw(t){
+    ctx.clearRect(0,0,width,height);
+    for(let i=0;i<particles.length;i++){
+      const p=particles[i];
+      if(!reduced)p.y-=p.v*.22;
+      if(p.y< -3)p.y=height+3;
+      const alpha=p.a*(reduced?1:.65+.35*Math.sin(t*.0007+p.phase));
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(111,183,255,'+alpha+')';ctx.fill();
+      if(i%3===0){
+        for(let j=i+1;j<Math.min(i+5,particles.length);j++){
+          const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);
+          if(d<115){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(65,143,230,'+((1-d/115)*.12)+')';ctx.lineWidth=.6;ctx.stroke();}
+        }
+      }
+    }
+    if(!reduced)raf=requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize,{passive:true});
+  resize();
+  if(!reduced)raf=requestAnimationFrame(draw);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf)}else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}});
+})();
