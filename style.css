@@ -110,3 +110,13 @@ body>*:not(#live-background){position:relative;z-index:1}
 .ai-presence:has(.is-online) small{color:#38d996}
 .ai-presence-dot:not(.is-online):not(.is-offline){background:#f2c45c;box-shadow:0 0 8px #f2c45c55}
 .ai-presence:has(.ai-presence-dot:not(.is-online):not(.is-offline)) small{color:#f2c45c}
+
+/* Mobile-only AI launcher comfort: raise it and enlarge the tap target */
+@media(max-width:680px){
+  .ai-launcher{right:16px;bottom:72px;min-width:64px;height:64px;padding:0 18px;touch-action:manipulation}
+  .ai-panel{right:15px;bottom:148px;max-height:calc(100dvh - 170px)}
+}
+@media(max-width:390px){
+  .ai-launcher{right:14px;bottom:68px;min-width:64px;height:64px;padding:0 17px}
+  .ai-panel{right:12px;bottom:142px;width:calc(100vw - 24px);max-height:calc(100dvh - 160px)}
+}
