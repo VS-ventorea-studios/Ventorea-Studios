@@ -21,15 +21,46 @@ const close=document.getElementById('aiClose');
 const messages=document.getElementById('aiMessages');
 const form=document.getElementById('aiForm');
 const input=document.getElementById('aiInput');
+const unreadBadge=document.getElementById('aiUnread');
+const presenceText=document.getElementById('aiPresenceText');
+const presenceDot=document.getElementById('aiPresenceDot');
 const chat=[];
 const MAX_HISTORY=12;
 const MAX_MESSAGE_LENGTH=2000;
 const AI_ENDPOINT='/api/chat';
+let unreadCount=0;
+let lastUserMessage=null;
 
+function setUnread(count){
+  unreadCount=Math.max(0,count);
+  if(unreadBadge){
+    unreadBadge.hidden=unreadCount===0;
+    unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount);
+  }
+  if(launcher)launcher.setAttribute('aria-label',unreadCount? `Open Ventorea AI, ${unreadCount} unread ${unreadCount===1?'message':'messages'}`:'Open Ventorea AI');
+}
+function setPresence(online,label){
+  if(presenceText)presenceText.textContent=label;
+  if(presenceDot){
+    presenceDot.classList.toggle('is-online',online);
+    presenceDot.classList.toggle('is-offline',!online);
+  }
+}
+async function checkPresence(){
+  try{
+    const response=await fetch(AI_ENDPOINT,{method:'GET',cache:'no-store'});
+    const data=await response.json().catch(()=>({}));
+    const online=response.ok&&data.ok===true&&data.keyConfigured===true;
+    setPresence(online,online?'Online':'Offline');
+  }catch{
+    setPresence(false,'Offline');
+  }
+}
 function aiOpen(){
   panel.classList.add('open');
   panel?.setAttribute('aria-hidden','false');
   launcher?.setAttribute('aria-expanded','true');
+  setUnread(0);
   setTimeout(()=>input?.focus(),100);
 }
 function aiClose(){
@@ -55,11 +86,14 @@ function add(text,type){
 }
 async function sendToAI(){
   const q=input.value.trim().slice(0,MAX_MESSAGE_LENGTH);
-  if(!q)return;
-  if(input.disabled)return;
-  add(q,'user');
+  if(!q||input.disabled)return;
+  const userBubble=add(q,'user');
+  const receipt=document.createElement('small');
+  receipt.className='ai-receipt';
+  receipt.textContent='Sent ✓';
+  userBubble.appendChild(receipt);
+  lastUserMessage={bubble:userBubble,receipt};
   chat.push({role:'user',content:q});
-  // Keep only recent turns so browser memory and payload size remain bounded.
   while(chat.length>MAX_HISTORY)chat.shift();
   input.value='';
   input.disabled=true;
@@ -80,18 +114,23 @@ async function sendToAI(){
     if(answer){
       chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});
       while(chat.length>MAX_HISTORY)chat.shift();
+      if(lastUserMessage?.receipt)lastUserMessage.receipt.textContent='Read ✓✓';
+      if(!panel?.classList.contains('open'))setUnread(unreadCount+1);
     }
   }catch(error){
     loading.remove();
+    if(lastUserMessage?.receipt)lastUserMessage.receipt.textContent='Not sent';
     add(error?.message||'Ventorea AI could not be reached. Please try again.','bot');
     console.error('Ventorea AI request failed:',error);
+    checkPresence();
   }finally{
     input.disabled=false;
     if(submit)submit.disabled=false;
-    input.focus();
+    if(panel?.classList.contains('open'))input.focus();
   }
 }
 if(form)form.addEventListener('submit',e=>{e.preventDefault();sendToAI()});
+checkPresence();
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{
   if(d.open)document.querySelectorAll('.faq details').forEach(other=>{
     if(other!==d)other.removeAttribute('open');
@@ -110,9 +149,9 @@ document.addEventListener('keydown',event=>{
 // Subtle animated starfield for the dark-blue live background.
 (()=>{
   const canvas=document.getElementById('ambientCanvas');
-  if(!canvas) return;
+  if(!canvas)return;
   const ctx=canvas.getContext('2d',{alpha:true});
-  if(!ctx) return;
+  if(!ctx)return;
   let width=0,height=0,dpr=1,raf=0;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let particles=[];
@@ -146,5 +185,5 @@ document.addEventListener('keydown',event=>{
   window.addEventListener('resize',resize,{passive:true});
   resize();
   if(!reduced)raf=requestAnimationFrame(draw);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf)}else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}});
 })();
