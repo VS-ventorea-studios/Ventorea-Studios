@@ -50,8 +50,10 @@ async function checkPresence(){
   try{
     const response=await fetch(AI_ENDPOINT,{method:'GET',cache:'no-store'});
     const data=await response.json().catch(()=>({}));
-    const online=response.ok&&data.ok===true&&data.keyConfigured===true;
-    setPresence(online,online?'Online':'Offline');
+    const serviceReady=response.ok&&data.ok===true&&data.keyConfigured===true;
+    const needsSetup=response.ok&&data.ok===true&&data.keyConfigured===false;
+    setPresence(serviceReady,serviceReady?'Online':needsSetup?'Setup needed':'Offline');
+    if(presenceText&&needsSetup)presenceText.title='Add GEMINI_API_KEY in Vercel project settings to enable replies.';
   }catch{
     setPresence(false,'Offline');
   }
