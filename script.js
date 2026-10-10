@@ -28,11 +28,13 @@ const AI_ENDPOINT='/api/chat';
 
 function aiOpen(){
   panel.classList.add('open');
+  panel?.setAttribute('aria-hidden','false');
   launcher?.setAttribute('aria-expanded','true');
   setTimeout(()=>input?.focus(),100);
 }
 function aiClose(){
   panel.classList.remove('open');
+  panel?.setAttribute('aria-hidden','true');
   launcher?.setAttribute('aria-expanded','false');
   launcher?.focus();
 }
