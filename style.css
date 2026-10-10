@@ -84,3 +84,22 @@ body>*:not(#live-background){position:relative;z-index:1}
 @keyframes driftGlow{0%{transform:translate3d(0,0,0) scale(.9)}100%{transform:translate3d(12vw,7vh,0) scale(1.2)}}
 @keyframes gridShift{from{background-position:0 0}to{background-position:70px 70px}}
 @media(prefers-reduced-motion:reduce){.ambient-glow,.ambient-grid{animation:none}}
+
+/* Ventorea AI: dark launcher, unread counter, presence and message receipts */
+.ai-launcher{display:flex;align-items:center;justify-content:center;gap:10px;min-width:62px;height:62px;padding:0 20px;background:#03060c!important;color:#f4f8ff!important;border:1px solid #26364b!important;border-radius:999px;box-shadow:0 10px 34px #0009;transition:transform .2s,border-color .2s,box-shadow .2s}
+.ai-launcher:hover{transform:translateY(-3px);border-color:#4da3ff!important;box-shadow:0 12px 38px #000b,0 0 24px #1c5e9b35}
+.launcher-spark{font-size:20px;color:#8bc5ff}.launcher-label{font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.ai-unread{position:absolute;top:-5px;right:-4px;min-width:22px;height:22px;padding:0 6px;display:grid;place-items:center;border-radius:999px;background:#ef3340;color:#fff;font-size:11px;font-weight:800;border:2px solid #050914;box-shadow:0 0 15px #ef334055}
+.ai-unread[hidden]{display:none}
+.ai-head .ai-brand{display:flex;align-items:center;gap:11px}
+.ai-presence{display:flex;align-items:center;gap:6px;margin-top:5px}
+.ai-presence small{font-size:10px;color:#9bb0ca;letter-spacing:.04em}
+.ai-presence-dot{width:7px;height:7px;border-radius:50%;background:#748196;display:inline-block}
+.ai-presence-dot.is-online{background:#38d996;box-shadow:0 0 9px #38d99699}
+.ai-presence-dot.is-offline{background:#f06a75}
+.ai-panel form button{background:#03060c!important;color:#fff!important;border-color:#26364b!important}
+.ai-panel form button:hover{border-color:#4da3ff!important;background:#0a1220!important}
+.ai-footer{padding:0 17px 12px;text-align:center;color:#7188a5;font-size:9px;letter-spacing:.04em}
+.ai-messages .user{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.ai-receipt{font-size:9px;line-height:1.2;color:#c8e3ff;opacity:.8}
+@media(max-width:680px){.ai-launcher{height:58px;min-width:58px;padding:0 16px}.launcher-label{font-size:11px}}
