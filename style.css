@@ -103,3 +103,20 @@ body>*:not(#live-background){position:relative;z-index:1}
 .ai-messages .user{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 .ai-receipt{font-size:9px;line-height:1.2;color:#c8e3ff;opacity:.8}
 @media(max-width:680px){.ai-launcher{height:58px;min-width:58px;padding:0 16px}.launcher-label{font-size:11px}}
+
+/* Keep the AI launcher comfortably above the bottom edge, especially on phones */
+.ai-launcher{bottom:32px;right:28px}
+.ai-launcher .ai-unread{position:absolute}
+.ai-presence:has(.is-offline) small{color:#f28b94}
+.ai-presence:has(.is-online) small{color:#38d996}
+.ai-presence:has(.is-offline) small{color:#f28b94}
+.ai-presence-dot:not(.is-online):not(.is-offline){background:#f2c45c;box-shadow:0 0 8px #f2c45c55}
+.ai-presence:has(.ai-presence-dot:not(.is-online):not(.is-offline)) small{color:#f2c45c}
+@media(max-width:680px){
+  .ai-launcher{right:18px;bottom:88px}
+  .ai-panel{right:15px;bottom:154px;max-height:calc(100dvh - 180px);height:min(480px,calc(100dvh - 180px))}
+}
+@media(max-width:390px){
+  .ai-launcher{right:16px;bottom:84px}
+  .ai-panel{right:12px;bottom:148px;width:calc(100vw - 24px);max-height:calc(100dvh - 164px);height:min(450px,calc(100dvh - 164px))}
+}
