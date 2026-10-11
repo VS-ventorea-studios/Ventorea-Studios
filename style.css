@@ -120,3 +120,15 @@ body>*:not(#live-background){position:relative;z-index:1}
   .ai-launcher{right:14px;bottom:68px;min-width:64px;height:64px;padding:0 17px}
   .ai-panel{right:12px;bottom:142px;width:calc(100vw - 24px);max-height:calc(100dvh - 160px)}
 }
+
+/* Keep Ventorea AI anchored to the bottom-right on every screen */
+.ai-launcher{right:24px;bottom:24px}
+.ai-panel{right:24px;bottom:92px}
+@media(max-width:680px){
+  .ai-launcher{right:16px;bottom:28px;min-width:64px;height:64px;padding:0 18px;touch-action:manipulation}
+  .ai-panel{right:15px;bottom:104px;max-height:calc(100dvh - 125px)}
+}
+@media(max-width:390px){
+  .ai-launcher{right:14px;bottom:28px;min-width:64px;height:64px;padding:0 17px}
+  .ai-panel{right:12px;bottom:104px;width:calc(100vw - 24px);max-height:calc(100dvh - 120px)}
+}
