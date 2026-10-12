@@ -155,3 +155,15 @@ body.legal-page{min-height:100vh;background:#050914;color:#eaf3ff}.legal-shell{p
 .ai-unread{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#4da3ff;color:#071326;font-size:9px}
 .ai-panel{top:94px;right:6.5vw;bottom:auto;max-height:calc(100dvh - 115px)}
 @media(max-width:680px){.site-header nav.open .nav-ai-trigger{align-self:flex-start;min-height:42px}.ai-panel{top:82px;right:12px;bottom:auto;width:calc(100vw - 24px);max-height:calc(100dvh - 100px)}}
+
+
+/* AI launcher placement hotfix v37: keep AI access in the header menu, never as a floating bottom button. */
+.ai-launcher,
+button.ai-launcher,
+#aiLauncher,
+#aiLauncherButton,
+#ai-launcher { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+.nav-ai-trigger { position: static !important; display: inline-flex !important; }
+@media (max-width: 680px) {
+  .site-header nav.open .nav-ai-trigger { display: inline-flex !important; position: static !important; }
+}
