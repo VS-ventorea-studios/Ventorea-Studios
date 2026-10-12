@@ -8,10 +8,14 @@ export default async function handler(req, res) {
   if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash'], keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  const body = req.body || {};
+  if (body.demoSession !== true || body.demoUser !== 'demo@ventorea.studio') {
+    return res.status(401).json({ error: 'Sign in with the public Ventorea demo account to use Ventorea AI.' });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
 
-  const body = req.body || {};
   const messages = Array.isArray(body.messages) ? body.messages : [];
   const safeMessages = messages
     .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
