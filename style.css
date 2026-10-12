@@ -216,3 +216,9 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
 @media (max-width: 680px) {
   html body #aiPanel.ai-panel { inset: 78px 12px auto 12px !important; width: auto !important; max-width: none !important; height: calc(100vh - 90px) !important; max-height: calc(100vh - 90px) !important; }
 }
+
+
+/* Interactive 3D city drag controls */
+.model-scene { pointer-events:auto !important; touch-action:none; cursor:grab; }
+.model-scene.is-dragging { cursor:grabbing; }
+.model-scene.is-dragging .model-city { animation:none !important; }
