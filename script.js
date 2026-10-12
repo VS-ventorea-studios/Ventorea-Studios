@@ -20,7 +20,20 @@ const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),panel=$('aiPanel'),close=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const demoModal=$('demoModal'),demoLoginForm=$('demoLoginForm'),demoEmail=$('demoEmail'),demoPassword=$('demoPassword'),demoStatus=$('demoStatus'),accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
-const chat=[];const MAX_HISTORY=12;const MAX_MESSAGE_LENGTH=2000;
+const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
+const MAX_HISTORY=12;const MAX_MESSAGE_LENGTH=2000;
+const chat=loadChatHistory();
+function loadChatHistory(){
+  try{const saved=JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)||'[]');return Array.isArray(saved)?saved.filter(m=>m&&['user','assistant'].includes(m.role)&&typeof m.content==='string').slice(-MAX_HISTORY):[]}catch{return []}
+}
+function saveChatHistory(){try{localStorage.setItem(CHAT_STORAGE_KEY,JSON.stringify(chat.slice(-MAX_HISTORY)))}catch{}}
+function renderSavedChat(){
+  if(!messages)return;
+  messages.replaceChildren();
+  add("Hey there. I’m Ventorea AI. Ask me about the studio, RSL, our systems or development progress.",'bot');
+  chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
+}
+
 let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
 
 function isDemoSignedIn(){try{return sessionStorage.getItem(DEMO_KEY)==='signed-in'}catch{return false}}
@@ -34,8 +47,8 @@ function updateAccountUI(){
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true')}
 function openDemo(){updateAccountUI();showModal(demoModal);setTimeout(()=>demoEmail?.focus(),80)}
-function signOut(){try{sessionStorage.removeItem(DEMO_KEY)}catch{};chat.length=0;if(messages)messages.replaceChildren();add('Sign in to the public demo account to start chatting with Ventorea AI.','bot');hideModal(demoModal);hideModal(panel);panel?.classList.remove('open');updateAccountUI();setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):'Offline · active '+duration(Date.now()-sessionStartedAt))}
-function aiOpen(){if(!isDemoSignedIn()){openDemo();if(demoStatus){demoStatus.textContent='Sign in with the public demo account to unlock Ventorea AI.';demoStatus.className='form-status error'}return}panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus(),100)}
+function signOut(){try{sessionStorage.removeItem(DEMO_KEY)}catch{};chat.length=0;saveChatHistory();if(messages)messages.replaceChildren();add('Sign in to the public demo account to start chatting with Ventorea AI.','bot');hideModal(demoModal);hideModal(panel);panel?.classList.remove('open');updateAccountUI();setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):'Offline · active '+duration(Date.now()-sessionStartedAt))}
+function aiOpen(){if(!isDemoSignedIn()){openDemo();if(demoStatus){demoStatus.textContent='Sign in with the public demo account to unlock Ventorea AI.';demoStatus.className='form-status error'}return}renderSavedChat();panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),100)}
 function aiClose(){panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
 function setPresence(online,label){if(presenceText)presenceText.textContent=label;if(presenceDot){presenceDot.classList.toggle('is-online',online);presenceDot.classList.toggle('is-offline',!online)}if(menuPresence){menuPresence.textContent=online?'ONLINE':'OFFLINE';menuPresence.classList.toggle('is-online',online);menuPresence.classList.toggle('is-offline',!online)}}
@@ -44,6 +57,7 @@ async function checkPresence(){
   try{const response=await fetch(AI_ENDPOINT,{method:'GET',cache:'no-store'});const data=await response.json().catch(()=>({}));serviceOnline=response.ok&&data.ok===true&&data.keyConfigured===true;const needsSetup=response.ok&&data.ok===true&&data.keyConfigured===false;setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):needsSetup?'Setup needed':'Offline · active '+duration(Date.now()-sessionStartedAt));if(needsSetup&&presenceText)presenceText.title='The server needs its AI API key configured.'}
   catch{serviceOnline=false;setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt))}
 }
+renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.onclick=()=>panel?.classList.contains('open')?aiClose():aiOpen()}
 close?.addEventListener('click',aiClose);accountOpen?.addEventListener('click',openDemo);$('demoSettingsOpen')?.addEventListener('click',openDemo);
 $('demoClose')?.addEventListener('click',()=>hideModal(demoModal));
@@ -64,14 +78,14 @@ async function sendToAI(){
   if(!isDemoSignedIn()){openDemo();return}
   const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH);if(!q||input.disabled)return;
   const userBubble=add(q,'user'),receipt=document.createElement('small');receipt.className='ai-receipt';receipt.textContent='Sent ✓';userBubble?.appendChild(receipt);
-  chat.push({role:'user',content:q});while(chat.length>MAX_HISTORY)chat.shift();input.value='';input.disabled=true;
+  chat.push({role:'user',content:q});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();input.value='';input.disabled=true;
   const submit=form?.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
   const loading=add('Thinking…','bot');
   try{
     const response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chat,demoSession:true,demoUser:DEMO_EMAIL})});
     const data=await response.json().catch(()=>({}));loading?.remove();if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
     const answer=typeof data.content==='string'?data.content.trim():'';add(answer||'Ventorea AI returned an empty response.','bot');
-    if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
+    if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
   }catch(error){loading?.remove();if(receipt)receipt.textContent='Not sent';add(error?.message||'Ventorea AI could not be reached. Please try again.','bot');checkPresence()}
   finally{if(input){input.disabled=!isDemoSignedIn();if(panel?.classList.contains('open'))input.focus()}if(submit)submit.disabled=false}
 }
