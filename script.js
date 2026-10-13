@@ -59,7 +59,38 @@ async function checkPresence(){
 }
 renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.onclick=()=>panel?.classList.contains('open')?aiClose():aiOpen()}
-close?.addEventListener('click',aiClose);accountOpen?.addEventListener('click',openDemo);$('demoSettingsOpen')?.addEventListener('click',openDemo);
+close?.addEventListener('click',aiClose);
+const SUPABASE_URL='https://ujxcvfgkpqzkpfthahla.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE';
+let supabaseClient=null,googleUser=null;
+const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
+function openGoogleLogin(){showModal(googleLoginModal);refreshGoogleAccount();setTimeout(()=>googleLoginButton?.focus(),80)}
+function refreshGoogleAccount(){
+ if(!googleLoginStatus)return;
+ if(!window.supabase||SUPABASE_PUBLISHABLE_KEY==='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){googleLoginStatus.textContent='Setup needed: add your Supabase publishable key in script.js before testing login.';googleLoginStatus.className='form-status error';return}
+ if(googleUser){googleLoginStatus.textContent='Signed in as '+(googleUser.email||googleUser.user_metadata?.full_name||'Google user')+'.';googleLoginStatus.className='form-status success';if(googleLoginButton)googleLoginButton.hidden=true;if(googleSignOutButton)googleSignOutButton.hidden=false}
+ else{googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';googleLoginStatus.className='form-status';if(googleLoginButton)googleLoginButton.hidden=false;if(googleSignOutButton)googleSignOutButton.hidden=true}
+}
+if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+ supabaseClient.auth.getSession().then(({data})=>{googleUser=data.session?.user||null;refreshGoogleAccount()});
+ supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount()});
+}
+accountOpen?.addEventListener('click',openGoogleLogin);
+$('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
+googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
+googleLoginButton?.addEventListener('click',async()=>{
+ if(!supabaseClient){refreshGoogleAccount();return}
+ googleLoginButton.disabled=true;googleLoginStatus.textContent='Redirecting to Google…';
+ const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+ if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error';googleLoginButton.disabled=false}
+});
+googleSignOutButton?.addEventListener('click',async()=>{
+ if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
+ if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
+ else{googleUser=null;googleLoginButton.disabled=false;refreshGoogleAccount()}
+});
+$('demoSettingsOpen')?.addEventListener('click',openDemo);
 $('demoClose')?.addEventListener('click',()=>hideModal(demoModal));
 $('fillDemoCredentials')?.addEventListener('click',()=>{if(demoEmail)demoEmail.value=DEMO_EMAIL;if(demoPassword)demoPassword.value=DEMO_PASSWORD;if(demoStatus){demoStatus.textContent='Demo credentials filled. Sign in to continue.';demoStatus.className='form-status'}});
 $('demoSignOut')?.addEventListener('click',signOut);
@@ -95,8 +126,8 @@ function showCookieNotice(){cookieNotice?.classList.add('is-visible')}
 function initCookieNotice(){let saved='';try{saved=localStorage.getItem('ventorea-cookie-choice')||''}catch{};if(!saved)showCookieNotice()}
 $('cookieAccept')?.addEventListener('click',()=>setCookieChoice('acknowledged'));$('cookieDecline')?.addEventListener('click',()=>setCookieChoice('declined'));$('cookieSettingsOpen')?.addEventListener('click',showCookieNotice);
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));
-document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(demoModal?.classList.contains('open'))hideModal(demoModal);['feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
-[demoModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
+document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(demoModal?.classList.contains('open'))hideModal(demoModal);if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
+[demoModal,googleLoginModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
 
 // Animated connected starfield for the midnight-blue background.
 (()=>{const canvas=$('ambientCanvas');if(!canvas)return;const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;let width=0,height=0,dpr=1,raf=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;let particles=[];
