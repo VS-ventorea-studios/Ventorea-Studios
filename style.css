@@ -218,7 +218,3 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
 }
 
 
-/* Interactive 3D city drag controls */
-.model-scene { pointer-events:auto !important; touch-action:none; cursor:grab; }
-.model-scene.is-dragging { cursor:grabbing; }
-.model-scene.is-dragging .model-city { animation:none !important; }
