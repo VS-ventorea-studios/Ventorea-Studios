@@ -66,8 +66,8 @@ function refreshGoogleAccount(){
 }
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
- supabaseClient.auth.getSession().then(({data})=>{googleUser=data.session?.user||null;refreshGoogleAccount();updateAccountUI()});
- supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI()});
+ supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI()}).catch(error=>console.error('Supabase session restore failed:',error));
+ supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI();if(googleUser&&googleLoginStatus)googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'.'});
 }
 accountOpen?.addEventListener('click',openGoogleLogin);
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
@@ -94,7 +94,7 @@ async function sendToAI(){
   const submit=form?.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
   const loading=add('Thinking…','bot');
   try{
-    const response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chat,demoSession:true,demoUser:DEMO_EMAIL})});
+    const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}googleUser=sessionData.session.user;updateAccountUI();const response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionData.session.access_token},body:JSON.stringify({messages:chat,user:{id:sessionData.session.user.id,email:sessionData.session.user.email}})});
     const data=await response.json().catch(()=>({}));loading?.remove();if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
     const answer=typeof data.content==='string'?data.content.trim():'';add(answer||'Ventorea AI returned an empty response.','bot');
     if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
