@@ -106,30 +106,4 @@ window.addEventListener('resize',resize,{passive:true});resize();if(!reduced)raf
 updateAccountUI();checkPresence();initCookieNotice();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
 
 
-// Interactive 3D city: drag to orbit, with a subtle synthesized movement sound.
-(()=>{
- const scene=document.querySelector('.model-scene');
- const city=scene?.querySelector('.model-city');
- if(!scene||!city)return;
- let dragging=false,startX=0,startY=0,baseX=59,baseZ=-34,rotX=59,rotZ=-34,audioCtx=null,lastSound=0;
- const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
- function playMoveSound(amount){
-   const now=performance.now(); if(now-lastSound<65||amount<1.2)return; lastSound=now;
-   try{
-     const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-     if(!audioCtx)audioCtx=new AC();
-     if(audioCtx.state==='suspended')audioCtx.resume();
-     const t=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
-     osc.type='sine';osc.frequency.setValueAtTime(380+Math.min(420,amount*16),t);osc.frequency.exponentialRampToValueAtTime(180,t+.075);
-     gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(Math.min(.035,.009+amount*.0007),t+.012);gain.gain.exponentialRampToValueAtTime(.0001,t+.09);
-     osc.connect(gain);gain.connect(audioCtx.destination);osc.start(t);osc.stop(t+.1);
-   }catch(e){}
- }
- scene.style.pointerEvents='auto';scene.style.touchAction='none';scene.style.cursor='grab';scene.setAttribute('role','application');scene.setAttribute('aria-label','Interactive 3D city. Drag to rotate the model.');
- scene.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;dragging=true;startX=e.clientX;startY=e.clientY;baseX=rotX;baseZ=rotZ;scene.classList.add('is-dragging');scene.style.cursor='grabbing';scene.setPointerCapture?.(e.pointerId);if(!audioCtx){const AC=window.AudioContext||window.webkitAudioContext;if(AC){try{audioCtx=new AC();audioCtx.resume()}catch(err){}}}e.preventDefault()});
- scene.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-startX,dy=e.clientY-startY;rotX=clamp(baseX-dy*.42,25,78);rotZ=baseZ+dx*.42;city.style.transform='rotateX('+rotX+'deg) rotateZ('+rotZ+'deg)';playMoveSound(Math.hypot(e.movementX||0,e.movementY||0))});
- const endDrag=e=>{if(!dragging)return;dragging=false;scene.classList.remove('is-dragging');scene.style.cursor='grab';try{if(e.pointerId!==undefined&&scene.hasPointerCapture?.(e.pointerId))scene.releasePointerCapture(e.pointerId)}catch(err){}};
- scene.addEventListener('pointerup',endDrag);scene.addEventListener('pointercancel',endDrag);scene.addEventListener('lostpointercapture',endDrag);
- scene.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();rotZ+=e.key==='ArrowLeft'?-6:e.key==='ArrowRight'?6:0;rotX=clamp(rotX+(e.key==='ArrowUp'?-4:e.key==='ArrowDown'?4:0),25,78);city.style.animation='none';city.style.transform='rotateX('+rotX+'deg) rotateZ('+rotZ+'deg)';playMoveSound(3)}});
- scene.tabIndex=0;
-})();
+
