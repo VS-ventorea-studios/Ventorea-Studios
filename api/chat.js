@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -9,8 +9,36 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
-  if (body.demoSession !== true || body.demoUser !== 'demo@ventorea.studio') {
-    return res.status(401).json({ error: 'Sign in with the public Ventorea demo account to use Ventorea AI.' });
+
+  // Verify the signed-in Supabase user from the bearer token sent by the frontend.
+  // Never trust user IDs or email addresses supplied in the request body.
+  const authorization = req.headers.authorization || req.headers.Authorization || '';
+  const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+  if (!accessToken) {
+    return res.status(401).json({ error: 'Sign in with Google to use Ventorea AI.' });
+  }
+
+  const supabaseUrl = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
+  const supabasePublishableKey = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
+  let authenticatedUser;
+  try {
+    const authResponse = await fetch(supabaseUrl + '/auth/v1/user', {
+      method: 'GET',
+      headers: {
+        apikey: supabasePublishableKey,
+        Authorization: 'Bearer ' + accessToken
+      },
+      cache: 'no-store'
+    });
+    if (!authResponse.ok) {
+      return res.status(401).json({ error: 'Your sign-in session is invalid or expired. Please sign in again.' });
+    }
+    authenticatedUser = await authResponse.json();
+    if (!authenticatedUser || typeof authenticatedUser.id !== 'string') {
+      return res.status(401).json({ error: 'Could not verify your Ventorea account. Please sign in again.' });
+    }
+  } catch {
+    return res.status(503).json({ error: 'Account verification is temporarily unavailable. Please try again.' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
