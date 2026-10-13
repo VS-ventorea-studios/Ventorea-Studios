@@ -61,7 +61,7 @@ renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.onclick=()=>panel?.classList.contains('open')?aiClose():aiOpen()}
 close?.addEventListener('click',aiClose);
 const SUPABASE_URL='https://ujxcvfgkpqzkpfthahla.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
 let supabaseClient=null,googleUser=null;
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
 function openGoogleLogin(){showModal(googleLoginModal);refreshGoogleAccount();setTimeout(()=>googleLoginButton?.focus(),80)}
