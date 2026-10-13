@@ -218,3 +218,10 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
 }
 
 
+
+/* Google account modal */
+.google-login-card{max-width:480px}
+.google-login-button{width:100%;justify-content:center;gap:12px;margin:12px 0}
+.google-g{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#fff;color:#4285f4;font:800 16px Arial,sans-serif}
+.google-signout-button{width:100%;justify-content:center;margin-top:8px}
+.google-login-footnote{font-size:10px;line-height:1.7;color:#8ea8c7;margin-top:18px}
