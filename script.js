@@ -13,12 +13,9 @@ if(menu&&nav){
 }
 
 const AI_ENDPOINT='https://ventorea-studios.vercel.app/api/chat';
-const DEMO_EMAIL='demo@ventorea.studio';
-const DEMO_PASSWORD='VentoreaDemo2026!';
-const DEMO_KEY='ventorea-demo-session';
 const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),panel=$('aiPanel'),close=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
-const demoModal=$('demoModal'),demoLoginForm=$('demoLoginForm'),demoEmail=$('demoEmail'),demoPassword=$('demoPassword'),demoStatus=$('demoStatus'),accountOpen=$('accountOpen');
+const accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
 const MAX_HISTORY=12;const MAX_MESSAGE_LENGTH=2000;
@@ -36,19 +33,15 @@ function renderSavedChat(){
 
 let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
 
-function isDemoSignedIn(){try{return sessionStorage.getItem(DEMO_KEY)==='signed-in'}catch{return false}}
+function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
-  const signed=isDemoSignedIn();
-  if(accountOpen){accountOpen.innerHTML=signed?'DEMO ACCOUNT <span>✓</span>':'DEMO SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open demo account settings':'Sign in to the demo account')}
-  if($('demoSignOut'))$('demoSignOut').hidden=!signed;
-  if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in to use Ventorea AI'}
-  if(signed&&demoStatus){demoStatus.textContent='Signed in to the public demo account for this tab.';demoStatus.className='form-status success'}
+  const signed=!!googleUser;
+  if(accountOpen){accountOpen.innerHTML=signed?'ACCOUNT <span>✓</span>':'SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
+  if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true')}
-function openDemo(){updateAccountUI();showModal(demoModal);setTimeout(()=>demoEmail?.focus(),80)}
-function signOut(){try{sessionStorage.removeItem(DEMO_KEY)}catch{};chat.length=0;saveChatHistory();if(messages)messages.replaceChildren();add('Sign in to the public demo account to start chatting with Ventorea AI.','bot');hideModal(demoModal);hideModal(panel);panel?.classList.remove('open');updateAccountUI();setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):'Offline · active '+duration(Date.now()-sessionStartedAt))}
-function aiOpen(){if(!isDemoSignedIn()){openDemo();if(demoStatus){demoStatus.textContent='Sign in with the public demo account to unlock Ventorea AI.';demoStatus.className='form-status error'}return}renderSavedChat();panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),100)}
+function aiOpen(){if(!isDemoSignedIn()){openGoogleLogin();if(googleLoginStatus){googleLoginStatus.textContent='Sign in with Google to unlock Ventorea AI.';googleLoginStatus.className='form-status error'}return}renderSavedChat();panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),100)}
 function aiClose(){panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
 function setPresence(online,label){if(presenceText)presenceText.textContent=label;if(presenceDot){presenceDot.classList.toggle('is-online',online);presenceDot.classList.toggle('is-offline',!online)}if(menuPresence){menuPresence.textContent=online?'ONLINE':'OFFLINE';menuPresence.classList.toggle('is-online',online);menuPresence.classList.toggle('is-offline',!online)}}
@@ -73,8 +66,8 @@ function refreshGoogleAccount(){
 }
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
- supabaseClient.auth.getSession().then(({data})=>{googleUser=data.session?.user||null;refreshGoogleAccount()});
- supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount()});
+ supabaseClient.auth.getSession().then(({data})=>{googleUser=data.session?.user||null;refreshGoogleAccount();updateAccountUI()});
+ supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI()});
 }
 accountOpen?.addEventListener('click',openGoogleLogin);
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
@@ -90,23 +83,11 @@ googleSignOutButton?.addEventListener('click',async()=>{
  if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
  else{googleUser=null;googleLoginButton.disabled=false;refreshGoogleAccount()}
 });
-$('demoSettingsOpen')?.addEventListener('click',openDemo);
-$('demoClose')?.addEventListener('click',()=>hideModal(demoModal));
-$('fillDemoCredentials')?.addEventListener('click',()=>{if(demoEmail)demoEmail.value=DEMO_EMAIL;if(demoPassword)demoPassword.value=DEMO_PASSWORD;if(demoStatus){demoStatus.textContent='Demo credentials filled. Sign in to continue.';demoStatus.className='form-status'}});
-$('demoSignOut')?.addEventListener('click',signOut);
-demoLoginForm?.addEventListener('submit',e=>{
-  e.preventDefault();
-  if(demoEmail?.value.trim().toLowerCase()===DEMO_EMAIL&&demoPassword?.value===DEMO_PASSWORD){
-    try{sessionStorage.setItem(DEMO_KEY,'signed-in')}catch{}
-    if(demoStatus){demoStatus.textContent='Demo sign-in successful. Ventorea AI is unlocked for this tab.';demoStatus.className='form-status success'}
-    updateAccountUI();setTimeout(()=>{hideModal(demoModal);aiOpen()},350);
-  }else if(demoStatus){demoStatus.textContent='Those details do not match the public demo account. Use “Fill demo credentials”.';demoStatus.className='form-status error'}
-});
 function add(text,type){
   if(!messages)return null;const p=document.createElement('p');p.className=type;p.textContent=text;messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p;
 }
 async function sendToAI(){
-  if(!isDemoSignedIn()){openDemo();return}
+  if(!isDemoSignedIn()){openGoogleLogin();return}
   const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH);if(!q||input.disabled)return;
   const userBubble=add(q,'user'),receipt=document.createElement('small');receipt.className='ai-receipt';receipt.textContent='Sent ✓';userBubble?.appendChild(receipt);
   chat.push({role:'user',content:q});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();input.value='';input.disabled=true;
@@ -126,8 +107,8 @@ function showCookieNotice(){cookieNotice?.classList.add('is-visible')}
 function initCookieNotice(){let saved='';try{saved=localStorage.getItem('ventorea-cookie-choice')||''}catch{};if(!saved)showCookieNotice()}
 $('cookieAccept')?.addEventListener('click',()=>setCookieChoice('acknowledged'));$('cookieDecline')?.addEventListener('click',()=>setCookieChoice('declined'));$('cookieSettingsOpen')?.addEventListener('click',showCookieNotice);
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));
-document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(demoModal?.classList.contains('open'))hideModal(demoModal);if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
-[demoModal,googleLoginModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
+document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
+[googleLoginModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
 
 // Animated connected starfield for the midnight-blue background.
 (()=>{const canvas=$('ambientCanvas');if(!canvas)return;const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;let width=0,height=0,dpr=1,raf=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;let particles=[];
