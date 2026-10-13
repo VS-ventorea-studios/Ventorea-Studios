@@ -225,3 +225,19 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
 .google-g{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#fff;color:#4285f4;font:800 16px Arial,sans-serif}
 .google-signout-button{width:100%;justify-content:center;margin-top:8px}
 .google-login-footnote{font-size:10px;line-height:1.7;color:#8ea8c7;margin-top:18px}
+
+
+/* Mobile access fix v42: keep account sign-in and Ventorea AI reachable on phones. */
+@media (max-width: 900px) {
+  .site-header .account-cta { display: inline-flex !important; align-items: center; margin-left: auto; margin-right: 10px; min-height: 38px; padding: 10px 12px; }
+}
+@media (max-width: 680px) {
+  .site-header { gap: 10px; }
+  .site-header .brand { min-width: 0; }
+  .site-header .account-cta { font-size: 8px; margin-left: auto; }
+  #aiMobileOpen.ai-launcher { display: grid !important; visibility: visible !important; pointer-events: auto !important; position: fixed !important; z-index: 100000 !important; right: 14px; bottom: max(16px, env(safe-area-inset-bottom)); width: 62px; height: 62px; padding: 0; place-items: center; border: 1px solid #8bc5ff; border-radius: 50%; background: #071326; color: #8bc5ff; box-shadow: 0 10px 34px #0009; font-size: 23px; }
+  #aiMobileOpen .ai-mobile-label { display: block; font: 8px var(--mono); letter-spacing: 1px; margin-top: -12px; }
+  #aiMobileOpen { line-height: 1; }
+  #aiMobileOpen[aria-expanded="true"] { background: #12315a; }
+  html body #aiPanel.ai-panel { inset: 78px 12px calc(90px + env(safe-area-inset-bottom)) 12px !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; }
+}
