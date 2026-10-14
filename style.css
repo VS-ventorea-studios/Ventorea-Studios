@@ -241,3 +241,20 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
   #aiMobileOpen[aria-expanded="true"] { background: #12315a; }
   html body #aiPanel.ai-panel { inset: 78px 12px calc(90px + env(safe-area-inset-bottom)) 12px !important; width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; }
 }
+
+
+/* Updated brand mark and mobile chat usability v43 */
+.brand-logo{display:block;width:clamp(132px,15vw,176px);height:48px;object-fit:contain;object-position:left center;flex:0 1 auto}
+.site-footer .brand-logo{width:150px;height:44px}
+@media(max-width:680px){.brand-logo{width:clamp(108px,35vw,145px);height:42px}.site-footer .brand-logo{width:140px;height:42px}}
+@media(max-width:680px){
+  body.ai-chat-open #aiMobileOpen{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  html body #aiPanel.ai-panel{inset:78px 10px max(10px,env(safe-area-inset-bottom)) 10px!important;height:auto!important;max-height:none!important;min-height:0!important;overflow:hidden!important}
+  #aiPanel .ai-head{flex:0 0 auto}
+  #aiPanel .ai-messages{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  #aiPanel form{flex:0 0 auto;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  #aiPanel input{font-size:16px;min-height:44px;touch-action:manipulation}
+  #aiPanel form button{min-width:44px;min-height:44px;touch-action:manipulation}
+}
+
+@media(max-width:680px){html body #aiPanel.ai-panel{height:var(--ai-visible-height,auto)!important;max-height:var(--ai-visible-height,none)!important}}
