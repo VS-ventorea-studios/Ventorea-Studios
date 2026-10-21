@@ -20,10 +20,15 @@ const cookieNotice=$('cookieNotice');
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
 const MAX_HISTORY=12;const MAX_MESSAGE_LENGTH=2000;
 const chat=loadChatHistory();
+const REMEMBER_CHAT_KEY='ventorea-remember-ai-chat-v1';
+const REDUCE_MOTION_KEY='ventorea-reduce-motion-v1';
+function readSetting(key,fallback){try{const value=localStorage.getItem(key);return value===null?fallback:value==='true'}catch{return fallback}}
 function loadChatHistory(){
+  if(!readSetting(REMEMBER_CHAT_KEY,true))return [];
   try{const saved=JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)||'[]');return Array.isArray(saved)?saved.filter(m=>m&&['user','assistant'].includes(m.role)&&typeof m.content==='string').slice(-MAX_HISTORY):[]}catch{return []}
 }
-function saveChatHistory(){try{localStorage.setItem(CHAT_STORAGE_KEY,JSON.stringify(chat.slice(-MAX_HISTORY)))}catch{}}
+function saveChatHistory(){try{if(readSetting(REMEMBER_CHAT_KEY,true))localStorage.setItem(CHAT_STORAGE_KEY,JSON.stringify(chat.slice(-MAX_HISTORY)));else localStorage.removeItem(CHAT_STORAGE_KEY)}catch{}}
+function applyMotionSetting(){document.body.classList.toggle('reduce-motion',readSetting(REDUCE_MOTION_KEY,false))}
 function renderSavedChat(){
   if(!messages)return;
   messages.replaceChildren();
@@ -36,8 +41,9 @@ let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
 function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
-  if(accountOpen){accountOpen.innerHTML=signed?'ACCOUNT <span>✓</span>':'SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
+  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
+  if(signed)populateAccountSettings();
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true')}
@@ -70,7 +76,66 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
  supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI()}).catch(error=>console.error('Supabase session restore failed:',error));
  supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI();if(googleUser&&googleLoginStatus)googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'.'});
 }
-accountOpen?.addEventListener('click',openGoogleLogin);
+const accountSettingsModal=$('accountSettingsModal');
+const accountProfileForm=$('accountProfileForm');
+const accountDisplayName=$('accountDisplayName');
+const accountEmail=$('accountEmail');
+const accountIdentityName=$('accountIdentityName');
+const accountIdentityEmail=$('accountIdentityEmail');
+const accountAvatar=$('accountAvatar');
+const accountProfileStatus=$('accountProfileStatus');
+const settingsStatus=$('settingsStatus');
+const rememberChatSetting=$('rememberChatSetting');
+const reduceMotionSetting=$('reduceMotionSetting');
+function displayNameFor(user){return user?.user_metadata?.display_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Ventorea member'}
+function populateAccountSettings(){
+ if(!googleUser)return;
+ const name=displayNameFor(googleUser),email=googleUser.email||'';
+ if(accountDisplayName&&document.activeElement!==accountDisplayName)accountDisplayName.value=name;
+ if(accountEmail)accountEmail.value=email;
+ if(accountIdentityName)accountIdentityName.textContent=name;
+ if(accountIdentityEmail)accountIdentityEmail.textContent=email;
+ if(accountAvatar)accountAvatar.textContent=(name.trim()[0]||'V').toUpperCase();
+ if(rememberChatSetting)rememberChatSetting.checked=readSetting(REMEMBER_CHAT_KEY,true);
+ if(reduceMotionSetting)reduceMotionSetting.checked=readSetting(REDUCE_MOTION_KEY,false);
+}
+function openAccountSettings(){
+ if(!googleUser){openGoogleLogin();return}
+ populateAccountSettings();showModal(accountSettingsModal);setTimeout(()=>accountDisplayName?.focus(),80)
+}
+accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():openGoogleLogin());
+$('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
+accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
+accountProfileForm?.addEventListener('submit',async e=>{
+ e.preventDefault();if(!supabaseClient||!googleUser)return;
+ const name=accountDisplayName.value.trim();
+ if(!name){accountProfileStatus.textContent='Please enter a display name.';accountProfileStatus.className='form-status error';return}
+ const save=$('accountSaveProfile');if(save)save.disabled=true;
+ accountProfileStatus.textContent='Saving profile…';accountProfileStatus.className='form-status';
+ try{
+  const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name}});
+  if(error)throw error;
+  googleUser=data.user||googleUser;populateAccountSettings();updateAccountUI();
+  accountProfileStatus.textContent='Profile saved successfully.';accountProfileStatus.className='form-status success';
+ }catch(error){accountProfileStatus.textContent=error?.message||'Could not save your profile.';accountProfileStatus.className='form-status error'}
+ finally{if(save)save.disabled=false}
+});
+rememberChatSetting?.addEventListener('change',()=>{
+ try{localStorage.setItem(REMEMBER_CHAT_KEY,String(rememberChatSetting.checked));if(!rememberChatSetting.checked)localStorage.removeItem(CHAT_STORAGE_KEY);else saveChatHistory();settingsStatus.textContent=rememberChatSetting.checked?'AI chat history will be saved on this device.':'AI chat history will not be saved on this device.';settingsStatus.className='form-status success'}catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
+});
+reduceMotionSetting?.addEventListener('change',()=>{
+ try{localStorage.setItem(REDUCE_MOTION_KEY,String(reduceMotionSetting.checked));applyMotionSetting();settingsStatus.textContent='Motion preference updated.';settingsStatus.className='form-status success'}catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
+});
+$('clearChatButton')?.addEventListener('click',()=>{
+ chat.length=0;try{localStorage.removeItem(CHAT_STORAGE_KEY)}catch{};renderSavedChat();settingsStatus.textContent='Saved AI chat history cleared from this device.';settingsStatus.className='form-status success'
+});
+$('accountSignOutButton')?.addEventListener('click',async()=>{
+ if(!supabaseClient)return;
+ const signout=$('accountSignOutButton');if(signout)signout.disabled=true;
+ try{const {error}=await supabaseClient.auth.signOut();if(error)throw error;googleUser=null;chat.length=0;try{localStorage.removeItem(CHAT_STORAGE_KEY)}catch{};hideModal(accountSettingsModal);refreshGoogleAccount();updateAccountUI()}
+ catch(error){settingsStatus.textContent=error?.message||'Could not sign out.';settingsStatus.className='form-status error'}
+ finally{if(signout)signout.disabled=false}
+});
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
 googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
 googleLoginButton?.addEventListener('click',async()=>{
@@ -108,15 +173,15 @@ function showCookieNotice(){cookieNotice?.classList.add('is-visible')}
 function initCookieNotice(){let saved='';try{saved=localStorage.getItem('ventorea-cookie-choice')||''}catch{};if(!saved)showCookieNotice()}
 $('cookieAccept')?.addEventListener('click',()=>setCookieChoice('acknowledged'));$('cookieDecline')?.addEventListener('click',()=>setCookieChoice('declined'));$('cookieSettingsOpen')?.addEventListener('click',showCookieNotice);
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));
-document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
-[googleLoginModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
+document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['accountSettingsModal','feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
+[googleLoginModal,accountSettingsModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
 
 // Animated connected starfield for the midnight-blue background.
 (()=>{const canvas=$('ambientCanvas');if(!canvas)return;const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;let width=0,height=0,dpr=1,raf=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;let particles=[];
 function resize(){dpr=Math.min(window.devicePixelRatio||1,2);width=window.innerWidth;height=window.innerHeight;canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(85,Math.max(28,Math.floor(width*height/19000)));particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*1.5,a:.15+Math.random()*.55,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));draw(0)}
 function draw(t){ctx.clearRect(0,0,width,height);for(let i=0;i<particles.length;i++){const p=particles[i];if(!reduced)p.y-=p.v*.22;if(p.y< -3)p.y=height+3;const alpha=p.a*(reduced?1:.65+.35*Math.sin(t*.0007+p.phase));ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(111,183,255,'+alpha+')';ctx.fill();if(i%3===0)for(let j=i+1;j<Math.min(i+5,particles.length);j++){const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);if(d<115){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(65,143,230,'+((1-d/115)*.12)+')';ctx.lineWidth=.6;ctx.stroke()}}}if(!reduced)raf=requestAnimationFrame(draw)}
 window.addEventListener('resize',resize,{passive:true});resize();if(!reduced)raf=requestAnimationFrame(draw);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}})})();
-updateAccountUI();checkPresence();initCookieNotice();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
+updateAccountUI();applyMotionSetting();checkPresence();initCookieNotice();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
 
 
 
