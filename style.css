@@ -258,3 +258,23 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
 }
 
 @media(max-width:680px){html body #aiPanel.ai-panel{height:var(--ai-visible-height,auto)!important;max-height:var(--ai-visible-height,none)!important}}
+
+/* Account profile and settings v44 */
+.account-settings-card{max-width:520px;max-height:min(88dvh,850px);overflow-y:auto}
+.account-identity{display:flex;align-items:center;gap:13px;padding:14px 0 20px;margin-bottom:8px;border-bottom:1px solid #1b2c43}
+.account-avatar{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#143b67,#58c8f5);color:#fff;font-size:19px;font-weight:800;flex:0 0 auto}
+.account-identity>div:last-child{display:grid;gap:5px;min-width:0}
+.account-identity b{color:#eaf4ff;font-size:14px;overflow-wrap:anywhere}
+.account-identity span,.settings-help{font-size:11px;color:#8ea8c7;overflow-wrap:anywhere}
+.account-settings-card input[readonly]{opacity:.7;cursor:not-allowed}
+.settings-divider{height:1px;background:#1b2c43;margin:20px 0}
+.settings-section-title{font-size:11px;letter-spacing:2px;color:#8ea8c7;margin:0 0 10px}
+.settings-toggle{display:flex!important;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px solid #17263a}
+.settings-toggle span{display:grid;gap:5px}
+.settings-toggle b{font-size:12px;color:#eaf4ff}
+.settings-toggle small{font-size:10px;line-height:1.6;color:#8ea8c7}
+.settings-toggle input[type=checkbox]{width:19px;height:19px;accent-color:#69c9ff;flex:0 0 auto}
+.settings-clear-chat,.settings-signout{width:100%;justify-content:center;margin-top:12px}
+#accountProfileForm>.button{width:100%;justify-content:center;margin-top:12px}
+body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+@media(max-width:680px){.account-settings-card{max-height:calc(100dvh - 24px);padding:24px 18px}.settings-toggle{align-items:flex-start}}
