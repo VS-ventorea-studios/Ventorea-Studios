@@ -278,3 +278,20 @@ html body #aiPanel.ai-panel.open { opacity: 1 !important; pointer-events: auto !
 #accountProfileForm>.button{width:100%;justify-content:center;margin-top:12px}
 body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
 @media(max-width:680px){.account-settings-card{max-height:calc(100dvh - 24px);padding:24px 18px}.settings-toggle{align-items:flex-start}}
+
+/* Account profile and friends */
+.account-settings-card label{display:grid;gap:7px;margin:12px 0;color:#c8d8ed;font-size:12px}
+.account-settings-card input:not([type=checkbox]),.account-settings-card textarea{width:100%;box-sizing:border-box;border:1px solid #263b56;border-radius:10px;background:#07111f;color:#eef6ff;padding:12px;font:inherit}
+.account-settings-card textarea{resize:vertical;min-height:76px}
+.friend-code-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+.friend-code-row .button{min-height:42px}
+.friend-add-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;margin-top:12px}
+.friend-add-form .button{min-height:42px}
+.friends-subtitle{margin:18px 0 8px;color:#c9ddf5;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.friends-list{display:grid;gap:8px}
+.friend-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px;border:1px solid #1b2c43;border-radius:10px;background:#091423}
+.friend-row>div{display:grid;gap:4px;min-width:0}
+.friend-row b{font-size:12px;color:#eaf4ff;overflow-wrap:anywhere}
+.friend-row small{font-size:10px;color:#8ea8c7}
+.friend-row .button{padding:9px 12px;min-height:34px;font-size:10px;flex:0 0 auto}
+@media(max-width:460px){.friend-code-row,.friend-add-form{grid-template-columns:1fr}.friend-code-row .button,.friend-add-form .button{width:100%;justify-content:center}}
