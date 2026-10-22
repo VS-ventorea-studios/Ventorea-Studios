@@ -80,6 +80,8 @@ const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
 const accountDisplayName=$('accountDisplayName');
 const accountEmail=$('accountEmail');
+const accountPhone=$('accountPhone');
+const accountBio=$('accountBio');
 const accountIdentityName=$('accountIdentityName');
 const accountIdentityEmail=$('accountIdentityEmail');
 const accountAvatar=$('accountAvatar');
@@ -93,6 +95,8 @@ function populateAccountSettings(){
  const name=displayNameFor(googleUser),email=googleUser.email||'';
  if(accountDisplayName&&document.activeElement!==accountDisplayName)accountDisplayName.value=name;
  if(accountEmail)accountEmail.value=email;
+ if(accountPhone&&document.activeElement!==accountPhone)accountPhone.value=googleUser.user_metadata?.phone_number||'';
+ if(accountBio&&document.activeElement!==accountBio)accountBio.value=googleUser.user_metadata?.bio||'';
  if(accountIdentityName)accountIdentityName.textContent=name;
  if(accountIdentityEmail)accountIdentityEmail.textContent=email;
  if(accountAvatar)accountAvatar.textContent=(name.trim()[0]||'V').toUpperCase();
@@ -101,7 +105,7 @@ function populateAccountSettings(){
 }
 function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
- populateAccountSettings();showModal(accountSettingsModal);setTimeout(()=>accountDisplayName?.focus(),80)
+ populateAccountSettings();showModal(accountSettingsModal);loadFriends();setTimeout(()=>accountDisplayName?.focus(),80)
 }
 accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():openGoogleLogin());
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
@@ -113,13 +117,77 @@ accountProfileForm?.addEventListener('submit',async e=>{
  const save=$('accountSaveProfile');if(save)save.disabled=true;
  accountProfileStatus.textContent='Saving profile…';accountProfileStatus.className='form-status';
  try{
-  const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name}});
+  const phone=accountPhone?.value.trim()||'';
+ const bio=accountBio?.value.trim()||'';
+ const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name,phone_number:phone,bio}});
   if(error)throw error;
-  googleUser=data.user||googleUser;populateAccountSettings();updateAccountUI();
+  googleUser=data.user||googleUser;populateAccountSettings();updateAccountUI();try{await ensurePublicProfile()}catch(profileError){console.warn('Friends profile setup is not complete:',profileError)}
   accountProfileStatus.textContent='Profile saved successfully.';accountProfileStatus.className='form-status success';
  }catch(error){accountProfileStatus.textContent=error?.message||'Could not save your profile.';accountProfileStatus.className='form-status error'}
  finally{if(save)save.disabled=false}
 });
+
+const accountFriendCode=$('accountFriendCode'),friendCodeInput=$('friendCodeInput'),friendsStatus=$('friendsStatus'),friendRequestsList=$('friendRequestsList'),friendsList=$('friendsList');
+function setFriendsStatus(message,kind=''){if(friendsStatus){friendsStatus.textContent=message;friendsStatus.className='form-status'+(kind?' '+kind:'')}}
+function makeFriendCode(){return 'VENT-'+Math.random().toString(36).slice(2,8).toUpperCase()}
+function safeText(tag,text,className){const el=document.createElement(tag);el.textContent=text;if(className)el.className=className;return el}
+async function ensurePublicProfile(){
+ if(!supabaseClient||!googleUser)return;
+ const user=googleUser;let code='';
+ const {data:existing,error:readError}=await supabaseClient.from('profiles').select('friend_code').eq('user_id',user.id).maybeSingle();
+ if(readError)throw readError;
+ code=existing?.friend_code||makeFriendCode();
+ const {error}=await supabaseClient.from('profiles').upsert({user_id:user.id,display_name:displayNameFor(user),bio:user.user_metadata?.bio||'',friend_code:code,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ if(error)throw error;
+ if(accountFriendCode)accountFriendCode.value=code;
+}
+async function loadFriends(){
+ if(!supabaseClient||!googleUser)return;
+ if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p','Loading requests…','settings-help'));
+ if(friendsList)friendsList.replaceChildren(safeText('p','Loading friends…','settings-help'));
+ try{
+  await ensurePublicProfile();
+  const {data:requests,error:reqError}=await supabaseClient.from('friend_requests').select('id,sender_id,receiver_id,status,created_at,sender:profiles!friend_requests_sender_id_fkey(display_name,friend_code),receiver:profiles!friend_requests_receiver_id_fkey(display_name,friend_code)').eq('receiver_id',googleUser.id).eq('status','pending').order('created_at',{ascending:false});
+  if(reqError)throw reqError;
+  if(friendRequestsList){friendRequestsList.replaceChildren();if(!requests?.length)friendRequestsList.append(safeText('p','No pending requests.','settings-help'));for(const request of requests){const row=document.createElement('div');row.className='friend-row';const info=document.createElement('div');info.append(safeText('b',request.sender?.display_name||'Ventorea member'),safeText('small',request.sender?.friend_code||''));const accept=document.createElement('button');accept.type='button';accept.className='button button-bright';accept.textContent='ACCEPT';accept.addEventListener('click',()=>acceptFriendRequest(request));row.append(info,accept);friendRequestsList.append(row)}}
+  const {data:links,error:linkError}=await supabaseClient.from('friendships').select('friend_id,friend:profiles!friendships_friend_id_fkey(display_name,friend_code,bio)').eq('user_id',googleUser.id).order('created_at',{ascending:false});
+  if(linkError)throw linkError;
+  if(friendsList){friendsList.replaceChildren();if(!links?.length)friendsList.append(safeText('p','No friends yet. Add someone using their friend code.','settings-help'));for(const link of links){const row=document.createElement('div');row.className='friend-row';const info=document.createElement('div');info.append(safeText('b',link.friend?.display_name||'Ventorea member'),safeText('small',link.friend?.friend_code||''));const remove=document.createElement('button');remove.type='button';remove.className='button button-outline';remove.textContent='REMOVE';remove.addEventListener('click',()=>removeFriend(link.friend_id));row.append(info,remove);friendsList.append(row)}}
+ }catch(error){const msg=error?.code==='42P01'||String(error?.message||'').includes('schema cache')?'Friends need database setup first. Run supabase/schema.sql in your Supabase SQL Editor, then reload.':(error?.message||'Could not load friends.');if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p',msg,'settings-help'));if(friendsList)friendsList.replaceChildren(safeText('p',msg,'settings-help'));if(accountFriendCode)accountFriendCode.value='Set up required';}
+}
+async function sendFriendRequest(e){
+ e.preventDefault();if(!supabaseClient||!googleUser)return;
+ const code=friendCodeInput?.value.trim().toUpperCase();if(!code)return;
+ const button=$('addFriendButton');if(button)button.disabled=true;setFriendsStatus('Looking up friend code…');
+ try{
+  await ensurePublicProfile();
+  const {data:profile,error}=await supabaseClient.from('profiles').select('user_id,display_name').eq('friend_code',code).maybeSingle();
+  if(error)throw error;if(!profile)throw new Error('That friend code was not found.');
+  if(profile.user_id===googleUser.id)throw new Error('You cannot add yourself.');
+  const {data:existing,error:existingError}=await supabaseClient.from('friendships').select('friend_id').eq('user_id',googleUser.id).eq('friend_id',profile.user_id).maybeSingle();
+  if(existingError)throw existingError;if(existing)throw new Error('You are already friends.');
+  const {error:insertError}=await supabaseClient.from('friend_requests').insert({sender_id:googleUser.id,receiver_id:profile.user_id,status:'pending'});
+  if(insertError){if(insertError.code==='23505')throw new Error('You already sent a request to this person.');throw insertError}
+  if(friendCodeInput)friendCodeInput.value='';setFriendsStatus('Friend request sent to '+profile.display_name+'.','success');
+ }catch(error){setFriendsStatus(error?.message||'Could not send friend request.','error')}
+ finally{if(button)button.disabled=false}
+}
+async function acceptFriendRequest(request){
+ try{
+  const {error:updateError}=await supabaseClient.from('friend_requests').update({status:'accepted'}).eq('id',request.id).eq('receiver_id',googleUser.id);
+  if(updateError)throw updateError;
+  const rows=[{user_id:googleUser.id,friend_id:request.sender_id},{user_id:request.sender_id,friend_id:googleUser.id}];
+  const {error:insertError}=await supabaseClient.from('friendships').insert(rows);
+  if(insertError&&insertError.code!=='23505')throw insertError;setFriendsStatus('Friend added.','success');await loadFriends();
+ }catch(error){setFriendsStatus(error?.message||'Could not accept request.','error')}
+}
+async function removeFriend(friendId){
+ if(!confirm('Remove this friend?'))return;
+ try{const {error}=await supabaseClient.from('friendships').delete().eq('user_id',googleUser.id).eq('friend_id',friendId);if(error)throw error;await supabaseClient.from('friendships').delete().eq('user_id',friendId).eq('friend_id',googleUser.id);setFriendsStatus('Friend removed.','success');await loadFriends()}catch(error){setFriendsStatus(error?.message||'Could not remove friend.','error')}
+}
+$('addFriendForm')?.addEventListener('submit',sendFriendRequest);
+$('copyFriendCode')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(accountFriendCode?.value||'');setFriendsStatus('Friend code copied.','success')}catch{setFriendsStatus('Copy failed. Select the code and copy it manually.','error')}});
+
 rememberChatSetting?.addEventListener('change',()=>{
  try{localStorage.setItem(REMEMBER_CHAT_KEY,String(rememberChatSetting.checked));if(!rememberChatSetting.checked)localStorage.removeItem(CHAT_STORAGE_KEY);else saveChatHistory();settingsStatus.textContent=rememberChatSetting.checked?'AI chat history will be saved on this device.':'AI chat history will not be saved on this device.';settingsStatus.className='form-status success'}catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
 });
