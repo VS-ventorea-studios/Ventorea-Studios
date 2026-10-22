@@ -74,7 +74,7 @@ function refreshGoogleAccount(){
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
  supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI()}).catch(error=>console.error('Supabase session restore failed:',error));
- supabaseClient.auth.onAuthStateChange((_event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI();if(googleUser&&googleLoginStatus)googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'.'});
+ supabaseClient.auth.onAuthStateChange((event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI();if(googleUser&&googleLoginStatus)googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'.';if(event==='SIGNED_IN'&&googleUser&&!googleUser.user_metadata?.profile_setup_complete)setTimeout(()=>openAccountSettings(),250)});
 }
 const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
@@ -119,7 +119,7 @@ accountProfileForm?.addEventListener('submit',async e=>{
  try{
   const phone=accountPhone?.value.trim()||'';
  const bio=accountBio?.value.trim()||'';
- const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name,phone_number:phone,bio}});
+ const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name,phone_number:phone,bio,profile_setup_complete:true}});
   if(error)throw error;
   googleUser=data.user||googleUser;populateAccountSettings();updateAccountUI();try{await ensurePublicProfile()}catch(profileError){console.warn('Friends profile setup is not complete:',profileError)}
   accountProfileStatus.textContent='Profile saved successfully.';accountProfileStatus.className='form-status success';
