@@ -9,16 +9,16 @@ create table if not exists public.profiles (
 );
 create table if not exists public.friend_requests (
   id uuid primary key default gen_random_uuid(),
-  sender_id uuid not null references auth.users(id) on delete cascade,
-  receiver_id uuid not null references auth.users(id) on delete cascade,
+  sender_id uuid not null references public.profiles(user_id) on delete cascade,
+  receiver_id uuid not null references public.profiles(user_id) on delete cascade,
   status text not null default 'pending' check (status in ('pending','accepted','rejected')),
   created_at timestamptz not null default now(),
   constraint friend_requests_no_self check (sender_id <> receiver_id),
   constraint friend_requests_unique_pair unique(sender_id, receiver_id)
 );
 create table if not exists public.friendships (
-  user_id uuid not null references auth.users(id) on delete cascade,
-  friend_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null references public.profiles(user_id) on delete cascade,
+  friend_id uuid not null references public.profiles(user_id) on delete cascade,
   created_at timestamptz not null default now(),
   primary key(user_id, friend_id),
   constraint friendships_no_self check(user_id <> friend_id)
