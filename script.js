@@ -18,10 +18,10 @@ const launcher=$('aiMenuOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel
 const accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
-const MAX_HISTORY=12;const MAX_MESSAGE_LENGTH=2000;
-const chat=loadChatHistory();
 const REMEMBER_CHAT_KEY='ventorea-remember-ai-chat-v1';
 const REDUCE_MOTION_KEY='ventorea-reduce-motion-v1';
+const MAX_HISTORY=12;const MAX_MESSAGE_LENGTH=2000;
+const chat=loadChatHistory();
 function readSetting(key,fallback){try{const value=localStorage.getItem(key);return value===null?fallback:value==='true'}catch{return fallback}}
 function loadChatHistory(){
   if(!readSetting(REMEMBER_CHAT_KEY,true))return [];
