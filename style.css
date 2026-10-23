@@ -412,3 +412,65 @@ button, .button, .header-cta, .account-cta, .menu, .modal-close { -webkit-tap-hi
   .contact-buttons .button { width: 100%; }
 }
 body.modal-open { overflow: hidden; }
+
+
+/* Final mobile modal/tap reliability pass v51 */
+.modal-card {
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:disabled, .button:disabled { cursor: not-allowed; }
+body.modal-open #aiMobileOpen {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: 300 !important;
+}
+@media (max-width: 680px) {
+  .modal {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  }
+  .modal-card {
+    width: 100%;
+    max-width: 600px;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: auto 0;
+    padding: 28px 18px;
+  }
+  .modal-close {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    top: 5px;
+    right: 5px;
+    z-index: 2;
+  }
+  .modal-card .button,
+  .contact-buttons .button,
+  .route-form-card .route-cta,
+  .account-cta,
+  .menu {
+    min-height: 46px;
+  }
+  .modal-card input,
+  .modal-card select,
+  .modal-card textarea,
+  .route-form-card input,
+  .route-form-card select,
+  .route-form-card textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .modal-card textarea,
+  .route-form-card textarea { min-height: 110px; }
+}
