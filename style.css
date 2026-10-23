@@ -740,3 +740,20 @@ a { text-decoration-thickness: 1px; text-underline-offset: 4px; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
   .motion-ready .reveal-target { opacity: 1; transform: none; }
 }
+
+
+/* Mobile performance guard: preserve the look, reduce expensive compositing. */
+@media (max-width: 680px), (pointer: coarse) {
+  #ambientCanvas { display: none !important; }
+  .site-header:not(.route-header),
+  .modal,
+  .cookie-notice {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  .noise { display: none !important; }
+  .modal, .cookie-notice { transition-duration: .12s; }
+  .system-card, .world-card, .button, .route-card { transition-duration: .12s; }
+  .motion-ready .reveal-target { transition-duration: .24s; }
+  .system-card:hover, .world-card:hover { box-shadow: none; }
+}
