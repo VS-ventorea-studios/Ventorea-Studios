@@ -257,3 +257,28 @@ updateAccountUI();applyMotionSetting();checkPresence();initCookieNotice();setInt
 
 // Keep the mobile chat panel usable when the on-screen keyboard opens.
 (()=>{const viewport=window.visualViewport,panel=document.getElementById('aiPanel');if(!viewport||!panel)return;const fit=()=>{if(!window.matchMedia('(max-width: 680px)').matches||!panel.classList.contains('open')){panel.style.removeProperty('--ai-visible-height');return}panel.style.setProperty('--ai-visible-height',Math.max(240,Math.floor(viewport.height-90))+'px')};viewport.addEventListener('resize',fit,{passive:true});viewport.addEventListener('scroll',fit,{passive:true});document.getElementById('aiMobileOpen')?.addEventListener('click',()=>setTimeout(fit,200));document.getElementById('aiClose')?.addEventListener('click',()=>panel.style.removeProperty('--ai-visible-height'));})();
+
+
+// v50 mobile interaction safeguards
+function setModalOpen(el, open){
+  if(!el) return;
+  el.classList.toggle('open', open);
+  el.setAttribute('aria-hidden', String(!open));
+  document.body.classList.toggle('modal-open', open || !!document.querySelector('.modal.open'));
+}
+const baseShowModal=showModal;
+showModal=function(el){baseShowModal(el);document.body.classList.add('modal-open')};
+const baseHideModal=hideModal;
+hideModal=function(el){baseHideModal(el);document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))};
+document.querySelectorAll('.modal').forEach(el=>{
+  el.addEventListener('click',event=>{if(event.target===el)hideModal(el)});
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){
+    document.querySelectorAll('.modal.open').forEach(hideModal);
+    if(panel?.classList.contains('open'))aiClose();
+    nav?.classList.remove('open');
+    menu?.setAttribute('aria-expanded','false');
+    menu?.setAttribute('aria-label','Open menu');
+  }
+});
