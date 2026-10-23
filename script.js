@@ -297,3 +297,80 @@ document.addEventListener('keydown',event=>{
     menu?.setAttribute('aria-label','Open menu');
   }
 });
+
+
+/* Ventorea 2026 interaction layer / v52 */
+(()=>{
+  const root=document.documentElement;
+  const progress=document.getElementById('scrollProgressBar');
+  const backToTop=document.getElementById('backToTop');
+  const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  let scrollFrame=0;
+  root.classList.add('motion-ready');
+
+  const targets=document.querySelectorAll('.section, .system-card, .world-card, .timeline-item, .faq-list details, .project-visual, .hero-art');
+  targets.forEach((el,index)=>{
+    el.classList.add('reveal-target');
+    if(el.classList.contains('system-card')||el.classList.contains('world-card'))el.style.transitionDelay=(index%4)*55+'ms';
+  });
+
+  if(!reduceMotion && 'IntersectionObserver' in window){
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.08,rootMargin:'0px 0px -5% 0px'});
+    targets.forEach(el=>observer.observe(el));
+  }else{
+    targets.forEach(el=>el.classList.add('is-visible'));
+  }
+
+  const updateScrollUI=()=>{
+    scrollFrame=0;
+    const max=Math.max(1,root.scrollHeight-window.innerHeight);
+    const ratio=Math.min(1,Math.max(0,window.scrollY/max));
+    if(progress)progress.style.width=(ratio*100)+'%';
+    if(backToTop)backToTop.classList.toggle('is-visible',window.scrollY>520);
+  };
+  const requestScrollUI=()=>{
+    if(!scrollFrame)scrollFrame=requestAnimationFrame(updateScrollUI);
+  };
+  window.addEventListener('scroll',requestScrollUI,{passive:true});
+  window.addEventListener('resize',requestScrollUI,{passive:true});
+  updateScrollUI();
+
+  backToTop?.addEventListener('click',()=>{
+    window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+  });
+
+  if(finePointer && !reduceMotion){
+    document.querySelectorAll('.system-card, .world-card').forEach(card=>{
+      card.addEventListener('pointermove',event=>{
+        const box=card.getBoundingClientRect();
+        card.style.setProperty('--pointer-x',Math.round(event.clientX-box.left)+'px');
+        card.style.setProperty('--pointer-y',Math.round(event.clientY-box.top)+'px');
+      },{passive:true});
+      card.addEventListener('pointerleave',()=>{
+        card.style.removeProperty('--pointer-x');
+        card.style.removeProperty('--pointer-y');
+      },{passive:true});
+    });
+  }
+
+  // Keep the header and scroll position predictable when a visitor follows an in-page link.
+  document.querySelectorAll('a[href^="#"]').forEach(link=>{
+    link.addEventListener('click',()=>{
+      const nav=document.getElementById('navLinks');
+      const menu=document.getElementById('menu');
+      if(nav?.classList.contains('open')){
+        nav.classList.remove('open');
+        menu?.setAttribute('aria-expanded','false');
+        menu?.setAttribute('aria-label','Open menu');
+      }
+    });
+  });
+})();
