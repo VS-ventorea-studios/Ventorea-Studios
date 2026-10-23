@@ -75,7 +75,12 @@ const SUPABASE_URL='https://ujxcvfgkpqzkpfthahla.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
 let supabaseClient=null,googleUser=null;
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
-function openGoogleLogin(){showModal(googleLoginModal);refreshGoogleAccount();setTimeout(()=>googleLoginButton?.focus(),80)}
+function openGoogleLogin(){
+ showModal(googleLoginModal);
+ refreshGoogleAccount();
+ // Prevent iOS Safari from scrolling the page when focus is applied to the login button.
+ if(!window.matchMedia('(pointer: coarse)').matches)setTimeout(()=>googleLoginButton?.focus({preventScroll:true}),80);
+}
 function refreshGoogleAccount(){
  if(!googleLoginStatus)return;
  if(!window.supabase||SUPABASE_PUBLISHABLE_KEY==='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){googleLoginStatus.textContent='Setup needed: add your Supabase publishable key in script.js before testing login.';googleLoginStatus.className='form-status error';return}
@@ -85,7 +90,17 @@ function refreshGoogleAccount(){
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
  supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI()}).catch(error=>console.error('Supabase session restore failed:',error));
- supabaseClient.auth.onAuthStateChange((event,session)=>{googleUser=session?.user||null;refreshGoogleAccount();updateAccountUI();if(googleUser&&googleLoginStatus)googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'.';if(event==='SIGNED_IN'&&googleUser&&!googleUser.user_metadata?.profile_setup_complete)setTimeout(()=>openAccountSettings(),250)});
+ supabaseClient.auth.onAuthStateChange((event,session)=>{
+  googleUser=session?.user||null;
+  refreshGoogleAccount();
+  updateAccountUI();
+  if(googleUser&&googleLoginStatus){
+    googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'. Your profile is available from My Account.';
+    googleLoginStatus.className='form-status success';
+  }
+  // Do not automatically open Account Settings after OAuth. It caused a page jump
+  // and made sign-in look frozen while profile/friend data loaded on mobile.
+});
 }
 const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
@@ -116,7 +131,7 @@ function populateAccountSettings(){
 }
 function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
- populateAccountSettings();showModal(accountSettingsModal);loadFriends();setTimeout(()=>accountDisplayName?.focus(),80)
+ populateAccountSettings();showModal(accountSettingsModal);loadFriends();
 }
 accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():openGoogleLogin());
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
@@ -217,14 +232,42 @@ $('accountSignOutButton')?.addEventListener('click',async()=>{
 });
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
 googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
+let googleOAuthPending=false;
 googleLoginButton?.addEventListener('click',async()=>{
+ if(googleOAuthPending)return;
  if(!supabaseClient){refreshGoogleAccount();return}
- googleLoginButton.disabled=true;googleLoginStatus.textContent='Redirecting to Google…';
+ googleOAuthPending=true;
+ googleLoginButton.disabled=true;
+ googleLoginStatus.textContent='Connecting to Google securely…';
+ googleLoginStatus.className='form-status';
  try {
-  const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
+  // Get the OAuth URL first, then navigate explicitly. This provides clear errors
+  // instead of leaving mobile users on a disabled button if redirect setup fails.
+  const {data,error}=await supabaseClient.auth.signInWithOAuth({
+   provider:'google',
+   options:{
+    redirectTo:window.location.origin+'/',
+    skipBrowserRedirect:true,
+    queryParams:{prompt:'select_account'}
+   }
+  });
   if(error)throw error;
+  if(!data?.url)throw new Error('Google did not return a sign-in link. Please try again.');
+  googleLoginStatus.textContent='Opening Google sign-in…';
+  window.location.assign(data.url);
+  window.setTimeout(()=>{
+   googleOAuthPending=false;
+   if(googleLoginButton)googleLoginButton.disabled=false;
+   if(googleLoginStatus&&googleLoginModal?.classList.contains('open')){
+    googleLoginStatus.textContent='Still on this page? Tap Continue again, or open Ventorea directly in Safari.';
+    googleLoginStatus.className='form-status error';
+   }
+  },10000);
  } catch(error) {
-  googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error';googleLoginButton.disabled=false
+  googleOAuthPending=false;
+  googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';
+  googleLoginStatus.className='form-status error';
+  googleLoginButton.disabled=false;
  }
 });
 googleSignOutButton?.addEventListener('click',async()=>{
