@@ -310,14 +310,14 @@ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(pa
   canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
   const count=mobile?14:Math.min(64,Math.max(24,Math.floor(width*height/24000)));
-  particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*(mobile?.7:1.3),a:.12+Math.random()*.35,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));
+  particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*(mobile ? 0.7 : 1.3),a:.12+Math.random()*.35,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));
   draw(0);
  }
  function draw(t){
   ctx.clearRect(0,0,width,height);
   for(let i=0;i<particles.length;i++){
    const p=particles[i];if(animate)p.y-=p.v*.22;if(p.y< -3)p.y=height+3;
-   const alpha=p.a*(animate?.65+.35*Math.sin(t*.0007+p.phase):1);
+   const alpha=p.a*(animate ? 0.65+0.35*Math.sin(t*0.0007+p.phase) : 1);
    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(111,183,255,'+alpha+')';ctx.fill();
    if(!mobile&&i%3===0)for(let j=i+1;j<Math.min(i+5,particles.length);j++){
     const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);
