@@ -2,11 +2,22 @@ const menu=document.getElementById('menu');
 const nav=document.getElementById('navLinks');
 if(menu&&nav){
   menu.setAttribute('aria-expanded','false');
+  const closeMenu=()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open menu')};
   menu.addEventListener('click',()=>{
-    const open=nav.classList.toggle('open');
+    const open=!nav.classList.contains('open');
+    nav.classList.toggle('open',open);
     menu.setAttribute('aria-expanded',String(open));
     menu.setAttribute('aria-label',open?'Close menu':'Open menu');
   });
+  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
+  nav.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{
+    if(button.id==='aiMenuOpen')closeMenu();
+  }));
+  document.addEventListener('click',event=>{
+    if(!nav.classList.contains('open'))return;
+    if(!nav.contains(event.target)&&!menu.contains(event.target))closeMenu();
+  });
+  window.addEventListener('resize',()=>{if(window.innerWidth>680)closeMenu()},{passive:true});
   document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>{
     nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','Open menu');
   }));
@@ -45,8 +56,8 @@ function updateAccountUI(){
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
   if(signed)populateAccountSettings();
 }
-function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false')}
-function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true')}
+function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
+function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
 function aiOpen(){if(!isDemoSignedIn()){openGoogleLogin();if(googleLoginStatus){googleLoginStatus.textContent='Sign in with Google to unlock Ventorea AI.';googleLoginStatus.className='form-status error'}return}renderSavedChat();document.body.classList.add('ai-chat-open');panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');mobileLauncher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),180)}
 function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
@@ -209,13 +220,17 @@ googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hi
 googleLoginButton?.addEventListener('click',async()=>{
  if(!supabaseClient){refreshGoogleAccount();return}
  googleLoginButton.disabled=true;googleLoginStatus.textContent='Redirecting to Google…';
- const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
- if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error';googleLoginButton.disabled=false}
+ try {
+  const {error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
+  if(error)throw error;
+ } catch(error) {
+  googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error';googleLoginButton.disabled=false
+ }
 });
 googleSignOutButton?.addEventListener('click',async()=>{
  if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
  if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
- else{googleUser=null;googleLoginButton.disabled=false;refreshGoogleAccount()}
+ else{googleUser=null;googleLoginButton.disabled=false;refreshGoogleAccount();updateAccountUI()}
 });
 function add(text,type){
   if(!messages)return null;const p=document.createElement('p');p.className=type;p.textContent=text;messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p;
