@@ -241,28 +241,21 @@ googleLoginButton?.addEventListener('click',async()=>{
  googleLoginStatus.textContent='Connecting to Google securely…';
  googleLoginStatus.className='form-status';
  try {
-  // Get the OAuth URL first, then navigate explicitly. This provides clear errors
-  // instead of leaving mobile users on a disabled button if redirect setup fails.
-  const {data,error}=await supabaseClient.auth.signInWithOAuth({
+  // Let Supabase perform its native top-level redirect. This is more reliable
+  // than manually navigating to a URL after an awaited request in mobile Safari.
+  const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
-   options:{
-    redirectTo:window.location.origin+'/',
-    skipBrowserRedirect:true,
-    queryParams:{prompt:'select_account'}
-   }
+   options:{redirectTo:window.location.origin+'/',queryParams:{prompt:'select_account'}}
   });
   if(error)throw error;
-  if(!data?.url)throw new Error('Google did not return a sign-in link. Please try again.');
-  googleLoginStatus.textContent='Opening Google sign-in…';
-  window.location.assign(data.url);
   window.setTimeout(()=>{
    googleOAuthPending=false;
    if(googleLoginButton)googleLoginButton.disabled=false;
    if(googleLoginStatus&&googleLoginModal?.classList.contains('open')){
-    googleLoginStatus.textContent='Still on this page? Tap Continue again, or open Ventorea directly in Safari.';
+    googleLoginStatus.textContent='Google sign-in did not open. Try opening this site directly in Safari, then tap Continue again.';
     googleLoginStatus.className='form-status error';
    }
-  },10000);
+  },12000);
  } catch(error) {
   googleOAuthPending=false;
   googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';
@@ -302,11 +295,41 @@ document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle'
 document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['accountSettingsModal','feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
 [googleLoginModal,accountSettingsModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
 
-// Animated connected starfield for the midnight-blue background.
-(()=>{const canvas=$('ambientCanvas');if(!canvas)return;const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;let width=0,height=0,dpr=1,raf=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;let particles=[];
-function resize(){dpr=Math.min(window.devicePixelRatio||1,2);width=window.innerWidth;height=window.innerHeight;canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(85,Math.max(28,Math.floor(width*height/19000)));particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*1.5,a:.15+Math.random()*.55,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));draw(0)}
-function draw(t){ctx.clearRect(0,0,width,height);for(let i=0;i<particles.length;i++){const p=particles[i];if(!reduced)p.y-=p.v*.22;if(p.y< -3)p.y=height+3;const alpha=p.a*(reduced?1:.65+.35*Math.sin(t*.0007+p.phase));ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(111,183,255,'+alpha+')';ctx.fill();if(i%3===0)for(let j=i+1;j<Math.min(i+5,particles.length);j++){const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);if(d<115){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(65,143,230,'+((1-d/115)*.12)+')';ctx.lineWidth=.6;ctx.stroke()}}}if(!reduced)raf=requestAnimationFrame(draw)}
-window.addEventListener('resize',resize,{passive:true});resize();if(!reduced)raf=requestAnimationFrame(draw);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}})})();
+// Lightweight ambient starfield. Phones use a static low-resolution field to avoid
+// burning CPU/GPU while the user is interacting with login and forms.
+(()=>{
+ const canvas=$('ambientCanvas');if(!canvas)return;
+ const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;
+ let width=0,height=0,dpr=1,raf=0,particles=[];
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const mobile=window.matchMedia('(max-width: 680px)').matches||window.matchMedia('(pointer: coarse)').matches;
+ const animate=!(reduced||mobile);
+ function resize(){
+  dpr=Math.min(window.devicePixelRatio||1,animate?1.5:1);
+  width=window.innerWidth;height=window.innerHeight;
+  canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const count=mobile?14:Math.min(64,Math.max(24,Math.floor(width*height/24000)));
+  particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*(mobile?.7:1.3),a:.12+Math.random()*.35,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));
+  draw(0);
+ }
+ function draw(t){
+  ctx.clearRect(0,0,width,height);
+  for(let i=0;i<particles.length;i++){
+   const p=particles[i];if(animate)p.y-=p.v*.22;if(p.y< -3)p.y=height+3;
+   const alpha=p.a*(animate?.65+.35*Math.sin(t*.0007+p.phase):1);
+   ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(111,183,255,'+alpha+')';ctx.fill();
+   if(!mobile&&i%3===0)for(let j=i+1;j<Math.min(i+5,particles.length);j++){
+    const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);
+    if(d<115){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(65,143,230,'+((1-d/115)*.12)+')';ctx.lineWidth:.6;ctx.stroke()}
+   }
+  }
+  if(animate)raf=requestAnimationFrame(draw);
+ }
+ window.addEventListener('resize',resize,{passive:true});resize();
+ if(animate)raf=requestAnimationFrame(draw);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(animate){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}});
+})();
 updateAccountUI();applyMotionSetting();checkPresence();initCookieNotice();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
 
 
