@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050914">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Sign in — Ventorea Studios</title>
+  <meta name="description" content="Sign in or create your Ventorea Studios account.">
+  <link rel="icon" href="./Ventorea%20Studios.jpg">
+  <link rel="stylesheet" href="./style.css?v=55">
+  <link rel="stylesheet" href="./login.css?v=1">
+</head>
+<body class="auth-page">
+  <div class="noise" aria-hidden="true"></div>
+  <header class="auth-header">
+    <a class="brand" href="./" aria-label="Ventorea Studios home"><img class="brand-logo" src="./Ventorea%20Studios.jpg" alt="Ventorea Studios"></a>
+    <a class="auth-home-link" href="./">BACK TO SITE <span>↗</span></a>
+  </header>
+  <main class="login-page-main">
+    <div class="auth-glow" aria-hidden="true"></div>
+    <section class="auth-card" aria-labelledby="loginTitle">
+      <p class="eyebrow">VENTOREA / ACCOUNT</p>
+      <h1 id="loginTitle">Your world, <em>your account.</em></h1>
+      <p class="auth-intro">Sign in to your Ventorea account, or create one to keep your profile with you.</p>
+      <div id="loginFormContent">
+        <div class="auth-tabs" role="tablist" aria-label="Account access">
+          <button id="authModeSignIn" class="auth-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="authSignInForm">Sign in</button>
+          <button id="authModeSignUp" class="auth-tab" type="button" role="tab" aria-selected="false" aria-controls="authSignUpForm">Create account</button>
+        </div>
+        <form id="authSignInForm" class="auth-form">
+          <label for="authEmail">Email address</label>
+          <input id="authEmail" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="authPassword">Password</label>
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" required>
+          <label class="remember-email" for="rememberEmail"><input id="rememberEmail" type="checkbox"><span>Remember my email on this device</span></label>
+          <button id="authSignInSubmit" class="button button-bright auth-submit" type="submit">SIGN IN <span>↗</span></button>
+        </form>
+        <form id="authSignUpForm" class="auth-form" hidden>
+          <label for="authUsername">Username</label>
+          <input id="authUsername" name="username" type="text" autocomplete="username" minlength="2" maxlength="40" required>
+          <label for="signupEmail">Email address</label>
+          <input id="signupEmail" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="authPhone">Phone number <span class="field-optional">OPTIONAL</span></label>
+          <input id="authPhone" name="phone" type="tel" autocomplete="tel" maxlength="32" aria-describedby="phoneHelp">
+          <small id="phoneHelp" class="field-help">Your phone number is private account information and is not shown to friends.</small>
+          <label for="signupPassword">Password</label>
+          <input id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="8" required>
+          <button id="authSignUpSubmit" class="button button-bright auth-submit" type="submit">CREATE ACCOUNT <span>↗</span></button>
+        </form>
+        <div class="auth-divider"><span>OR</span></div>
+        <button id="googleLoginButton" class="button button-outline auth-google" type="button"><span class="google-g">G</span> CONTINUE WITH GOOGLE <span>↗</span></button>
+        <p id="googleLoginStatus" class="form-status" role="status" aria-live="polite">Choose Google or sign in with your email and password.</p>
+        <p class="auth-security-note">Your sign-in session is kept by Supabase in this browser. Ventorea never saves your password. Your browser may offer to remember it in its password manager.</p>
+      </div>
+      <div id="loginSignedIn" class="login-signed-in" hidden>
+        <h2>You’re signed in.</h2>
+        <p id="loginSignedInEmail" class="signed-in-email"></p>
+        <a class="button button-bright auth-submit" href="./">CONTINUE TO VENTOREA <span>↗</span></a>
+        <button id="googleSignOutButton" class="button button-outline auth-signout" type="button">SIGN OUT</button>
+      </div>
+      <p class="auth-legal">By creating an account, you agree to our <a href="./Terms/">Terms</a> and acknowledge the <a href="./Privacy/">Privacy Policy</a>.</p>
+    </section>
+    <footer class="auth-footer">
+      <a href="./Cookies/">COOKIES &amp; STORAGE</a><button id="cookieSettingsOpen" type="button">COOKIE SETTINGS</button><span>© 2026 VENTOREA STUDIOS</span>
+    </footer>
+  </main>
+  <div class="cookie-notice" id="cookieNotice" role="dialog" aria-label="Cookie and storage preferences" aria-live="polite">
+    <div><b>YOUR PRIVACY, YOUR CALL.</b><p>Your sign-in session stays in this browser. If you choose “Remember my email,” we save your email in a 30-day cookie. Passwords are never saved by this site. <a href="./Cookies/">Read the cookies notice</a>.</p></div>
+    <div class="cookie-actions"><button id="cookieDecline" type="button">DECLINE OPTIONAL</button><button id="cookieAccept" type="button">OK, GOT IT</button></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./script.js?v=56"></script>
+</body>
+</html>
