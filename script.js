@@ -160,7 +160,7 @@ function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
  populateAccountSettings();showModal(accountSettingsModal);loadFriends();
 }
-accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():window.location.assign(new URL('/Login/',window.location.origin).href));
+accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():window.location.assign(new URL('/login.html',window.location.origin).href));
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
 accountProfileForm?.addEventListener('submit',async e=>{
