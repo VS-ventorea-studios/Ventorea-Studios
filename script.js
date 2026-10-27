@@ -28,6 +28,22 @@ const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),close=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
+const REMEMBER_EMAIL_COOKIE='ventorea-remembered-email';
+function readRememberedEmail(){
+  try{
+    const prefix=REMEMBER_EMAIL_COOKIE+'=';
+    const item=document.cookie.split(';').map(part=>part.trim()).find(part=>part.startsWith(prefix));
+    return item?decodeURIComponent(item.slice(prefix.length)):'';
+  }catch{return ''}
+}
+function writeRememberedEmail(email){
+  try{
+    const value=(email||'').trim();
+    const secure=location.protocol==='https:'?'; Secure':'';
+    document.cookie=REMEMBER_EMAIL_COOKIE+'='+encodeURIComponent(value)+'; Max-Age='+(value?2592000:0)+'; Path=/; SameSite=Lax'+secure;
+  }catch{}
+}
+function clearRememberedEmail(){writeRememberedEmail('')}
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
 const REMEMBER_CHAT_KEY='ventorea-remember-ai-chat-v1';
 const REDUCE_MOTION_KEY='ventorea-reduce-motion-v1';
@@ -55,6 +71,7 @@ function updateAccountUI(){
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
   if(signed)populateAccountSettings();
+  updateLoginPage();
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
@@ -75,6 +92,15 @@ const SUPABASE_URL='https://ujxcvfgkpqzkpfthahla.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
 let supabaseClient=null,googleUser=null;
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
+function updateLoginPage(){
+ const formContent=$('loginFormContent'),signedInPanel=$('loginSignedIn');
+ if(!formContent||!signedInPanel)return;
+ const signed=!!googleUser;
+ formContent.hidden=signed;
+ signedInPanel.hidden=!signed;
+ const email=$('loginSignedInEmail');
+ if(email)email.textContent=googleUser?.email||'Your Ventorea account is signed in.';
+}
 function openGoogleLogin(){
  showModal(googleLoginModal);
  refreshGoogleAccount();
@@ -82,10 +108,11 @@ function openGoogleLogin(){
  if(!window.matchMedia('(pointer: coarse)').matches)setTimeout(()=>googleLoginButton?.focus({preventScroll:true}),80);
 }
 function refreshGoogleAccount(){
- if(!googleLoginStatus)return;
- if(!window.supabase||SUPABASE_PUBLISHABLE_KEY==='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){googleLoginStatus.textContent='Setup needed: add your Supabase publishable key in script.js before testing login.';googleLoginStatus.className='form-status error';return}
+ if(!googleLoginStatus){updateLoginPage();return}
+ if(!window.supabase||SUPABASE_PUBLISHABLE_KEY==='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){googleLoginStatus.textContent='Setup needed: add your Supabase publishable key in script.js before testing login.';googleLoginStatus.className='form-status error';updateLoginPage();return}
  if(googleUser){googleLoginStatus.textContent='Signed in as '+(googleUser.email||googleUser.user_metadata?.full_name||'Google user')+'.';googleLoginStatus.className='form-status success';if(googleLoginButton)googleLoginButton.hidden=true;if(googleSignOutButton)googleSignOutButton.hidden=false}
  else{googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';googleLoginStatus.className='form-status';if(googleLoginButton)googleLoginButton.hidden=false;if(googleSignOutButton)googleSignOutButton.hidden=true}
+ updateLoginPage();
 }
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
@@ -133,7 +160,7 @@ function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
  populateAccountSettings();showModal(accountSettingsModal);loadFriends();
 }
-accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():openGoogleLogin());
+accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():window.location.assign(new URL('/login.html',window.location.origin).href));
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
 accountProfileForm?.addEventListener('submit',async e=>{
@@ -251,7 +278,7 @@ googleLoginButton?.addEventListener('click',async()=>{
   window.setTimeout(()=>{
    googleOAuthPending=false;
    if(googleLoginButton)googleLoginButton.disabled=false;
-   if(googleLoginStatus&&googleLoginModal?.classList.contains('open')){
+   if(googleLoginStatus&&(!googleLoginModal||googleLoginModal.classList.contains('open'))){
     googleLoginStatus.textContent='Google sign-in did not open. Please try again. If the problem continues, contact Ventorea support.';
     googleLoginStatus.className='form-status error';
    }
@@ -263,6 +290,83 @@ googleLoginButton?.addEventListener('click',async()=>{
   googleLoginButton.disabled=false;
  }
 });
+function initLoginPage(){
+ const signInForm=$('authSignInForm'),signUpForm=$('authSignUpForm');
+ if(!signInForm||!signUpForm)return;
+ const remember=$('rememberEmail'),emailInput=$('authEmail'),status=googleLoginStatus;
+ const setStatus=(message,kind)=>{if(!status)return;status.textContent=message;status.className='form-status'+(kind?' '+kind:'')};
+ const signinTab=$('authModeSignIn'),signupTab=$('authModeSignUp');
+ const setMode=mode=>{
+  const signIn=mode==='signin';
+  signInForm.hidden=!signIn;signUpForm.hidden=signIn;
+  if(signinTab){signinTab.classList.toggle('is-active',signIn);signinTab.setAttribute('aria-selected',String(signIn))}
+  if(signupTab){signupTab.classList.toggle('is-active',!signIn);signupTab.setAttribute('aria-selected',String(!signIn))}
+  if(!googleUser)setStatus(signIn?'Sign in with Google or your email and password.':'Create an account with your email and password.');
+ };
+ signinTab?.addEventListener('click',()=>setMode('signin'));
+ signupTab?.addEventListener('click',()=>setMode('signup'));
+ let cookieChoice='';try{cookieChoice=localStorage.getItem('ventorea-cookie-choice')||''}catch{}
+ if(cookieChoice==='declined'){
+  clearRememberedEmail();
+  if(remember){remember.checked=false;remember.disabled=true}
+ }else if(remember&&emailInput){
+  const savedEmail=readRememberedEmail();
+  if(savedEmail){emailInput.value=savedEmail;remember.checked=true}
+ }
+ const syncRememberedEmail=()=>{
+  if(!remember||remember.disabled)return;
+  if(remember.checked)writeRememberedEmail(emailInput?.value||'');
+  else clearRememberedEmail();
+ };
+ remember?.addEventListener('change',syncRememberedEmail);
+ emailInput?.addEventListener('change',syncRememberedEmail);
+ signInForm.addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(!supabaseClient){setStatus('Sign-in is unavailable right now. Please try again later.','error');return}
+  const email=emailInput?.value.trim()||'';
+  const password=$('authPassword')?.value||'';
+  if(remember?.checked)writeRememberedEmail(email);else clearRememberedEmail();
+  const submit=$('authSignInSubmit');if(submit)submit.disabled=true;
+  setStatus('Signing in securely…');
+  try{
+   const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+   if(error)throw error;
+   setStatus('You’re signed in. Welcome back.','success');
+   updateLoginPage();
+   window.location.assign('/');
+  }catch(error){
+   const message=String(error?.message||'').toLowerCase();
+   setStatus(message.includes('invalid login credentials')?'That email and password don’t match. Please try again.':'We couldn’t sign you in. Check your details and try again.','error');
+  }finally{if(submit)submit.disabled=false}
+ });
+ signUpForm.addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(!supabaseClient){setStatus('Account creation is unavailable right now. Please try again later.','error');return}
+  const username=$('authUsername')?.value.trim()||'';
+  const phone=$('authPhone')?.value.trim()||'';
+  const email=$('signupEmail')?.value.trim()||'';
+  const password=$('signupPassword')?.value||'';
+  const submit=$('authSignUpSubmit');if(submit)submit.disabled=true;
+  setStatus('Creating your account securely…');
+  try{
+   const {data,error}=await supabaseClient.auth.signUp({
+    email,password,
+    options:{data:{username,display_name:username,phone_number:phone},emailRedirectTo:window.location.origin+'/'}
+   });
+   if(error)throw error;
+   if(data?.session){
+    setStatus('Your account is ready. Welcome to Ventorea.','success');
+    updateLoginPage();
+    window.location.assign('/');
+   }else setStatus('Check your email for a confirmation link. After confirming, you can sign in here.','success');
+  }catch(error){
+   const message=String(error?.message||'').toLowerCase();
+   setStatus(message.includes('password')?'Choose a stronger password and try again.':'We couldn’t create your account. Check your details and try again.','error');
+  }finally{if(submit)submit.disabled=false}
+ });
+ setMode('signin');
+ updateLoginPage();
+}
 googleSignOutButton?.addEventListener('click',async()=>{
  if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
  if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
@@ -287,7 +391,7 @@ async function sendToAI(){
   finally{if(input){input.disabled=!isDemoSignedIn();if(panel?.classList.contains('open'))input.focus()}if(submit)submit.disabled=false}
 }
 form?.addEventListener('submit',e=>{e.preventDefault();sendToAI()});
-function setCookieChoice(choice){try{localStorage.setItem('ventorea-cookie-choice',choice)}catch{};cookieNotice?.classList.remove('is-visible')}
+function setCookieChoice(choice){try{localStorage.setItem('ventorea-cookie-choice',choice)}catch{};const remember=$('rememberEmail');if(choice==='declined'){clearRememberedEmail();if(remember){remember.checked=false;remember.disabled=true}}else if(remember)remember.disabled=false;cookieNotice?.classList.remove('is-visible')}
 function showCookieNotice(){cookieNotice?.classList.add('is-visible')}
 function initCookieNotice(){let saved='';try{saved=localStorage.getItem('ventorea-cookie-choice')||''}catch{};if(!saved)showCookieNotice()}
 $('cookieAccept')?.addEventListener('click',()=>setCookieChoice('acknowledged'));$('cookieDecline')?.addEventListener('click',()=>setCookieChoice('declined'));$('cookieSettingsOpen')?.addEventListener('click',showCookieNotice);
@@ -330,7 +434,7 @@ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(pa
  if(!reduced)raf=requestAnimationFrame(draw);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}});
 })();
-updateAccountUI();applyMotionSetting();checkPresence();initCookieNotice();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
+updateAccountUI();applyMotionSetting();checkPresence();initCookieNotice();initLoginPage();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
 
 
 
