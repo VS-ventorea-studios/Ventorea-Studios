@@ -252,7 +252,7 @@ googleLoginButton?.addEventListener('click',async()=>{
    googleOAuthPending=false;
    if(googleLoginButton)googleLoginButton.disabled=false;
    if(googleLoginStatus&&googleLoginModal?.classList.contains('open')){
-    googleLoginStatus.textContent='Google sign-in did not open. Try opening this site directly in Safari, then tap Continue again.';
+    googleLoginStatus.textContent='Google sign-in did not open. Please try again. If the problem continues, contact Ventorea support.';
     googleLoginStatus.className='form-status error';
    }
   },12000);
