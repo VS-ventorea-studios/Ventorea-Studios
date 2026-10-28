@@ -757,3 +757,21 @@ a { text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .motion-ready .reveal-target { transition-duration: .24s; }
   .system-card:hover, .world-card:hover { box-shadow: none; }
 }
+
+
+/* Login interaction reliability: the active modal must sit above the header and chat controls. */
+.modal { z-index: 100500 !important; }
+body.modal-open .site-header { pointer-events: none !important; }
+body.modal-open .cookie-notice { z-index: 450 !important; }
+body.modal-open .ambient-glow,
+body.modal-open .ambient-grid { animation-play-state: paused !important; }
+
+@media (max-width: 680px), (pointer: coarse) {
+  .ambient-glow { animation: none !important; filter: blur(42px) !important; }
+  .modal {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(5, 9, 20, .96) !important;
+  }
+  .noise { display: none !important; }
+}
