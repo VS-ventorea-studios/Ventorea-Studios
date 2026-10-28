@@ -73,7 +73,7 @@ if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobile
 closeButton?.addEventListener('click',aiClose);
 const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
-let supabaseClient=null,googleUser=null;
+let supabaseClient=null,googleUser=null,pendingAccountEmail='';
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
 const oauthReturnError=(()=>{const params=new URLSearchParams(window.location.search);const error=params.get('error_description')||params.get('error_code')||params.get('error');if(!error)return '';params.delete('error_description');params.delete('error_code');params.delete('error');const query=params.toString();window.history.replaceState(null,document.title,window.location.pathname+(query?'?'+query:'')+window.location.hash);return error})();
 function showOAuthReturnError(){if(!oauthReturnError||!googleLoginStatus)return;showModal(googleLoginModal);const expired=/state.*expired|expired.*state|state.*invalid|invalid.*state/i.test(oauthReturnError);googleLoginStatus.textContent=expired?'Google sign-in expired before returning to Ventorea. Start a fresh sign-in and finish it in the same browser tab.':'Google sign-in failed: '+oauthReturnError;googleLoginStatus.className='form-status error'}
@@ -95,6 +95,7 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
  supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI();if(oauthReturnError)showOAuthReturnError()}).catch(error=>{console.error('Supabase session restore failed:',error);if(oauthReturnError)showOAuthReturnError()});
  supabaseClient.auth.onAuthStateChange((event,session)=>{
   googleUser=session?.user||null;
+   if(googleUser&&pendingAccountEmail&&googleUser.email?.toLowerCase()===pendingAccountEmail.toLowerCase())pendingAccountEmail='';
   refreshGoogleAccount();
   updateAccountUI();
   if(oauthReturnError)showOAuthReturnError();
@@ -125,7 +126,7 @@ function populateAccountSettings(){
  if(!googleUser)return;
  const name=displayNameFor(googleUser),email=googleUser.email||'';
  if(accountDisplayName&&document.activeElement!==accountDisplayName)accountDisplayName.value=name;
- if(accountEmail)accountEmail.value=email;
+ if(accountEmail&&document.activeElement!==accountEmail)accountEmail.value=pendingAccountEmail||email;
  if(accountPhone&&document.activeElement!==accountPhone)accountPhone.value=googleUser.user_metadata?.phone_number||'';
  if(accountBio&&document.activeElement!==accountBio)accountBio.value=googleUser.user_metadata?.bio||'';
  if(accountIdentityName)accountIdentityName.textContent=name;
@@ -144,17 +145,31 @@ accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettings
 accountProfileForm?.addEventListener('submit',async e=>{
  e.preventDefault();if(!supabaseClient||!googleUser)return;
  const name=accountDisplayName.value.trim();
- if(!name){accountProfileStatus.textContent='Please enter a display name.';accountProfileStatus.className='form-status error';return}
+ const email=accountEmail?.value.trim()||'';
+ const currentEmail=(googleUser.email||'').trim();
+ if(!name){accountProfileStatus.textContent='Please enter your name.';accountProfileStatus.className='form-status error';return}
+ if(!email){accountProfileStatus.textContent='Please enter an email address.';accountProfileStatus.className='form-status error';return}
+ const emailChanged=email.toLowerCase()!==currentEmail.toLowerCase();
  const save=$('accountSaveProfile');if(save)save.disabled=true;
- accountProfileStatus.textContent='Saving profile…';accountProfileStatus.className='form-status';
+ accountProfileStatus.textContent='Saving account details…';accountProfileStatus.className='form-status';
  try{
   const phone=accountPhone?.value.trim()||'';
- const bio=accountBio?.value.trim()||'';
- const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name,phone_number:phone,bio,profile_setup_complete:true}});
+  const bio=googleUser.user_metadata?.bio||'';
+  const attributes={data:{display_name:name,phone_number:phone,bio,profile_setup_complete:true}};
+  if(emailChanged)attributes.email=email;
+  const options=emailChanged?{emailRedirectTo:'https://www.ventoreastudios.online/'}:undefined;
+  const {data,error}=await supabaseClient.auth.updateUser(attributes,options);
   if(error)throw error;
-  googleUser=data.user||googleUser;populateAccountSettings();updateAccountUI();try{await ensurePublicProfile()}catch(profileError){console.warn('Friends profile setup is not complete:',profileError)}
-  accountProfileStatus.textContent='Profile saved successfully.';accountProfileStatus.className='form-status success';
- }catch(error){accountProfileStatus.textContent=error?.message||'Could not save your profile.';accountProfileStatus.className='form-status error'}
+  googleUser=data.user||googleUser;
+  pendingAccountEmail=emailChanged?email:'';
+  if(accountEmail)accountEmail.value=emailChanged?email:(googleUser.email||email);
+  populateAccountSettings();updateAccountUI();
+  try{await ensurePublicProfile()}catch(profileError){console.warn('Friends profile setup is not complete:',profileError)}
+  accountProfileStatus.textContent=emailChanged
+   ?'Name and phone saved. Supabase sent confirmation email(s). Follow the instructions there to finish changing your Ventorea account email. This does not change your Google Account email.'
+   :'Account details saved successfully.';
+  accountProfileStatus.className='form-status success';
+ }catch(error){accountProfileStatus.textContent=error?.message||'Could not save your account details.';accountProfileStatus.className='form-status error'}
  finally{if(save)save.disabled=false}
 });
 
