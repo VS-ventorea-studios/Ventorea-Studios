@@ -133,7 +133,7 @@ function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
  populateAccountSettings();showModal(accountSettingsModal);loadFriends();
 }
-accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():openGoogleLogin());
+accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():startGoogleLogin());
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
 accountProfileForm?.addEventListener('submit',async e=>{
@@ -233,16 +233,14 @@ $('accountSignOutButton')?.addEventListener('click',async()=>{
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
 googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
 let googleOAuthPending=false;
-googleLoginButton?.addEventListener('click',async()=>{
+async function startGoogleLogin(){
  if(googleOAuthPending)return;
+ openGoogleLogin();
  if(!supabaseClient){refreshGoogleAccount();return}
  googleOAuthPending=true;
- googleLoginButton.disabled=true;
- googleLoginStatus.textContent='Connecting to Google securely…';
- googleLoginStatus.className='form-status';
+ if(googleLoginButton)googleLoginButton.disabled=true;
+ if(googleLoginStatus){googleLoginStatus.textContent='Connecting to Google securely…';googleLoginStatus.className='form-status'}
  try {
-  // Let Supabase perform its native top-level redirect. This is more reliable
-  // than manually navigating to a URL after an awaited request in mobile Safari.
   const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
    options:{redirectTo:window.location.origin+'/',queryParams:{prompt:'select_account'}}
@@ -252,17 +250,17 @@ googleLoginButton?.addEventListener('click',async()=>{
    googleOAuthPending=false;
    if(googleLoginButton)googleLoginButton.disabled=false;
    if(googleLoginStatus&&googleLoginModal?.classList.contains('open')){
-    googleLoginStatus.textContent='Google sign-in did not open. Try opening this site directly in Safari, then tap Continue again.';
+    googleLoginStatus.textContent='Google sign-in did not open. Please try again or open the site in another browser.';
     googleLoginStatus.className='form-status error';
    }
   },12000);
  } catch(error) {
   googleOAuthPending=false;
-  googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';
-  googleLoginStatus.className='form-status error';
-  googleLoginButton.disabled=false;
+  if(googleLoginStatus){googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error'}
+  if(googleLoginButton)googleLoginButton.disabled=false;
  }
-});
+}
+googleLoginButton?.addEventListener('click',startGoogleLogin);
 googleSignOutButton?.addEventListener('click',async()=>{
  if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
  if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
@@ -295,40 +293,35 @@ document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle'
 document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(panel?.classList.contains('open'))aiClose();if(googleLoginModal?.classList.contains('open'))hideModal(googleLoginModal);['accountSettingsModal','feedbackModal','supportModal'].forEach(id=>{const el=$(id);if(el?.classList.contains('open'))hideModal(el)})});
 [googleLoginModal,accountSettingsModal,$('feedbackModal'),$('supportModal')].forEach(el=>el?.addEventListener('click',e=>{if(e.target===el)hideModal(el)}));
 
-// Keep the animated starfield off touch devices: drawing it at 60fps was
-// needlessly expensive while mobile browsers were opening the Google sign-in flow.
+// Keep the ambient starfield static to avoid continuous canvas work while the page is open.
 (()=>{
  const canvas=$('ambientCanvas');if(!canvas)return;
  const mobile=window.matchMedia('(max-width: 680px)').matches||window.matchMedia('(pointer: coarse)').matches;
- if(mobile){canvas.style.display='none';return;}
+ if(mobile){canvas.style.display='none';return}
  const ctx=canvas.getContext('2d',{alpha:true});if(!ctx)return;
- let width=0,height=0,dpr=1,raf=0,particles=[];
- const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let width=0,height=0,dpr=1,particles=[];
  function resize(){
   dpr=Math.min(window.devicePixelRatio||1,1.5);
   width=window.innerWidth;height=window.innerHeight;
   canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
   const count=Math.min(64,Math.max(24,Math.floor(width*height/24000)));
-  particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*1.3,a:.12+Math.random()*.35,v:.08+Math.random()*.28,phase:Math.random()*Math.PI*2}));
-  draw(0);
+  particles=Array.from({length:count},()=>({x:Math.random()*width,y:Math.random()*height,r:.5+Math.random()*1.3,a:.12+Math.random()*.35}));
+  draw();
  }
- function draw(t){
+ function draw(){
   ctx.clearRect(0,0,width,height);
   for(let i=0;i<particles.length;i++){
-   const p=particles[i];if(!reduced)p.y-=p.v*.22;if(p.y< -3)p.y=height+3;
-   const alpha=p.a*(reduced?1:.65+.35*Math.sin(t*.0007+p.phase));
-   ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(111,183,255,'+alpha+')';ctx.fill();
+   const p=particles[i];
+   ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(111,183,255,'+p.a+')';ctx.fill();
    if(i%3===0)for(let j=i+1;j<Math.min(i+5,particles.length);j++){
     const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);
     if(d<115){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(65,143,230,'+((1-d/115)*.12)+')';ctx.lineWidth=.6;ctx.stroke()}
    }
   }
-  if(!reduced)raf=requestAnimationFrame(draw);
  }
- window.addEventListener('resize',resize,{passive:true});resize();
- if(!reduced)raf=requestAnimationFrame(draw);
- document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else if(!reduced){cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)}});
+ window.addEventListener('resize',resize,{passive:true});
+ resize();
 })();
 updateAccountUI();applyMotionSetting();checkPresence();initCookieNotice();setInterval(()=>{if(presenceText){const status=serviceOnline?'Online':'Offline';presenceText.textContent=status+' · active '+duration(Date.now()-sessionStartedAt)}},1000);
 

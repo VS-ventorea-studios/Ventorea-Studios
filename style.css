@@ -757,3 +757,6 @@ a { text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .motion-ready .reveal-target { transition-duration: .24s; }
   .system-card:hover, .world-card:hover { box-shadow: none; }
 }
+
+/* Keep the ambient background static to reduce continuous browser compositing. */
+.ambient-glow,.ambient-grid{animation:none!important}
