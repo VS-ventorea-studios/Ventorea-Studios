@@ -75,6 +75,9 @@ const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
 let supabaseClient=null,googleUser=null;
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
+const oauthReturnError=(()=>{const params=new URLSearchParams(window.location.search);const error=params.get('error_description')||params.get('error_code')||params.get('error');if(!error)return '';params.delete('error_description');params.delete('error_code');params.delete('error');const query=params.toString();window.history.replaceState(null,document.title,window.location.pathname+(query?'?'+query:'')+window.location.hash);return error})();
+function showOAuthReturnError(){if(!oauthReturnError||!googleLoginStatus)return;showModal(googleLoginModal);const expired=/state.*expired|expired.*state|state.*invalid|invalid.*state/i.test(oauthReturnError);googleLoginStatus.textContent=expired?'Google sign-in expired before returning to Ventorea. Start a fresh sign-in and finish it in the same browser tab.':'Google sign-in failed: '+oauthReturnError;googleLoginStatus.className='form-status error'}
+
 function openGoogleLogin(){
  showModal(googleLoginModal);
  refreshGoogleAccount();
@@ -88,12 +91,13 @@ function refreshGoogleAccount(){
  else{googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';googleLoginStatus.className='form-status';if(googleLoginButton)googleLoginButton.hidden=false;if(googleSignOutButton)googleSignOutButton.hidden=true}
 }
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
- supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
- supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI()}).catch(error=>console.error('Supabase session restore failed:',error));
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
+ supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI();if(oauthReturnError)showOAuthReturnError()}).catch(error=>{console.error('Supabase session restore failed:',error);if(oauthReturnError)showOAuthReturnError()});
  supabaseClient.auth.onAuthStateChange((event,session)=>{
   googleUser=session?.user||null;
   refreshGoogleAccount();
   updateAccountUI();
+  if(oauthReturnError)showOAuthReturnError();
   if(googleUser&&googleLoginStatus){
     googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'. Your profile is available from My Account.';
     googleLoginStatus.className='form-status success';
@@ -102,6 +106,7 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
   // and made sign-in look frozen while profile/friend data loaded on mobile.
 });
 }
+if(oauthReturnError&&!supabaseClient)showOAuthReturnError();
 const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
 const accountDisplayName=$('accountDisplayName');
