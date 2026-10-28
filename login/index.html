@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050914">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Sign in to Ventorea Studios securely with your Google account.">
+  <title>Sign In — Ventorea Studios</title>
+  <link rel="icon" href="../Ventorea%20Studios.jpg">
+  <link rel="stylesheet" href="../style.css?v=59">
+</head>
+<body>
+  <div id="live-background" aria-hidden="true">
+    <div class="ambient-glow glow-one"></div>
+    <div class="ambient-glow glow-two"></div>
+    <div class="ambient-grid"></div>
+  </div>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Ventorea Studios home">
+      <img class="brand-logo" src="../Ventorea%20Studios.jpg" alt="Ventorea Studios">
+    </a>
+    <a class="header-cta" href="/">BACK TO SITE <span>↗</span></a>
+  </header>
+  <main class="auth-page">
+    <section class="auth-card" aria-labelledby="login-title">
+      <p class="eyebrow">VENTOREA / ACCOUNT</p>
+      <h1 id="login-title">Welcome <em>back.</em></h1>
+      <p class="modal-intro">Sign in to Ventorea Studios with your Google account.</p>
+      <button class="button button-bright google-login-button" id="googleLoginButton" type="button">
+        <span class="google-g">G</span> CONTINUE WITH GOOGLE ↗
+      </button>
+      <button class="button button-outline google-signout-button" id="googleSignOutButton" type="button" hidden>SIGN OUT</button>
+      <p id="googleLoginStatus" class="form-status" role="status" aria-live="polite">Your account is managed securely through Google and Supabase.</p>
+      <p class="google-login-footnote">Google securely handles your sign-in. Never enter your Google password directly on this website.</p>
+      <a class="auth-back-link" href="/">← BACK TO VENTOREA STUDIOS</a>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../script.js?v=59"></script>
+</body>
+</html>
