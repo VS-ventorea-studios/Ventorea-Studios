@@ -133,7 +133,7 @@ function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
  populateAccountSettings();showModal(accountSettingsModal);loadFriends();
 }
-accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():openGoogleLogin());
+accountOpen?.addEventListener('click',()=>googleUser?openAccountSettings():startGoogleLogin());
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
 accountProfileForm?.addEventListener('submit',async e=>{
@@ -233,16 +233,14 @@ $('accountSignOutButton')?.addEventListener('click',async()=>{
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
 googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
 let googleOAuthPending=false;
-googleLoginButton?.addEventListener('click',async()=>{
+async function startGoogleLogin(){
  if(googleOAuthPending)return;
+ openGoogleLogin();
  if(!supabaseClient){refreshGoogleAccount();return}
  googleOAuthPending=true;
- googleLoginButton.disabled=true;
- googleLoginStatus.textContent='Connecting to Google securely…';
- googleLoginStatus.className='form-status';
+ if(googleLoginButton)googleLoginButton.disabled=true;
+ if(googleLoginStatus){googleLoginStatus.textContent='Connecting to Google securely…';googleLoginStatus.className='form-status'}
  try {
-  // Let Supabase perform its native top-level redirect. This is more reliable
-  // than manually navigating to a URL after an awaited request in mobile Safari.
   const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
    options:{redirectTo:window.location.origin+'/',queryParams:{prompt:'select_account'}}
@@ -252,17 +250,17 @@ googleLoginButton?.addEventListener('click',async()=>{
    googleOAuthPending=false;
    if(googleLoginButton)googleLoginButton.disabled=false;
    if(googleLoginStatus&&googleLoginModal?.classList.contains('open')){
-    googleLoginStatus.textContent='Google sign-in did not open. Try opening this site directly in Safari, then tap Continue again.';
+    googleLoginStatus.textContent='Google sign-in did not open. Please try again or open the site in another browser.';
     googleLoginStatus.className='form-status error';
    }
   },12000);
  } catch(error) {
   googleOAuthPending=false;
-  googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';
-  googleLoginStatus.className='form-status error';
-  googleLoginButton.disabled=false;
+  if(googleLoginStatus){googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error'}
+  if(googleLoginButton)googleLoginButton.disabled=false;
  }
-});
+}
+googleLoginButton?.addEventListener('click',startGoogleLogin);
 googleSignOutButton?.addEventListener('click',async()=>{
  if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
  if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
