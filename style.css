@@ -775,3 +775,7 @@ body.modal-open .ambient-grid { animation-play-state: paused !important; }
   }
   .noise { display: none !important; }
 }
+
+
+/* Keep the ambient background static to reduce continuous browser compositing. */
+.ambient-glow,.ambient-grid{animation:none!important}
