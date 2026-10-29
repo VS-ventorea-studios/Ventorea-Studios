@@ -783,3 +783,10 @@ body.modal-open .ambient-grid { animation-play-state: paused !important; }
 
 /* Dedicated Google sign-in route */
 .auth-page{position:relative;z-index:1;min-height:calc(100vh - 180px);display:grid;place-items:center;padding:125px 20px 80px}.auth-card{width:min(480px,100%);padding:clamp(28px,6vw,48px);border:1px solid var(--line);background:rgba(10,18,31,.94);box-shadow:0 24px 80px #0008}.auth-card h1{font:500 clamp(42px,7vw,64px)/1 var(--display);letter-spacing:-.07em;margin:18px 0}.auth-card h1 em{font-family:Georgia,serif;font-weight:400;color:var(--acid)}.auth-card .modal-intro{margin:0 0 25px}.auth-card .google-login-button,.auth-card .google-signout-button{width:100%;margin-top:8px}.auth-card .form-status{margin-top:16px}.auth-card .google-login-footnote{font:8px var(--mono);line-height:1.7;letter-spacing:.6px;color:#9b9d91;margin-top:20px}.auth-back-link{display:inline-block;margin-top:26px;font:9px var(--mono);letter-spacing:1px;color:#c8d7e9}
+
+
+/* Signed-out Ventorea AI panel state */
+.ai-auth-required{padding:18px 16px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px;background:rgba(10,20,34,.92)}
+.ai-auth-required[hidden],.ai-panel form[hidden]{display:none!important}
+.ai-auth-required p{margin:0;color:#d8e7f8;font-size:12px;line-height:1.6}
+.ai-auth-required button{min-height:44px;width:100%;font:600 11px var(--mono);letter-spacing:.5px}
