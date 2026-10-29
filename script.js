@@ -168,14 +168,22 @@ function openAccountSettings(){
  if(accountFriendCode)accountFriendCode.value='Loading…';
  window.setTimeout(()=>{if(accountSettingsModal?.classList.contains('open'))loadFriends()},0);
 }
-accountOpen?.addEventListener('click',async event=>{
+accountOpen?.addEventListener('click',event=>{
  event.preventDefault();
- if(!googleUser&&supabaseClient){
-  try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null}
-  catch(error){console.warn('Could not refresh account session:',error)}
+ // A signed-in user should see settings immediately. Do not block the click
+ // on a second Supabase session request, which can hang on some browsers.
+ if(googleUser){openAccountSettings();return}
+ openGoogleLogin();
+ // Recover a session only when the local account state has not loaded yet.
+ if(supabaseClient){
+  supabaseClient.auth.getSession().then(({data,error})=>{
+   if(error||!data?.session?.user)return;
+   googleUser=data.session.user;
+   hideModal(googleLoginModal);
+   updateAccountUI();
+   openAccountSettings();
+  }).catch(error=>console.warn('Could not refresh account session:',error));
  }
- updateAccountUI();
- if(googleUser)openAccountSettings();else openGoogleLogin();
 });
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
