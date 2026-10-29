@@ -58,7 +58,7 @@ function updateAccountUI(){
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
-async function aiOpen(){
+async async function aiOpen(){
   // Restore the current Supabase session before deciding whether to block access.
   if(!googleUser&&supabaseClient){
     try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null;updateAccountUI();}
@@ -80,9 +80,13 @@ async function checkPresence(){
   catch{serviceOnline=false;setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt))}
 }
 renderSavedChat();
-if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.onclick=()=>panel?.classList.contains('open')?aiClose():aiOpen()}
-if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.onclick=()=>panel?.classList.contains('open')?aiClose():aiOpen()}
+if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{if(!isDemoSignedIn())return;event.preventDefault();panel?.classList.contains('open')?aiClose():aiOpen()})}
+if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{if(!isDemoSignedIn())return;event.preventDefault();panel?.classList.contains('open')?aiClose():aiOpen()})}
 closeButton?.addEventListener('click',aiClose);
+if(new URLSearchParams(window.location.search).get('login')==='required'){
+  openGoogleLogin();
+  if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
+}
 const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
 let supabaseClient=null,googleUser=null;
