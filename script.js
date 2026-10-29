@@ -83,10 +83,7 @@ renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{if(!isDemoSignedIn())return;event.preventDefault();panel?.classList.contains('open')?aiClose():aiOpen()})}
 if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{if(!isDemoSignedIn())return;event.preventDefault();panel?.classList.contains('open')?aiClose():aiOpen()})}
 closeButton?.addEventListener('click',aiClose);
-if(new URLSearchParams(window.location.search).get('login')==='required'){
-  openGoogleLogin();
-  if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
-}
+
 const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
 let supabaseClient=null,googleUser=null;
@@ -123,6 +120,10 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
 });
 }
 if(oauthReturnError&&!supabaseClient)showOAuthReturnError();
+if(new URLSearchParams(window.location.search).get('login')==='required'){
+  openGoogleLogin();
+  if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
+}
 const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
 const accountDisplayName=$('accountDisplayName');
