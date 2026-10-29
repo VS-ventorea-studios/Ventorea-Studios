@@ -59,16 +59,20 @@ function updateAccountUI(){
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
 async function aiOpen(){
-  // Restore the current Supabase session before deciding whether to block access.
-  if(!googleUser&&supabaseClient){
+  // Resolve auth before deciding what the AI button should do. This avoids a
+  // click racing Supabase's initial session restore and triggering a page reload.
+  if(supabaseClient){
     try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null;updateAccountUI();}
     catch(error){console.warn('Could not verify Ventorea AI sign-in:',error)}
   }
   if(!isDemoSignedIn()){
+    if(window.location.search!=='?login=required')window.history.pushState({},'',window.location.pathname+'?login=required'+window.location.hash);
     openGoogleLogin();
     if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
     return;
   }
+  if(window.location.search.includes('login=required'))window.history.replaceState({},'',window.location.pathname+window.location.hash);
+  hideModal(googleLoginModal);
   renderSavedChat();document.body.classList.add('ai-chat-open');panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');mobileLauncher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),180);
 }
 function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else launcher?.focus()}
@@ -80,8 +84,8 @@ async function checkPresence(){
   catch{serviceOnline=false;setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt))}
 }
 renderSavedChat();
-if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{if(!isDemoSignedIn())return;event.preventDefault();panel?.classList.contains('open')?aiClose():aiOpen()})}
-if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{if(!isDemoSignedIn())return;event.preventDefault();panel?.classList.contains('open')?aiClose():aiOpen()})}
+if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
+if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 closeButton?.addEventListener('click',aiClose);
 
 const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
