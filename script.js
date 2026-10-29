@@ -160,9 +160,23 @@ function populateAccountSettings(){
 }
 function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
- populateAccountSettings();showModal(accountSettingsModal);loadFriends();
+ populateAccountSettings();
+ showModal(accountSettingsModal);
+ // Let the browser paint the account panel before any database requests start.
+ if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p','Loading requests…','settings-help'));
+ if(friendsList)friendsList.replaceChildren(safeText('p','Loading friends…','settings-help'));
+ if(accountFriendCode)accountFriendCode.value='Loading…';
+ window.setTimeout(()=>{if(accountSettingsModal?.classList.contains('open'))loadFriends()},0);
 }
-accountOpen?.addEventListener('click',event=>{if(googleUser){event.preventDefault();openAccountSettings()}});
+accountOpen?.addEventListener('click',async event=>{
+ event.preventDefault();
+ if(!googleUser&&supabaseClient){
+  try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null}
+  catch(error){console.warn('Could not refresh account session:',error)}
+ }
+ updateAccountUI();
+ if(googleUser)openAccountSettings();else openGoogleLogin();
+});
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
 accountProfileForm?.addEventListener('submit',async e=>{
