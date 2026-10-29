@@ -26,6 +26,7 @@ if(menu&&nav){
 const AI_ENDPOINT='https://ventorea-studios.vercel.app/api/chat';
 const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
+const aiAuthRequired=$('aiAuthRequired'),aiSignInButton=$('aiSignInButton');
 const accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
@@ -54,26 +55,28 @@ function updateAccountUI(){
   const signed=!!googleUser;
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
+  if(aiAuthRequired)aiAuthRequired.hidden=signed;
+  if(form)form.hidden=!signed;
+  if(aiSignInButton)aiSignInButton.disabled=!!googleOAuthPending;
   if(signed)populateAccountSettings();
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
 async function aiOpen(){
-  // Resolve auth before deciding what the AI button should do. This avoids a
-  // click racing Supabase's initial session restore and triggering a page reload.
+  // Refresh the session before showing the right chat state.
   if(supabaseClient){
     try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null;updateAccountUI();}
     catch(error){console.warn('Could not verify Ventorea AI sign-in:',error)}
   }
-  if(!isDemoSignedIn()){
-    if(window.location.search!=='?login=required')window.history.pushState({},'',window.location.pathname+'?login=required'+window.location.hash);
-    openGoogleLogin();
-    if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
-    return;
-  }
-  if(window.location.search.includes('login=required'))window.history.replaceState({},'',window.location.pathname+window.location.hash);
-  hideModal(googleLoginModal);
-  renderSavedChat();document.body.classList.add('ai-chat-open');panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');mobileLauncher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),180);
+  renderSavedChat();
+  updateAccountUI();
+  document.body.classList.add('ai-chat-open');
+  panel?.classList.add('open');
+  panel?.setAttribute('aria-hidden','false');
+  launcher?.setAttribute('aria-expanded','true');
+  mobileLauncher?.setAttribute('aria-expanded','true');
+  setUnread(0);
+  if(isDemoSignedIn())setTimeout(()=>input?.focus({preventScroll:true}),180);
 }
 function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
@@ -87,6 +90,7 @@ renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 closeButton?.addEventListener('click',aiClose);
+aiSignInButton?.addEventListener('click',startGoogleLogin);
 
 const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
@@ -125,8 +129,7 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
 }
 if(oauthReturnError&&!supabaseClient)showOAuthReturnError();
 if(new URLSearchParams(window.location.search).get('login')==='required'){
-  openGoogleLogin();
-  if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
+  aiOpen();
 }
 const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
