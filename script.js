@@ -58,7 +58,19 @@ function updateAccountUI(){
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
-function aiOpen(){if(!isDemoSignedIn()){openGoogleLogin();if(googleLoginStatus){googleLoginStatus.textContent='Sign in with Google to unlock Ventorea AI.';googleLoginStatus.className='form-status error'}return}renderSavedChat();document.body.classList.add('ai-chat-open');panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');mobileLauncher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),180)}
+async function aiOpen(){
+  // Restore the current Supabase session before deciding whether to block access.
+  if(!googleUser&&supabaseClient){
+    try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null;updateAccountUI();}
+    catch(error){console.warn('Could not verify Ventorea AI sign-in:',error)}
+  }
+  if(!isDemoSignedIn()){
+    openGoogleLogin();
+    if(googleLoginStatus){googleLoginStatus.textContent='Log in required. Sign in with Google to use Ventorea AI.';googleLoginStatus.className='form-status error'}
+    return;
+  }
+  renderSavedChat();document.body.classList.add('ai-chat-open');panel?.classList.add('open');panel?.setAttribute('aria-hidden','false');launcher?.setAttribute('aria-expanded','true');mobileLauncher?.setAttribute('aria-expanded','true');setUnread(0);setTimeout(()=>input?.focus({preventScroll:true}),180);
+}
 function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
 function setPresence(online,label){if(presenceText)presenceText.textContent=label;if(presenceDot){presenceDot.classList.toggle('is-online',online);presenceDot.classList.toggle('is-offline',!online)}if(menuPresence){menuPresence.textContent=online?'ONLINE':'OFFLINE';menuPresence.classList.toggle('is-online',online);menuPresence.classList.toggle('is-offline',!online)}}
