@@ -130,13 +130,21 @@ function populateAccountSettings(){
  if(accountBio&&document.activeElement!==accountBio)accountBio.value=googleUser.user_metadata?.bio||'';
  if(accountIdentityName)accountIdentityName.textContent=name;
  if(accountIdentityEmail)accountIdentityEmail.textContent=email;
- if(accountAvatar)accountAvatar.textContent=(name.trim()[0]||'V').toUpperCase();
+ if(accountAvatar&&!accountAvatar.dataset.avatarUrl)renderAccountAvatar('',name);
  if(rememberChatSetting)rememberChatSetting.checked=readSetting(REMEMBER_CHAT_KEY,true);
  if(reduceMotionSetting)reduceMotionSetting.checked=readSetting(REDUCE_MOTION_KEY,false);
 }
+
+const accountAvatarFile=$('accountAvatarFile'),accountAvatarUpload=$('accountAvatarUpload'),accountAvatarStatus=$('accountAvatarStatus');
+function setAvatarStatus(message,kind=''){if(accountAvatarStatus){accountAvatarStatus.textContent=message;accountAvatarStatus.className='form-status'+(kind?' '+kind:'')}}
+function renderAccountAvatar(url,name=displayNameFor(googleUser)){if(!accountAvatar)return;accountAvatar.replaceChildren();if(url){const img=document.createElement('img');img.src=url;img.alt='Profile picture';accountAvatar.append(img)}else accountAvatar.textContent=(name.trim()[0]||'V').toUpperCase();accountAvatar.dataset.avatarUrl=url||''}
+async function loadProfileAvatar(){if(!supabaseClient||!googleUser)return;try{const {data,error}=await supabaseClient.from('profiles').select('avatar_url').eq('user_id',googleUser.id).maybeSingle();if(error)throw error;renderAccountAvatar(data?.avatar_url||googleUser.user_metadata?.avatar_url||'',displayNameFor(googleUser))}catch(error){console.warn('Could not load profile picture:',error)}}
+accountAvatarFile?.addEventListener('change',()=>{const file=accountAvatarFile.files?.[0];if(!file){if(accountAvatarUpload)accountAvatarUpload.disabled=true;return}if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>3*1024*1024){setAvatarStatus('Choose a JPG, PNG or WebP image up to 3 MB.','error');accountAvatarFile.value='';accountAvatarUpload.disabled=true;return}setAvatarStatus('Photo ready to upload.');accountAvatarUpload.disabled=false});
+accountAvatarUpload?.addEventListener('click',async()=>{const file=accountAvatarFile?.files?.[0];if(!file||!supabaseClient||!googleUser)return;accountAvatarUpload.disabled=true;setAvatarStatus('Uploading photo…');try{const ext=file.type==='image/jpeg'?'jpg':file.type==='image/png'?'png':'webp';const path=googleUser.id+'/'+crypto.randomUUID()+'.'+ext;const {error:uploadError}=await supabaseClient.storage.from('ventorea-avatars').upload(path,file,{contentType:file.type,cacheControl:'3600',upsert:false});if(uploadError)throw uploadError;const {data:{publicUrl}}=supabaseClient.storage.from('ventorea-avatars').getPublicUrl(path);await ensurePublicProfile();const {error:profileError}=await supabaseClient.from('profiles').update({avatar_url:publicUrl,updated_at:new Date().toISOString()}).eq('user_id',googleUser.id);if(profileError)throw profileError;renderAccountAvatar(publicUrl,displayNameFor(googleUser));accountAvatarFile.value='';setAvatarStatus('Profile picture saved.','success')}catch(error){setAvatarStatus(error?.message||'Photo upload failed. Please try again.','error')}finally{accountAvatarUpload.disabled=!accountAvatarFile?.files?.length}});
+
 function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
- populateAccountSettings();showModal(accountSettingsModal);loadFriends();
+ populateAccountSettings();showModal(accountSettingsModal);loadProfileAvatar();loadFriends();
 }
 accountOpen?.addEventListener('click',event=>{if(googleUser){event.preventDefault();openAccountSettings()}});
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
@@ -165,10 +173,10 @@ function safeText(tag,text,className){const el=document.createElement(tag);el.te
 async function ensurePublicProfile(){
  if(!supabaseClient||!googleUser)return;
  const user=googleUser;let code='';
- const {data:existing,error:readError}=await supabaseClient.from('profiles').select('friend_code').eq('user_id',user.id).maybeSingle();
+ const {data:existing,error:readError}=await supabaseClient.from('profiles').select('friend_code,avatar_url').eq('user_id',user.id).maybeSingle();
  if(readError)throw readError;
  code=existing?.friend_code||makeFriendCode();
- const {error}=await supabaseClient.from('profiles').upsert({user_id:user.id,display_name:displayNameFor(user),bio:user.user_metadata?.bio||'',friend_code:code,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ const {error}=await supabaseClient.from('profiles').upsert({user_id:user.id,display_name:displayNameFor(user),bio:user.user_metadata?.bio||'',friend_code:code,avatar_url:existing?.avatar_url||null,updated_at:new Date().toISOString()},{onConflict:'user_id'});
  if(error)throw error;
  if(accountFriendCode)accountFriendCode.value=code;
 }
