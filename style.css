@@ -948,3 +948,12 @@ img { max-width: 100%; }
   #live-background::before, #live-background::after { animation: none; }
 }
 
+/* Remove the old hero city-and-sun illustration entirely */
+.hero-art { display: none !important; }
+.hero-copy { width: min(900px, 92%) !important; }
+.hero {
+  background:
+    radial-gradient(ellipse at 72% 42%, rgba(15, 43, 83, .18), transparent 48%),
+    linear-gradient(110deg, #03050b 0%, #071326 58%, #03060d 100%) !important;
+}
+
