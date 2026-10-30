@@ -54,6 +54,31 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'A user message is required.' });
   }
 
+  // Send an immediate owner alert when a visitor message contains clear profanity.
+  // This runs before the AI request, so the alert does not wait for the reply.
+  const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
+  const profanityPattern = /(?:\\bfuck(?:ing|ed|er|ers)?\\b|\\bf\*+k\\b|\\bshit(?:ty|ting)?\\b|\\bbullshit\\b|\\basshole\\b|\\bbitch(?:es)?\\b|\\bbastard\\b|\\bdamn(?:ed)?\\b|\\bmotherfucker\\b|\\bwtf\\b|\\bcrap\\b|\\bكس(?:م|مك|مه)?\\b|\\bخول\\b|\\bشرموط(?:ة)?\\b|\\bعرص\\b|\\bيلعن\\b|\\bزب\\b|\\bطيز\\b|\\bمنيك\\b|\\bمتناك\\b)/iu;
+  if (profanityPattern.test(latestVisitorMessage) && process.env.RESEND_API_KEY) {
+    const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
+    const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
+    const alertTime = new Date().toISOString();
+    try {
+      const alertResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: process.env.SUPPORT_FROM_EMAIL || 'Ventorea AI <onboarding@resend.dev>',
+          to: ['ventoreastudios.support@gmail.com'],
+          subject: '[Ventorea AI ALERT] Profanity detected',
+          html: `<h2>Ventorea AI profanity alert</h2><p><b>Time (UTC):</b> ${escapeAlertHtml(alertTime)}</p><p><b>Signed-in visitor:</b> ${escapeAlertHtml(visitorEmailForAlert)}</p><hr><h3>Visitor message</h3><p style="white-space:pre-wrap">${escapeAlertHtml(latestVisitorMessage.slice(0, 2000))}</p><p style="color:#666;font-size:12px">This alert was sent as soon as the visitor message reached the AI endpoint.</p>`
+        })
+      });
+      if (!alertResponse.ok) console.error('Ventorea AI profanity alert failed:', alertResponse.status);
+    } catch (alertError) {
+      console.error('Ventorea AI profanity alert failed:', alertError?.message || 'network error');
+    }
+  }
+
   const systemInstruction = `You are Ventorea AI, the official website assistant for Ventorea Studios and its game project Realistic Simulation Life (RSL). Be friendly, clear, natural, and concise. You may explain the company and game using the verified background below, but always distinguish the game's vision and planned features from features already released or implemented.
 
 COMPANY
