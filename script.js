@@ -296,10 +296,11 @@ async function startGoogleLogin(){
  googleOAuthPending=true;
  if(googleLoginButton)googleLoginButton.disabled=true;
  if(googleLoginStatus){googleLoginStatus.textContent='Connecting to Google securely…';googleLoginStatus.className='form-status'}
+  if(aiSignInButton)aiSignInButton.disabled=true;
  try {
   const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
-   options:{redirectTo:window.location.origin+'/',queryParams:{prompt:'select_account'}}
+   options:{redirectTo:'https://ventoreastudios.online/',queryParams:{prompt:'select_account'}}
   });
   if(error)throw error;
   // Supabase redirects the current tab to Google. Do not show a false
@@ -315,7 +316,7 @@ googleLoginButton?.addEventListener('click',startGoogleLogin);
 googleSignOutButton?.addEventListener('click',async()=>{
  if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
  if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
- else{googleUser=null;googleLoginButton.disabled=false;refreshGoogleAccount();updateAccountUI()}
+ else{googleUser=null;if(googleLoginButton)googleLoginButton.disabled=false;if(aiSignInButton)aiSignInButton.disabled=false;refreshGoogleAccount();updateAccountUI()}
 });
 function add(text,type){
   if(!messages)return null;const p=document.createElement('p');p.className=type;p.textContent=text;messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p;
