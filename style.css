@@ -902,3 +902,55 @@ img { max-width: 100%; }
     transition-duration: .01ms !important;
   }
 }
+
+/* Orbital Earth live background and periodic shooting star */
+#live-background::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: min(76vw, 980px);
+  aspect-ratio: 1;
+  right: -24vw;
+  bottom: -49vw;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 29% 30%, rgba(100, 191, 255, .92) 0, rgba(34, 117, 206, .48) 9%, transparent 25%),
+    radial-gradient(ellipse at 38% 44%, transparent 0 14%, rgba(43, 139, 217, .65) 15% 18%, transparent 19%),
+    radial-gradient(ellipse at 58% 36%, rgba(57, 155, 112, .72) 0 6%, transparent 7%),
+    radial-gradient(ellipse at 40% 58%, rgba(52, 151, 111, .65) 0 9%, transparent 10%),
+    radial-gradient(ellipse at 68% 57%, rgba(43, 129, 98, .52) 0 8%, transparent 9%),
+    radial-gradient(circle at 32% 27%, #4b9de0 0, #174b83 27%, #09213f 56%, #020711 72%);
+  box-shadow: inset 24px 8px 65px rgba(119, 200, 255, .2), inset -55px -35px 95px #01040b, 0 0 50px rgba(43, 131, 229, .13);
+  opacity: .58;
+  transform: rotate(-19deg);
+  pointer-events: none;
+}
+#live-background::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 15%;
+  left: -24%;
+  width: clamp(100px, 19vw, 260px);
+  height: 2px;
+  border-radius: 999px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(132, 203, 255, .2) 15%, #dff4ff 76%, #fff 100%);
+  box-shadow: 0 0 8px 2px rgba(105, 185, 255, .65), 0 0 24px 4px rgba(61, 143, 255, .35);
+  transform: rotate(-24deg);
+  animation: orbitalShootingStar 13s linear infinite;
+  pointer-events: none;
+}
+@keyframes orbitalShootingStar {
+  0%, 66%, 100% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-24deg); }
+  68% { opacity: .95; }
+  74% { opacity: 0; transform: translate3d(145vw, 48vh, 0) rotate(-24deg); }
+}
+@media (max-width: 680px) {
+  #live-background::before { width: 115vw; right: -49vw; bottom: -76vw; opacity: .4; }
+  #live-background::after { top: 23%; width: 34vw; animation-duration: 16s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #live-background::after { animation: none; display: none; }
+}
+
