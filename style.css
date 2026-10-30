@@ -813,3 +813,36 @@ body.modal-open .ambient-grid { animation-play-state: paused !important; }
 @media(max-width:760px){.all-pages-cta{min-height:38px;font-size:9px;padding:0 11px;gap:7px;letter-spacing:.6px}.all-pages-panel{top:74px;right:10px;width:calc(100vw - 20px);padding:16px;max-height:calc(100dvh - 86px);border-radius:12px}.all-pages-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.all-pages-grid>a{gap:7px;padding:11px 8px}.all-pages-grid b{font-size:10px}.all-pages-grid small{font-size:9px}.all-pages-heading h2{font-size:27px}}
 @media(max-width:380px){.all-pages-cta{padding:0 8px;font-size:8px}.all-pages-grid{grid-template-columns:1fr}.all-pages-panel{padding:13px}}
 @media(prefers-reduced-motion:reduce){.all-pages-panel,.all-pages-grid>a,.all-pages-cta,.all-pages-arrow{transition:none!important}.all-pages-grid>a{opacity:1;transform:none}}
+
+
+/* Desktop interaction glow: subtle blue light for interactive controls */
+@media (hover: hover) and (pointer: fine) {
+  :is(button, .button, a, input[type="button"], input[type="submit"], input[type="reset"], summary, [role="button"]):not(:disabled):not([aria-disabled="true"]) {
+    transition: color .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .22s ease, transform .22s ease, filter .22s ease;
+  }
+  :is(button, .button, a, input[type="button"], input[type="submit"], input[type="reset"], summary, [role="button"]):not(:disabled):not([aria-disabled="true"]):hover {
+    filter: brightness(1.12);
+    box-shadow: 0 0 0 1px rgba(77,163,255,.22), 0 0 16px rgba(77,163,255,.2), 0 0 30px rgba(77,163,255,.08);
+  }
+  :is(button, .button, a, input[type="button"], input[type="submit"], input[type="reset"], summary, [role="button"]):not(:disabled):not([aria-disabled="true"]):active {
+    filter: brightness(1.18);
+    box-shadow: 0 0 0 1px rgba(125,195,255,.45), 0 0 22px rgba(77,163,255,.28);
+  }
+  :is(button, .button, a, input[type="button"], input[type="submit"], input[type="reset"], summary, [role="button"]):focus-visible {
+    outline: 2px solid rgba(125,195,255,.95);
+    outline-offset: 4px;
+    box-shadow: 0 0 0 4px rgba(77,163,255,.14), 0 0 20px rgba(77,163,255,.22);
+  }
+  .site-header nav a:hover, .header-cta:hover, .text-link:hover, .inline-link:hover,
+  .contact-links a:hover, .legal-links a:hover, .site-footer > a:hover {
+    text-shadow: 0 0 12px rgba(77,163,255,.48);
+  }
+  .button-bright:hover {
+    box-shadow: 0 0 0 1px rgba(125,195,255,.5), 0 0 20px rgba(77,163,255,.34), 0 0 36px rgba(77,163,255,.15);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(button, .button, a, input[type="button"], input[type="submit"], input[type="reset"], summary, [role="button"]) {
+    transition-duration: .01ms !important;
+  }
+}
