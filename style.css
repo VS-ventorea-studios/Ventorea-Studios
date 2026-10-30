@@ -1029,3 +1029,29 @@ img { max-width: 100%; }
   }
 }
 
+/* Let the VS logo occupy roughly half of the hero on desktop */
+@media (min-width: 901px) {
+  .hero-art {
+    width: 50% !important;
+    right: 0 !important;
+    top: 4% !important;
+    height: 90% !important;
+  }
+  .art-sun {
+    width: min(42vw, 620px) !important;
+    height: min(42vw, 620px) !important;
+    max-width: 90%;
+    right: 2% !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+  .hero-copy { width: min(760px, 52%) !important; }
+}
+@media (max-width: 900px) {
+  .hero-art { width: 48% !important; height: 38% !important; }
+  .art-sun {
+    width: min(38vw, 260px) !important;
+    height: min(38vw, 260px) !important;
+  }
+}
+
