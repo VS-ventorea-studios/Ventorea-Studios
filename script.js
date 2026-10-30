@@ -53,7 +53,7 @@ let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
 function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
-  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
+  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
   if(aiAuthRequired)aiAuthRequired.hidden=signed;
   if(form)form.hidden=!signed;
@@ -173,23 +173,6 @@ function openAccountSettings(){
  if(accountFriendCode)accountFriendCode.value='Loading…';
  window.setTimeout(()=>{if(accountSettingsModal?.classList.contains('open'))loadFriends()},0);
 }
-accountOpen?.addEventListener('click',event=>{
- event.preventDefault();
- // A signed-in user should see settings immediately. Do not block the click
- // on a second Supabase session request, which can hang on some browsers.
- if(googleUser){openAccountSettings();return}
- openGoogleLogin();
- // Recover a session only when the local account state has not loaded yet.
- if(supabaseClient){
-  supabaseClient.auth.getSession().then(({data,error})=>{
-   if(error||!data?.session?.user)return;
-   googleUser=data.session.user;
-   hideModal(googleLoginModal);
-   updateAccountUI();
-   openAccountSettings();
-  }).catch(error=>console.warn('Could not refresh account session:',error));
- }
-});
 $('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
 accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
 accountProfileForm?.addEventListener('submit',async e=>{
