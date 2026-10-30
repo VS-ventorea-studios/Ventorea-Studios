@@ -968,3 +968,64 @@ img { max-width: 100%; }
   box-shadow: 0 0 55px rgba(77, 163, 255, .22), 0 0 120px rgba(33, 93, 177, .18) !important;
 }
 
+/* Properly frame the VS logo in the homepage hero */
+.hero-art {
+  right: 0 !important;
+  top: 8% !important;
+  width: 52% !important;
+  height: 82% !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  background: radial-gradient(ellipse at center, rgba(12, 43, 83, .3), transparent 68%) !important;
+}
+.hero-art::after { display: none !important; }
+.art-sun {
+  position: absolute !important;
+  top: 50% !important;
+  right: 8% !important;
+  width: clamp(190px, 24vw, 360px) !important;
+  height: clamp(190px, 24vw, 360px) !important;
+  transform: translateY(-50%) !important;
+  background-image: url("./Ventorea%20Studios.jpg") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  box-shadow: 0 0 45px rgba(77, 163, 255, .18), 0 0 110px rgba(33, 93, 177, .12) !important;
+  filter: drop-shadow(0 0 20px rgba(77, 163, 255, .12));
+}
+.hero-art .art-orbit,
+.hero-art .city-layer,
+.hero-art .art-road,
+.hero-art .art-label,
+.hero-art .art-cross { display: none !important; }
+@media (max-width: 900px) {
+  .hero-copy { width: 100% !important; }
+  .hero-art {
+    top: auto !important;
+    bottom: 7% !important;
+    right: 4% !important;
+    width: 40% !important;
+    height: 36% !important;
+    opacity: .8;
+  }
+  .art-sun {
+    top: 50% !important;
+    right: 0 !important;
+    width: clamp(120px, 32vw, 220px) !important;
+    height: clamp(120px, 32vw, 220px) !important;
+  }
+}
+@media (max-width: 560px) {
+  .hero-art {
+    bottom: 10% !important;
+    right: 0 !important;
+    width: 34% !important;
+    height: 25% !important;
+    opacity: .55;
+  }
+  .art-sun {
+    width: clamp(90px, 27vw, 145px) !important;
+    height: clamp(90px, 27vw, 145px) !important;
+  }
+}
+
