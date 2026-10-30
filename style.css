@@ -903,54 +903,48 @@ img { max-width: 100%; }
   }
 }
 
-/* Orbital Earth live background and periodic shooting star */
-#live-background::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  width: min(76vw, 980px);
-  aspect-ratio: 1;
-  right: -24vw;
-  bottom: -49vw;
-  border-radius: 50%;
+/* Abstract midnight glow background, no planet or shooting star */
+#live-background {
   background:
-    radial-gradient(ellipse at 29% 30%, rgba(100, 191, 255, .92) 0, rgba(34, 117, 206, .48) 9%, transparent 25%),
-    radial-gradient(ellipse at 38% 44%, transparent 0 14%, rgba(43, 139, 217, .65) 15% 18%, transparent 19%),
-    radial-gradient(ellipse at 58% 36%, rgba(57, 155, 112, .72) 0 6%, transparent 7%),
-    radial-gradient(ellipse at 40% 58%, rgba(52, 151, 111, .65) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 68% 57%, rgba(43, 129, 98, .52) 0 8%, transparent 9%),
-    radial-gradient(circle at 32% 27%, #4b9de0 0, #174b83 27%, #09213f 56%, #020711 72%);
-  box-shadow: inset 24px 8px 65px rgba(119, 200, 255, .2), inset -55px -35px 95px #01040b, 0 0 50px rgba(43, 131, 229, .13);
-  opacity: .58;
-  transform: rotate(-19deg);
-  pointer-events: none;
+    radial-gradient(ellipse at 16% 18%, rgba(20, 57, 112, .3) 0%, transparent 43%),
+    radial-gradient(ellipse at 84% 68%, rgba(12, 47, 99, .28) 0%, transparent 42%),
+    linear-gradient(135deg, #03050b 0%, #071326 48%, #03060d 100%);
+  isolation: isolate;
 }
+#live-background::before,
 #live-background::after {
   content: "";
   position: absolute;
-  z-index: 1;
-  top: 15%;
-  left: -24%;
-  width: clamp(100px, 19vw, 260px);
-  height: 2px;
-  border-radius: 999px;
-  opacity: 0;
-  background: linear-gradient(90deg, transparent, rgba(132, 203, 255, .2) 15%, #dff4ff 76%, #fff 100%);
-  box-shadow: 0 0 8px 2px rgba(105, 185, 255, .65), 0 0 24px 4px rgba(61, 143, 255, .35);
-  transform: rotate(-24deg);
-  animation: orbitalShootingStar 13s linear infinite;
   pointer-events: none;
+  border-radius: 50%;
+  filter: blur(70px);
+  mix-blend-mode: screen;
 }
-@keyframes orbitalShootingStar {
-  0%, 66%, 100% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-24deg); }
-  68% { opacity: .95; }
-  74% { opacity: 0; transform: translate3d(145vw, 48vh, 0) rotate(-24deg); }
+#live-background::before {
+  width: min(65vw, 850px);
+  height: min(42vw, 560px);
+  left: -20%;
+  top: 8%;
+  background: radial-gradient(ellipse, rgba(24, 88, 173, .28) 0%, rgba(12, 44, 93, .13) 42%, transparent 72%);
+  animation: midnightGlowDrift 19s ease-in-out infinite alternate;
+}
+#live-background::after {
+  width: min(58vw, 760px);
+  height: min(48vw, 620px);
+  right: -19%;
+  bottom: -16%;
+  background: radial-gradient(ellipse, rgba(34, 87, 166, .25) 0%, rgba(13, 40, 83, .12) 46%, transparent 73%);
+  animation: midnightGlowDrift 24s ease-in-out -8s infinite alternate-reverse;
+}
+@keyframes midnightGlowDrift {
+  0% { transform: translate3d(-2%, -2%, 0) scale(.94); opacity: .65; }
+  100% { transform: translate3d(8%, 7%, 0) scale(1.12); opacity: 1; }
 }
 @media (max-width: 680px) {
-  #live-background::before { width: 115vw; right: -49vw; bottom: -76vw; opacity: .4; }
-  #live-background::after { top: 23%; width: 34vw; animation-duration: 16s; }
+  #live-background::before { width: 100vw; height: 72vw; left: -35%; top: 12%; filter: blur(52px); }
+  #live-background::after { width: 90vw; height: 75vw; right: -36%; bottom: -6%; filter: blur(54px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  #live-background::after { animation: none; display: none; }
+  #live-background::before, #live-background::after { animation: none; }
 }
 
