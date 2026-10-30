@@ -790,3 +790,13 @@ body.modal-open .ambient-grid { animation-play-state: paused !important; }
 .ai-auth-required[hidden],.ai-panel form[hidden]{display:none!important}
 .ai-auth-required p{margin:0;color:#d8e7f8;font-size:12px;line-height:1.6}
 .ai-auth-required button{min-height:44px;width:100%;font:600 11px var(--mono);letter-spacing:.5px}
+
+
+/* Gemini branding for the Ventorea AI launcher and header. */
+.gemini-mark{display:block;width:18px;height:18px;flex:0 0 auto}
+.nav-ai-trigger .gemini-mark{width:16px;height:16px}
+.ai-launcher .gemini-mark{width:28px;height:28px}
+.ai-orb .gemini-mark{width:22px;height:22px}
+.ai-orb{flex:0 0 auto}
+.nav-ai-trigger .ai-unread{margin-left:2px}
+@media(max-width:680px){#aiMobileOpen .gemini-mark{width:29px;height:29px}#aiMobileOpen .ai-mobile-label{margin-top:-10px}}
