@@ -62,12 +62,9 @@ function updateAccountUI(){
 }
 function showModal(el){if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.classList.add('modal-open')}
 function hideModal(el){if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.classList.toggle('modal-open',!!document.querySelector('.modal.open'))}
-async function aiOpen(){
-  // Refresh the session before showing the right chat state.
-  if(supabaseClient){
-    try{const {data,error}=await supabaseClient.auth.getSession();if(!error)googleUser=data?.session?.user||null;updateAccountUI();}
-    catch(error){console.warn('Could not verify Ventorea AI sign-in:',error)}
-  }
+function aiOpen(){
+  // Open the chat immediately. Session recovery runs in the background so slow
+  // auth requests never make the desktop or mobile launcher appear unresponsive.
   renderSavedChat();
   updateAccountUI();
   document.body.classList.add('ai-chat-open');
@@ -77,6 +74,14 @@ async function aiOpen(){
   mobileLauncher?.setAttribute('aria-expanded','true');
   setUnread(0);
   if(isDemoSignedIn())setTimeout(()=>input?.focus({preventScroll:true}),180);
+  if(supabaseClient){
+    supabaseClient.auth.getSession().then(({data,error})=>{
+      if(error){console.warn('Could not verify Ventorea AI sign-in:',error);return}
+      googleUser=data?.session?.user||null;
+      updateAccountUI();
+      if(isDemoSignedIn()&&panel?.classList.contains('open'))setTimeout(()=>input?.focus({preventScroll:true}),80);
+    }).catch(error=>console.warn('Could not verify Ventorea AI sign-in:',error));
+  }
 }
 function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
@@ -297,14 +302,9 @@ async function startGoogleLogin(){
    options:{redirectTo:window.location.origin+'/',queryParams:{prompt:'select_account'}}
   });
   if(error)throw error;
-  window.setTimeout(()=>{
-   googleOAuthPending=false;
-   if(googleLoginButton)googleLoginButton.disabled=false;
-   if(googleLoginStatus){
-    googleLoginStatus.textContent='Google sign-in did not open. Please try again.';
-    googleLoginStatus.className='form-status error';
-   }
-  },12000);
+  // Supabase redirects the current tab to Google. Do not show a false
+  // timeout error while mobile browsers are still completing the redirect.
+  // If OAuth returns with an error, showOAuthReturnError() handles it.
  } catch(error) {
   googleOAuthPending=false;
   if(googleLoginStatus){googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error'}
