@@ -957,3 +957,14 @@ img { max-width: 100%; }
     linear-gradient(110deg, #03050b 0%, #071326 58%, #03060d 100%) !important;
 }
 
+/* Replace the hero sun with the Ventorea Studios VS logo */
+.hero-art { display: block !important; }
+.hero-copy { width: min(760px, 65%) !important; }
+.art-sun {
+  width: clamp(150px, 17vw, 250px) !important;
+  height: clamp(150px, 17vw, 250px) !important;
+  border-radius: 0 !important;
+  background: url("./Ventorea%20Studios.jpg") center / contain no-repeat !important;
+  box-shadow: 0 0 55px rgba(77, 163, 255, .22), 0 0 120px rgba(33, 93, 177, .18) !important;
+}
+
