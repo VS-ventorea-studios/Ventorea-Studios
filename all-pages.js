@@ -1,0 +1,16 @@
+(()=>{'use strict';
+const pages=[
+['⌂','Home','Main page','/'],['◉','Our Vision','Studio mission','/Vision/'],['▣','The Game · RSL','Project overview','/RSL/'],['⌘','Systems','Game features','/Systems/'],['↗','Roadmap','Development progress','/Roadmap/'],['?','FAQ','Common questions','/FAQ/'],['✧','Ventorea AI','AI assistant','/?login=required'],['◎','Sign In','Profile and account','/login/'],['✉','Contact','Get in touch','/Contact/'],['✎','Feedback','Share an idea','/Feedback/'],['◌','Support','Help and requests','/Support/'],['◇','Services','Studio services','/Service/'],['◈','Privacy Policy','Personal information','/Privacy/'],['▤','Terms of Service','Website terms','/Terms/'],['◍','Cookie Policy','Browser storage','/Cookies/']];
+const header=document.querySelector('.site-header');if(!header)return;
+let trigger=document.getElementById('allPagesOpen');
+if(!trigger){trigger=document.createElement('button');trigger.type='button';trigger.id='allPagesOpen';trigger.className='all-pages-cta';trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','allPagesPanel');trigger.innerHTML='<span class="all-pages-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ALL PAGES</span><span class="all-pages-arrow" aria-hidden="true">⌄</span>';const cta=header.querySelector('.header-cta');if(cta)header.insertBefore(trigger,cta);else header.appendChild(trigger);}
+let panel=document.getElementById('allPagesPanel');
+if(!panel){panel=document.createElement('section');panel.id='allPagesPanel';panel.className='all-pages-panel';panel.hidden=true;panel.setAttribute('aria-label','All website pages');panel.innerHTML='<div class="all-pages-heading"><div><span class="all-pages-kicker">VENTOREA STUDIOS</span><h2>All pages</h2><p>Every destination, one menu.</p></div><button type="button" id="allPagesClose" aria-label="Close all pages">✕</button></div><div class="all-pages-grid"></div>';panel.querySelector('.all-pages-grid').innerHTML=pages.map(([icon,title,desc,url])=>'<a href="'+url+'"><span class="all-pages-item-icon" aria-hidden="true">'+icon+'</span><span><b>'+title+'</b><small>'+desc+'</small></span><i aria-hidden="true">↗</i></a>').join('');document.body.appendChild(panel);}
+const close=panel.querySelector('#allPagesClose');let closeTimer;
+const openPanel=()=>{clearTimeout(closeTimer);panel.hidden=false;trigger.setAttribute('aria-expanded','true');requestAnimationFrame(()=>requestAnimationFrame(()=>panel.classList.add('is-open')));};
+const closePanel=(returnFocus=false)=>{panel.classList.remove('is-open');trigger.setAttribute('aria-expanded','false');closeTimer=setTimeout(()=>{panel.hidden=true;},380);if(returnFocus)trigger.focus({preventScroll:true});};
+trigger.addEventListener('click',()=>{if(panel.hidden||!panel.classList.contains('is-open'))openPanel();else closePanel();});
+close?.addEventListener('click',()=>closePanel(true));panel.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>closePanel(false)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)closePanel(true);});
+document.addEventListener('click',e=>{if(!panel.hidden&&!panel.contains(e.target)&&!trigger.contains(e.target))closePanel(false);});
+})();
