@@ -1055,3 +1055,46 @@ img { max-width: 100%; }
   }
 }
 
+/* Subtle luminous typography across the site */
+body {
+  text-shadow: 0 0 10px rgba(112, 178, 255, .08);
+}
+h1, h2, h3, h4,
+p, li, label, small, strong, em,
+.site-header nav a, .site-footer a,
+.eyebrow, .section-kicker, .pulse-label,
+.art-label, .hero-bottom, .hero-footnote {
+  text-shadow: 0 0 9px rgba(100, 169, 255, .2);
+}
+.hero h1,
+.manifesto h2, .project h2, .systems h2, .world h2,
+.roadmap h2, .faq h2, .contact h2 {
+  text-shadow: 0 0 16px rgba(92, 164, 255, .22), 0 0 36px rgba(42, 112, 216, .12);
+}
+.hero h1 em, .manifesto h2 em, .project h2 em,
+.systems h2 em, .world h2 em, .roadmap h2 em,
+.faq h2 em, .contact h2 em {
+  text-shadow: 0 0 12px rgba(77, 163, 255, .48), 0 0 28px rgba(77, 163, 255, .24);
+}
+a:hover, button:hover, .button:hover,
+.site-header nav a:hover, .site-footer a:hover {
+  text-shadow: 0 0 10px rgba(125, 195, 255, .58), 0 0 24px rgba(77, 163, 255, .24);
+}
+::selection {
+  color: #f4f9ff;
+  background: rgba(45, 113, 194, .55);
+  text-shadow: 0 0 10px rgba(255, 255, 255, .35);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1, .hero-description, .hero-actions, .hero-footnote {
+    animation: textGlowIn 1.2s ease-out both;
+  }
+  .hero-description { animation-delay: .12s; }
+  .hero-actions { animation-delay: .2s; }
+  .hero-footnote { animation-delay: .28s; }
+}
+@keyframes textGlowIn {
+  from { opacity: .35; text-shadow: 0 0 2px rgba(100, 169, 255, .08); }
+  to { opacity: 1; text-shadow: 0 0 12px rgba(100, 169, 255, .2); }
+}
+
