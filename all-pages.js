@@ -6,6 +6,7 @@ const header=document.querySelector('.site-header');if(!header)return;
 // Secondary pages share the same mobile navigation behavior as the homepage.
 const pageNav=header.querySelector('nav');
 let pageMenu=header.querySelector('#menu');
+const needsPageMenuBinding=!pageMenu;
 if(pageNav&&!pageMenu){
   pageMenu=document.createElement('button');
   pageMenu.type='button';pageMenu.id='menu';pageMenu.className='menu';
@@ -16,7 +17,7 @@ if(pageNav&&!pageMenu){
   const cta=header.querySelector('.header-cta');
   if(cta)header.insertBefore(pageMenu,cta);else header.appendChild(pageMenu);
 }
-if(pageMenu&&pageNav&&!pageMenu.dataset.navReady){
+if(pageMenu&&pageNav&&needsPageMenuBinding&&!pageMenu.dataset.navReady){
   pageMenu.dataset.navReady='true';
   const closePageNav=()=>{pageNav.classList.remove('open');pageMenu.setAttribute('aria-expanded','false');pageMenu.setAttribute('aria-label','Open menu');pageMenu.textContent='☰';};
   pageMenu.addEventListener('click',()=>{
