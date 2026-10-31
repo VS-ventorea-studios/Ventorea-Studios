@@ -3,6 +3,35 @@ const pages=[
 ['⌂','Home','Main page','/'],['◉','Our Vision','Studio mission','/Vision/'],['▣','The Game · RSL','Project overview','/RSL/'],['⌘','Systems','Game features','/Systems/'],['↗','Roadmap','Development progress','/Roadmap/'],['?','FAQ','Common questions','/FAQ/'],['✧','Ventorea AI','AI assistant','/?login=required'],['◎','Sign In','Profile and account','/login/'],['✉','Contact','Get in touch','/Contact/'],['✎','Feedback','Share an idea','/Feedback/'],['◌','Support','Help and requests','/Support/'],['◇','Services','Studio services','/Service/'],['◈','Privacy Policy','Personal information','/Privacy/'],['▤','Terms of Service','Website terms','/Terms/'],['◍','Cookie Policy','Browser storage','/Cookies/']];
 const header=document.querySelector('.site-header');if(!header)return;
 
+// Secondary pages share the same mobile navigation behavior as the homepage.
+const pageNav=header.querySelector('nav');
+let pageMenu=header.querySelector('#menu');
+if(pageNav&&!pageMenu){
+  pageMenu=document.createElement('button');
+  pageMenu.type='button';pageMenu.id='menu';pageMenu.className='menu';
+  pageMenu.setAttribute('aria-label','Open menu');pageMenu.setAttribute('aria-expanded','false');
+  pageMenu.setAttribute('aria-controls',pageNav.id||'pageNavigation');
+  if(!pageNav.id)pageNav.id='pageNavigation';
+  pageMenu.textContent='☰';
+  const cta=header.querySelector('.header-cta');
+  if(cta)header.insertBefore(pageMenu,cta);else header.appendChild(pageMenu);
+}
+if(pageMenu&&pageNav&&!pageMenu.dataset.navReady){
+  pageMenu.dataset.navReady='true';
+  const closePageNav=()=>{pageNav.classList.remove('open');pageMenu.setAttribute('aria-expanded','false');pageMenu.setAttribute('aria-label','Open menu');pageMenu.textContent='☰';};
+  pageMenu.addEventListener('click',()=>{
+    const open=!pageNav.classList.contains('open');
+    pageNav.classList.toggle('open',open);
+    pageMenu.setAttribute('aria-expanded',String(open));
+    pageMenu.setAttribute('aria-label',open?'Close menu':'Open menu');
+    pageMenu.textContent=open?'×':'☰';
+  });
+  pageNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',closePageNav));
+  document.addEventListener('click',event=>{if(pageNav.classList.contains('open')&&!pageNav.contains(event.target)&&!pageMenu.contains(event.target))closePageNav();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closePageNav();});
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)closePageNav();},{passive:true});
+}
+
 // Replace static image wordmarks with accessible live text branding.
 document.querySelectorAll('.brand img.brand-logo').forEach(img=>{
   const wordmark=document.createElement('span');
