@@ -1098,3 +1098,113 @@ a:hover, button:hover, .button:hover,
   to { opacity: 1; text-shadow: 0 0 12px rgba(100, 169, 255, .2); }
 }
 
+
+
+/* Ventorea Studio polish refresh */
+:root{
+  --acid:#58a6ff;
+  --violet:#8bc5ff;
+  --glow-soft:0 0 16px rgba(77,163,255,.24);
+  --glow-strong:0 0 10px rgba(77,163,255,.45),0 0 28px rgba(77,163,255,.24);
+}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{min-width:320px}
+.site-header{
+  position:sticky;top:0;height:auto;min-height:78px;padding:12px clamp(16px,4vw,64px);
+  gap:16px;background:rgba(3,7,16,.86);backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(112,178,255,.2);
+  box-shadow:0 8px 34px rgba(0,0,0,.18)
+}
+.brand{flex:0 0 auto;min-width:0}
+.brand-logo{display:block;width:auto;max-width:150px;height:auto;max-height:52px;object-fit:contain}
+.brand-wordmark{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;line-height:.92;white-space:nowrap;min-width:max-content}
+.brand-wordmark-main{font:700 clamp(18px,1.7vw,25px)/1 var(--display);letter-spacing:-1.1px;color:#f3f7ff}
+.brand-wordmark-sub{margin-top:5px;font:600 10px/1 var(--mono);letter-spacing:4.2px;text-transform:uppercase;color:#c5d6eb}
+.brand-v,.brand-s{color:#a8d5ff;text-shadow:0 0 5px #4da3ff,0 0 13px #4da3ff,0 0 27px rgba(77,163,255,.8);animation:brandPulse 2.8s ease-in-out infinite alternate}
+.brand-s{animation-delay:.45s}
+@keyframes brandPulse{from{filter:brightness(.9);text-shadow:0 0 4px #4da3ff,0 0 10px rgba(77,163,255,.55)}to{filter:brightness(1.35);text-shadow:0 0 7px #8bc5ff,0 0 18px #4da3ff,0 0 34px rgba(77,163,255,.8)}}
+.site-header nav{align-items:center;justify-content:center;gap:clamp(10px,1.5vw,24px);flex:1;min-width:0}
+.site-header nav a,.header-cta{font-size:9px;letter-spacing:.75px}
+.site-header nav a{white-space:nowrap}
+.header-cta,.button,.all-pages-cta,.menu,.all-pages-grid>a,.contact-links a,.legal-links a,.legal-links button{
+  transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease,color .2s ease
+}
+.header-cta,.all-pages-cta,.button-bright{
+  border-color:rgba(101,177,255,.65);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 0 16px rgba(77,163,255,.12)
+}
+.header-cta:hover,.all-pages-cta:hover,.button-bright:hover{
+  transform:translateY(-2px);border-color:#9ed2ff;
+  box-shadow:0 0 0 1px rgba(77,163,255,.16),0 0 18px rgba(77,163,255,.35),0 8px 30px rgba(0,0,0,.25)
+}
+.button-outline:hover,.contact-links a:hover,.all-pages-grid>a:hover{
+  box-shadow:0 0 18px rgba(77,163,255,.16),inset 0 0 20px rgba(77,163,255,.045)
+}
+.button-bright{background:linear-gradient(135deg,#8bc5ff,#4da3ff 58%,#347fe0);color:#04101f}
+.button{min-height:48px;border-radius:5px}
+.section{position:relative;scroll-margin-top:96px}
+.hero{min-height:690px;height:auto;min-height:min(820px,calc(100svh - 78px));padding-top:clamp(90px,12vh,140px);padding-bottom:clamp(70px,10vh,110px)}
+.hero-copy{max-width:760px}
+.hero h1{font-size:clamp(52px,7.5vw,108px);overflow-wrap:normal}
+.hero-description{max-width:560px}
+.contact-links a{border-color:rgba(133,183,238,.2)}
+.site-footer{gap:22px;flex-wrap:wrap}
+.all-pages-panel{z-index:180;box-shadow:0 24px 90px rgba(0,0,0,.65),0 0 35px rgba(77,163,255,.08)}
+.all-pages-grid>a{min-height:76px}
+:where(.modal,.modal-card) {max-width:100%}
+:where(input,select,textarea){max-width:100%}
+@media(max-width:1100px){
+  .site-header{flex-wrap:wrap;gap:12px}
+  .site-header nav{gap:12px}
+  .site-header nav a{font-size:8px;letter-spacing:.35px}
+  .header-cta{padding:11px}
+}
+@media(max-width:900px){
+  .site-header{position:sticky;min-height:72px;padding:12px 18px;flex-wrap:nowrap}
+  .site-header nav{display:none;position:absolute;top:100%;left:0;right:0;max-height:calc(100svh - 80px);overflow:auto;padding:16px 20px 22px;background:rgba(3,7,16,.98);border-bottom:1px solid rgba(112,178,255,.24);box-shadow:0 22px 35px rgba(0,0,0,.4);align-items:stretch;flex-direction:column;gap:0}
+  .site-header nav.open{display:flex}
+  .site-header nav a{font-size:11px;padding:13px 2px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .header-cta{margin-left:auto;white-space:nowrap}
+  .menu{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:42px}
+  .all-pages-cta{min-height:42px}
+  .hero{min-height:680px;padding-left:7vw;padding-right:7vw}
+  .hero-copy{width:100%!important;max-width:760px}
+  .hero h1{font-size:clamp(54px,10vw,88px)}
+  .hero-art{opacity:.32!important;width:45%!important;right:-5%!important;top:auto!important;bottom:5%!important;height:35%!important}
+  .art-sun{width:clamp(120px,26vw,220px)!important;height:clamp(120px,26vw,220px)!important;right:0!important}
+}
+@media(max-width:600px){
+  .site-header{padding:10px 12px;gap:8px;min-height:66px}
+  .brand-wordmark-main{font-size:18px}
+  .brand-wordmark-sub{font-size:8px;letter-spacing:3.5px;margin-top:4px}
+  .brand-logo{max-width:94px;max-height:42px}
+  .header-cta{font-size:8px;padding:10px 9px;letter-spacing:.2px}
+  .header-cta span{margin-left:4px}
+  .all-pages-cta{min-height:39px;padding:0 9px;font-size:8px;letter-spacing:.45px;gap:6px}
+  .menu{min-width:38px;min-height:39px;padding:7px}
+  .hero{min-height:670px;padding:96px 22px 180px}
+  .hero-copy{margin-top:0}
+  .hero h1{font-size:clamp(47px,13vw,68px);line-height:.98;letter-spacing:-.075em;margin:27px 0 20px}
+  .hero-description{font-size:14px;line-height:1.75}
+  .hero-actions{align-items:flex-start;flex-wrap:wrap;gap:14px;margin-top:25px}
+  .hero-footnote{gap:12px;margin-top:36px}
+  .hero-art{bottom:2%!important;right:0!important;width:40%!important;height:26%!important;opacity:.24!important}
+  .art-sun{width:clamp(100px,30vw,150px)!important;height:clamp(100px,30vw,150px)!important}
+  .all-pages-panel{top:74px;right:8px;width:calc(100vw - 16px);max-height:calc(100svh - 84px);padding:15px}
+  .all-pages-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .site-footer{align-items:flex-start;flex-direction:column;gap:16px;padding:30px 22px}
+  .site-footer>*{max-width:100%}
+  .contact-buttons{flex-wrap:wrap}
+  .contact-links{min-width:0}
+  .section{padding-left:22px;padding-right:22px}
+}
+@media(max-width:370px){
+  .brand-wordmark-main{font-size:16px}
+  .brand-wordmark-sub{font-size:7px;letter-spacing:3px}
+  .header-cta{display:none}
+  .all-pages-grid{grid-template-columns:1fr}
+  .hero{padding-left:17px;padding-right:17px}
+}
+@media(prefers-reduced-motion:reduce){
+  .brand-v,.brand-s{animation:none;text-shadow:0 0 8px #4da3ff,0 0 18px rgba(77,163,255,.6)}
+}
