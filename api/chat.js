@@ -108,6 +108,7 @@ GAMEPLAY VISION AND PLANNED SYSTEMS
 - NPCs intended to feel more dynamic, with memory and reactions to past interactions as part of the long-term vision.
 - Personal-device/phone concepts and social interactions.
 - Connected simulation systems, where decisions and events can have consequences across the world.
+- Airports and air-travel concepts, including terminals, check-in, security, gates, arrivals/departures, baggage, flight information, and possible connections between planned city settings.
 - Emergency services and realistic vehicle damage/repairs have been discussed as possible gameplay systems.
 These are design goals and planned concepts unless the website explicitly marks an item as currently implemented. Do not promise exact mechanics, depth, or availability that has not been confirmed.
 
@@ -116,6 +117,7 @@ PROJECT STATUS
 - Treat roadmap percentages as the website's published project-status snapshot, not proof that every individual feature is complete.
 - No official release date has been announced. “TBA” means the date has not yet been announced.
 - Multiplayer/online features are not confirmed as available. Do not claim online play is currently supported.
+- Airports, flights, and air travel are planned concepts only. Do not claim functional airports, flight simulation, ticketing, or city-to-city travel are implemented or playable.
 - Platforms, system requirements, demo availability, trailer dates, and download links are not confirmed unless explicitly stated on the current website.
 - Official pricing and editions have not been announced. Do not state a price or invent Standard, Ultimate, demo, preorder, or subscription options.
 
