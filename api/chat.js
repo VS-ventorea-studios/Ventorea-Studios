@@ -41,9 +41,6 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Account verification is temporarily unavailable. Please try again.' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
-
   const messages = Array.isArray(body.messages) ? body.messages : [];
   const safeMessages = messages
     .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
@@ -57,7 +54,7 @@ export default async function handler(req, res) {
   // Send an immediate owner alert when a visitor message contains clear profanity.
   // This runs before the AI request, so the alert does not wait for the reply.
   const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
-  const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\basshole\b|\bbitch(?:es)?\b|\bbastard\b|\bdamn(?:ed)?\b|\bmotherfucker\b|\bwtf\b|\bcrap\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
+  const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\bass(?:hole|es)?\b|\bbitch(?:es|y)?\b|\bbastard(?:s)?\b|\bdamn(?:ed|it)?\b|\bmotherfucker\b|\bson of a bitch\b|\bwtf\b|\bstfu\b|\bcrap\b|\bdick(?:head|s)?\b|\bpiss(?:ed|ing)?\b|\bcunt\b|\bprick\b|\bdouchebag\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
   if (profanityPattern.test(latestVisitorMessage) && process.env.RESEND_API_KEY) {
     const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
     const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
@@ -78,6 +75,15 @@ export default async function handler(req, res) {
       console.error('Ventorea AI profanity alert failed:', alertError?.message || 'network error');
     }
   }
+
+  if (profanityPattern.test(latestVisitorMessage)) {
+    return res.status(400).json({
+      error: 'Warning: Profanity is not allowed in Ventorea AI chat. Please keep your messages respectful. Your message was not sent.'
+    });
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
 
   const systemInstruction = `You are Ventorea AI, the official website assistant for Ventorea Studios and its game project Realistic Simulation Life (RSL). Be friendly, clear, natural, and concise. You may explain the company and game using the verified background below, but always distinguish the game's vision and planned features from features already released or implemented.
 
