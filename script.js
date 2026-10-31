@@ -25,7 +25,7 @@ if(menu&&nav){
 
 const AI_ENDPOINT='https://ventorea-studios.vercel.app/api/chat';
 const $=id=>document.getElementById(id);
-const launcher=$('aiMenuOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
+const launcher=$('aiMenuOpen'),desktopLauncher=$('aiDesktopOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const aiAuthRequired=$('aiAuthRequired'),aiSignInButton=$('aiSignInButton');
 const accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
@@ -71,6 +71,7 @@ function aiOpen(){
   panel?.classList.add('open');
   panel?.setAttribute('aria-hidden','false');
   launcher?.setAttribute('aria-expanded','true');
+  desktopLauncher?.setAttribute('aria-expanded','true');
   mobileLauncher?.setAttribute('aria-expanded','true');
   setUnread(0);
   if(isDemoSignedIn())setTimeout(()=>input?.focus({preventScroll:true}),180);
@@ -83,7 +84,7 @@ function aiOpen(){
     }).catch(error=>console.warn('Could not verify Ventorea AI sign-in:',error));
   }
 }
-function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else launcher?.focus()}
+function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');desktopLauncher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else if(desktopLauncher)desktopLauncher.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
 function setPresence(online,label){if(presenceText)presenceText.textContent=label;if(presenceDot){presenceDot.classList.toggle('is-online',online);presenceDot.classList.toggle('is-offline',!online)}if(menuPresence){menuPresence.textContent=online?'ONLINE':'OFFLINE';menuPresence.classList.toggle('is-online',online);menuPresence.classList.toggle('is-offline',!online)}}
 function duration(ms){const sec=Math.max(0,Math.floor(ms/1000)),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
@@ -93,6 +94,7 @@ async function checkPresence(){
 }
 renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
+if(desktopLauncher){desktopLauncher.setAttribute('aria-controls','aiPanel');desktopLauncher.setAttribute('aria-expanded','false');desktopLauncher.addEventListener('click',()=>{if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 closeButton?.addEventListener('click',aiClose);
 aiSignInButton?.addEventListener('click',startGoogleLogin);
