@@ -49,22 +49,30 @@
     try { localStorage.setItem(key, String(!!value)); }
     catch { /* Private browsing can block storage. */ }
   }
-  async function signIn() {
+  async function signIn(provider) {
     if (!client || busy) return;
     busy = true;
-    signInButton.disabled = true;
-    status(signedOutStatus, 'Connecting to Google…');
+    const buttons = [signInButton, $('accountAppleSignIn'), $('accountFacebookSignIn')].filter(Boolean);
+    buttons.forEach(button => { button.disabled = true; });
+    const providerName = provider === 'google' ? 'Google' : provider === 'apple' ? 'Apple' : 'Facebook';
+    status(signedOutStatus, 'Connecting to ' + providerName + '…');
     try {
       const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/account/', queryParams: { prompt: 'select_account' } }
+        provider,
+        options: {
+          redirectTo: window.location.origin + '/account/',
+          ...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {})
+        }
       });
       if (error) throw error;
-      status(signedOutStatus, 'Opening Google sign-in…');
+      status(signedOutStatus, 'Opening ' + providerName + ' sign-in…');
     } catch (error) {
-      status(signedOutStatus, error?.message || 'Could not start Google sign-in.', 'error');
+      const message = error?.message || 'Could not start ' + providerName + ' sign-in.';
+      status(signedOutStatus, /provider is not enabled|unsupported provider|provider.*disabled/i.test(message)
+        ? providerName + ' sign-in is not enabled in the authentication settings yet. The studio needs to configure this provider first.'
+        : message, 'error');
       busy = false;
-      signInButton.disabled = false;
+      buttons.forEach(button => { button.disabled = false; });
     }
   }
   async function signOut() {
@@ -114,7 +122,9 @@
       saveButton.disabled = false;
     }
   }
-  signInButton.addEventListener('click', signIn);
+  signInButton.addEventListener('click', () => signIn('google'));
+  $('accountAppleSignIn').addEventListener('click', () => signIn('apple'));
+  $('accountFacebookSignIn').addEventListener('click', () => signIn('facebook'));
   signOutButton.addEventListener('click', signOut);
   profileForm.addEventListener('submit', saveProfile);
   $('rememberChat').addEventListener('change', event => writeBool('ventorea-remember-ai-chat-v1', event.target.checked));
@@ -132,7 +142,7 @@
   client.auth.getSession().then(({ data, error }) => {
     if (error) throw error;
     render(data?.session?.user || null);
-    if (!data?.session?.user) status(signedOutStatus, 'Sign in with Google to manage your account.');
+    if (!data?.session?.user) status(signedOutStatus, 'Sign in with Google, Apple, or Facebook to manage your account.');
   }).catch(error => {
     render(null);
     status(signedOutStatus, error?.message || 'Could not check your session. Refresh the page and try again.', 'error');
