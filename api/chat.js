@@ -96,7 +96,7 @@ GAME OVERVIEW
 - Full name: Realistic Simulation Life. Short name: RSL.
 - RSL is envisioned as an open-world life simulation built around realism, freedom, everyday activities, and interconnected systems.
 - The core idea is to let players build their own life in a living world, with actions and systems that can affect one another rather than feeling like unrelated mini-games.
-- The world concepts discussed for the project include Cairo, Dubai, Tokyo, Paris, New York, London, Singapore, and Istanbul. Describe all eight as creative concepts or planned settings, not as finished or playable maps. The additional cities suggest varied urban rhythms, transport, architecture, neighborhoods, and daily routines.
+- The world concepts discussed for the project include Cairo, Dubai, Tokyo, Paris, New York, London, Singapore, Istanbul, Rome in Italy, and Berlin in Germany. Describe all ten as creative concepts or planned settings, not as finished or playable maps. These cities suggest varied urban rhythms, transport, architecture, neighborhoods, and daily routines.
 - RSL is a project in development. Do not describe it as released, playable, available to download, or feature-complete.
 
 GAMEPLAY VISION AND PLANNED SYSTEMS
