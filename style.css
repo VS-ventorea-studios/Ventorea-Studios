@@ -1277,3 +1277,37 @@ body{min-width:320px}
 @media(max-width:420px){
   .brand img.brand-logo{width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important}
 }
+
+
+/* Restore desktop Ventorea AI access while keeping the dedicated mobile launcher. */
+@media (min-width: 681px) {
+  #aiDesktopOpen.ai-desktop-open {
+    display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100000 !important;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 54px;
+    padding: 0 20px;
+    border: 1px solid #8bc5ff;
+    border-radius: 999px;
+    background: #071326;
+    color: #eaf4ff;
+    box-shadow: 0 10px 34px #0009;
+    font: 10px var(--mono);
+    letter-spacing: .8px;
+    cursor: pointer;
+  }
+  #aiDesktopOpen.ai-desktop-open:hover {
+    border-color: #8bc5ff;
+    box-shadow: 0 12px 38px #000b, 0 0 24px #1c5e9b55;
+  }
+}
+@media (max-width: 680px) {
+  #aiDesktopOpen.ai-desktop-open { display: none !important; }
+}
