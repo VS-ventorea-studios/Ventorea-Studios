@@ -2,6 +2,16 @@
 const pages=[
 ['⌂','Home','Main page','/'],['◉','Our Vision','Studio mission','/Vision/'],['▣','The Game · RSL','Project overview','/RSL/'],['⌘','Systems','Game features','/Systems/'],['↗','Roadmap','Development progress','/Roadmap/'],['?','FAQ','Common questions','/FAQ/'],['✧','Ventorea AI','AI assistant','/?login=required'],['◎','Sign In','Profile and account','/login/'],['✉','Contact','Get in touch','/Contact/'],['✎','Feedback','Share an idea','/Feedback/'],['◌','Support','Help and requests','/Support/'],['◇','Services','Studio services','/Service/'],['◈','Privacy Policy','Personal information','/Privacy/'],['▤','Terms of Service','Website terms','/Terms/'],['◍','Cookie Policy','Browser storage','/Cookies/']];
 const header=document.querySelector('.site-header');if(!header)return;
+
+// Replace static image wordmarks with accessible live text branding.
+document.querySelectorAll('.brand img.brand-logo').forEach(img=>{
+  const wordmark=document.createElement('span');
+  wordmark.className='brand-wordmark';
+  wordmark.setAttribute('role','img');
+  wordmark.setAttribute('aria-label','Ventorea Studios');
+  wordmark.innerHTML='<span class="brand-wordmark-main"><span class="brand-v">V</span>entorea</span><span class="brand-wordmark-sub"><span class="brand-s">S</span>tudios</span>';
+  img.replaceWith(wordmark);
+});
 let trigger=document.getElementById('allPagesOpen');
 if(!trigger){trigger=document.createElement('button');trigger.type='button';trigger.id='allPagesOpen';trigger.className='all-pages-cta';trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','allPagesPanel');trigger.innerHTML='<span class="all-pages-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ALL PAGES</span><span class="all-pages-arrow" aria-hidden="true">⌄</span>';const cta=header.querySelector('.header-cta');if(cta)header.insertBefore(trigger,cta);else header.appendChild(trigger);}
 let panel=document.getElementById('allPagesPanel');
