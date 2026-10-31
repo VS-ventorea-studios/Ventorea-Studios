@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Owner Notices | Ventorea Studios</title><meta name="theme-color" content="#050914">
+<style>
+:root{color-scheme:dark;font-family:Arial,sans-serif;background:#050914;color:#eef4ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#10264a 0,#050914 55%);padding:28px 16px}.wrap{width:min(680px,100%);margin:30px auto}.brand{color:#8bc5ff;letter-spacing:2px;font-size:12px;font-weight:bold}.card{margin-top:18px;padding:clamp(20px,5vw,36px);background:#0b1424;border:1px solid #253b5c;border-radius:14px;box-shadow:0 20px 70px #0007}h1{font-size:clamp(26px,5vw,38px);margin:8px 0 10px}p{color:#a9bad2;line-height:1.6}label{display:block;margin:20px 0 8px;color:#dce8fb;font-size:13px}input,select,textarea{width:100%;padding:13px 14px;border:1px solid #344b6c;border-radius:8px;background:#070d18;color:#f4f7ff;font:inherit}textarea{min-height:160px;resize:vertical}button{margin-top:20px;padding:13px 18px;border:0;border-radius:8px;background:#4c9aff;color:#04101f;font-weight:bold;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.secondary{background:transparent;color:#9fcaff;border:1px solid #344b6c;margin-left:8px}.status{padding:12px;border-radius:8px;background:#101f35;margin-top:16px;white-space:pre-wrap;overflow-wrap:anywhere}.muted{font-size:12px;color:#8094af}.hidden{display:none!important}a{color:#8bc5ff}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body><main class="wrap"><a class="brand" href="/">VENTOREA STUDIOS</a><section class="card">
+<div class="muted">PRIVATE OWNER TOOL</div><h1>Visitor notices</h1><p>Send a warning or a note to a visitor by email. Your sender address is configured on the server, so you do not need to enter it here.</p>
+<div id="loginBox"><p>Sign in with the studio owner Google account to continue.</p><button id="signIn">Sign in with Google</button></div>
+<form id="noticeForm" class="hidden">
+<label for="to">Visitor email address</label><input id="to" type="email" autocomplete="email" required maxlength="254" placeholder="visitor@example.com">
+<label for="type">Message type</label><select id="type" required><option value="warning">Warning</option><option value="note">Note</option></select>
+<label for="message">Message</label><textarea id="message" maxlength="4000" required placeholder="Write the warning or note for this visitor..."></textarea>
+<p class="muted">Only send relevant messages to visitors who have a valid reason to receive them.</p>
+<button id="send" type="submit">Send email</button><button id="signOut" class="secondary" type="button">Sign out</button>
+</form><div id="status" class="status" role="status" aria-live="polite">Checking sign-in…</div>
+</section></main>
+<script>
+const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
+const SUPABASE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let session=null;
+function status(text){$('status').textContent=text}
+function render(s){session=s;$('loginBox').classList.toggle('hidden',!!s);$('noticeForm').classList.toggle('hidden',!s);status(s?'Signed in. Owner access will be verified securely when you send.':'Sign in with the owner account to continue.')}
+async function refresh(){const {data,error}=await client.auth.getSession();if(error){status('Could not check your session. Reload and try again.');return}render(data.session)}
+$('signIn').addEventListener('click',async()=>{status('Opening Google sign-in…');const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('?')[0]}});if(error)status('Sign-in failed: '+error.message)});
+$('signOut').addEventListener('click',async()=>{await client.auth.signOut();render(null)});
+$('noticeForm').addEventListener('submit',async event=>{event.preventDefault();if(!session?.access_token){status('Your session expired. Sign in again.');render(null);return}
+const button=$('send');button.disabled=true;status('Sending email…');
+try{const response=await fetch('https://ventorea-studios.vercel.app/api/send-notice',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({to:$('to').value,type:$('type').value,message:$('message').value})});const data=await response.json().catch(()=>({}));
+if(!response.ok)throw new Error(data.error||'Email could not be sent.');
+status('Email sent successfully.');$('message').value='';
+}catch(error){status(error.message||'Email could not be sent.')}
+finally{button.disabled=false}
+});
+client.auth.onAuthStateChange((_event,s)=>render(s));
+refresh();
+</script></body></html>
