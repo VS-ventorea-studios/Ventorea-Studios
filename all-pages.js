@@ -40,7 +40,7 @@ document.querySelectorAll('.brand img.brand-logo').forEach(img=>{
   wordmark.setAttribute('role','img');
   wordmark.setAttribute('aria-label','Ventorea Studios');
   wordmark.innerHTML='<span class="brand-wordmark-main"><span class="brand-v">V</span>entorea</span><span class="brand-wordmark-sub"><span class="brand-s">S</span>tudios</span>';
-  img.replaceWith(wordmark);
+  img.insertAdjacentElement('afterend',wordmark);
 });
 let trigger=document.getElementById('allPagesOpen');
 if(!trigger){trigger=document.createElement('button');trigger.type='button';trigger.id='allPagesOpen';trigger.className='all-pages-cta';trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','allPagesPanel');trigger.innerHTML='<span class="all-pages-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ALL PAGES</span><span class="all-pages-arrow" aria-hidden="true">⌄</span>';const cta=header.querySelector('.header-cta');if(cta)header.insertBefore(trigger,cta);else header.appendChild(trigger);}
