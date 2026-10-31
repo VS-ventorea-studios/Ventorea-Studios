@@ -51,32 +51,103 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'A user message is required.' });
   }
 
-  // Send an immediate owner alert when a visitor message contains clear profanity.
-  // This runs before the AI request, so the alert does not wait for the reply.
   const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
-  const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\bass(?:hole|es)?\b|\bbitch(?:es|y)?\b|\bbastard(?:s)?\b|\bdamn(?:ed|it)?\b|\bmotherfucker\b|\bson of a bitch\b|\bwtf\b|\bstfu\b|\bcrap\b|\bdick(?:head|s)?\b|\bpiss(?:ed|ing)?\b|\bcunt\b|\bprick\b|\bdouchebag\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
-  if (profanityPattern.test(latestVisitorMessage) && process.env.RESEND_API_KEY) {
-    const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
-    const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
-    const alertTime = new Date().toISOString();
+  const profanityPattern = /(?:\\bfck\\b|\\bfuck(?:ing|ed|er|ers)?\\b|\\bf\\*+k\\b|\\bshit(?:ty|ting)?\\b|\\bbullshit\\b|\\bass(?:hole|es)?\\b|\\bbitch(?:es|y)?\\b|\\bbastard(?:s)?\\b|\\bdamn(?:ed|it)?\\b|\\bmotherfucker\\b|\\bson of a bitch\\b|\\bwtf\\b|\\bstfu\\b|\\bcrap\\b|\\bdick(?:head|s)?\\b|\\bpiss(?:ed|ing)?\\b|\\bcunt\\b|\\bprick\\b|\\bdouchebag\\b|\\bكس(?:م|مك|مه)?\\b|\\bخول\\b|\\bشرموط(?:ة)?\\b|\\bعرص\\b|\\bيلعن\\b|\\bزب\\b|\\bطيز\\b|\\bمنيك\\b|\\bمتناك\\b)/iu;
+
+  // Persistent abuse tracking is stored server-side in Supabase. Never trust client-side counters.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const databaseUrl = supabaseUrl + '/rest/v1/ai_abuse_status';
+  const abuseHeaders = serviceKey ? { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey, 'Content-Type': 'application/json' } : null;
+  async function loadAbuseStatus() {
+    if (!abuseHeaders) return null;
+    const response = await fetch(databaseUrl + '?user_id=eq.' + encodeURIComponent(authenticatedUser.id) + '&select=user_id,swear_count,suspension_level,suspended_until', {
+      headers: abuseHeaders, cache: 'no-store'
+    });
+    if (!response.ok) throw new Error('Could not read abuse status');
+    const rows = await response.json();
+    return rows[0] || { user_id: authenticatedUser.id, swear_count: 0, suspension_level: 0, suspended_until: null };
+  }
+  async function saveAbuseStatus(status) {
+    const response = await fetch(databaseUrl, {
+      method: 'POST',
+      headers: { ...abuseHeaders, Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(status)
+    });
+    if (!response.ok) throw new Error('Could not save abuse status');
+  }
+
+  let abuseStatus = null;
+  if (abuseHeaders) {
     try {
-      const alertResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: process.env.SUPPORT_FROM_EMAIL || 'Ventorea AI <onboarding@resend.dev>',
-          to: ['ventoreastudios.support@gmail.com'],
-          subject: '[Ventorea AI ALERT] Profanity detected',
-          html: `<h2>Ventorea AI profanity alert</h2><p><b>Time (UTC):</b> ${escapeAlertHtml(alertTime)}</p><p><b>Signed-in visitor:</b> ${escapeAlertHtml(visitorEmailForAlert)}</p><hr><h3>Visitor message</h3><p style="white-space:pre-wrap">${escapeAlertHtml(latestVisitorMessage.slice(0, 2000))}</p><p style="color:#666;font-size:12px">This alert was sent as soon as the visitor message reached the AI endpoint.</p>`
-        })
-      });
-      if (!alertResponse.ok) console.error('Ventorea AI profanity alert failed:', alertResponse.status);
-    } catch (alertError) {
-      console.error('Ventorea AI profanity alert failed:', alertError?.message || 'network error');
+      abuseStatus = await loadAbuseStatus();
+      if (abuseStatus.suspended_until && Date.parse(abuseStatus.suspended_until) > Date.now()) {
+        const remaining = Math.ceil((Date.parse(abuseStatus.suspended_until) - Date.now()) / 60000);
+        return res.status(429).json({
+          error: 'Your Ventorea AI chat is suspended for repeated profanity. Try again in about ' + remaining + ' minute' + (remaining === 1 ? '' : 's') + '.',
+          suspendedUntil: abuseStatus.suspended_until
+        });
+      }
+      if (abuseStatus.suspended_until && Date.parse(abuseStatus.suspended_until) <= Date.now()) {
+        abuseStatus.suspended_until = null;
+        await saveAbuseStatus(abuseStatus);
+      }
+    } catch (error) {
+      console.error('Ventorea AI abuse status check failed:', error?.message || 'database error');
+      return res.status(503).json({ error: 'Ventorea AI safety checks are temporarily unavailable. Please try again shortly.' });
     }
   }
 
   if (profanityPattern.test(latestVisitorMessage)) {
+    // Existing one-message warning stays in place. Three profanity messages trigger a timed suspension.
+    if (abuseHeaders && abuseStatus) {
+      try {
+        const nextCount = Number(abuseStatus.swear_count || 0) + 1;
+        const nextStatus = {
+          user_id: authenticatedUser.id,
+          swear_count: nextCount,
+          suspension_level: Number(abuseStatus.suspension_level || 0),
+          suspended_until: abuseStatus.suspended_until || null
+        };
+        let suspensionMessage = '';
+        if (nextCount % 3 === 0) {
+          nextStatus.suspension_level += 1;
+          const durationMs = nextStatus.suspension_level === 1 ? 60 * 60 * 1000
+            : nextStatus.suspension_level === 2 ? 5 * 60 * 60 * 1000
+            : 24 * 60 * 60 * 1000;
+          nextStatus.suspended_until = new Date(Date.now() + durationMs).toISOString();
+          const durationLabel = nextStatus.suspension_level === 1 ? '1 hour'
+            : nextStatus.suspension_level === 2 ? '5 hours' : '24 hours';
+          suspensionMessage = ' You have reached ' + nextCount + ' profanity messages. Your chat is suspended for ' + durationLabel + '.';
+        }
+        await saveAbuseStatus(nextStatus);
+        if (suspensionMessage) {
+          return res.status(429).json({ error: 'Warning: Profanity is not allowed in Ventorea AI chat.' + suspensionMessage, suspendedUntil: nextStatus.suspended_until });
+        }
+      } catch (error) {
+        console.error('Ventorea AI abuse status update failed:', error?.message || 'database error');
+        return res.status(503).json({ error: 'Your message was blocked, but the safety counter could not be updated. Please try again shortly.' });
+      }
+    }
+    if (process.env.RESEND_API_KEY) {
+      const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
+      const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
+      const alertTime = new Date().toISOString();
+      try {
+        const alertResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: process.env.SUPPORT_FROM_EMAIL || 'Ventorea AI <onboarding@resend.dev>',
+            to: ['ventoreastudios.support@gmail.com'],
+            subject: '[Ventorea AI ALERT] Profanity detected',
+            html: `<h2>Ventorea AI profanity alert</h2><p><b>Time (UTC):</b> ${escapeAlertHtml(alertTime)}</p><p><b>Signed-in visitor:</b> ${escapeAlertHtml(visitorEmailForAlert)}</p><hr><h3>Visitor message</h3><p style="white-space:pre-wrap">${escapeAlertHtml(latestVisitorMessage.slice(0, 2000))}</p><p style="color:#666;font-size:12px">This alert was sent as soon as the visitor message reached the AI endpoint.</p>`
+          })
+        });
+        if (!alertResponse.ok) console.error('Ventorea AI profanity alert failed:', alertResponse.status);
+      } catch (alertError) {
+        console.error('Ventorea AI profanity alert failed:', alertError?.message || 'network error');
+      }
+    }
     return res.status(400).json({
       error: 'Warning: Profanity is not allowed in Ventorea AI chat. Please keep your messages respectful. Your message was not sent.'
     });
