@@ -1252,3 +1252,10 @@ body{min-width:320px}
  .brand-wordmark-sub{font-size:7px;letter-spacing:2.7px}
  .all-pages-grid{grid-template-columns:1fr!important}
 }
+
+
+/* Hide the duplicate inline navigation row. Use All Pages for site-wide navigation. */
+.site-header > nav,
+.site-header nav#navLinks{
+  display:none!important;
+}
