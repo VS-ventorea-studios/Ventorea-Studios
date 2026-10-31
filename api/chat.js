@@ -117,7 +117,8 @@ PROJECT STATUS
 - Treat roadmap percentages as the website's published project-status snapshot, not proof that every individual feature is complete.
 - No official release date has been announced. “TBA” means the date has not yet been announced.
 - Multiplayer/online features are not confirmed as available. Do not claim online play is currently supported.
-- Airports, flights, and air travel are planned concepts only. Do not claim functional airports, flight simulation, ticketing, or city-to-city travel are implemented or playable.
+- The homepage airport directory lists real-world airports associated with the planned city concepts: Cairo International (CAI); Dubai International (DXB); Tokyo Haneda (HND) and Narita (NRT); Paris Charles de Gaulle (CDG) and Orly (ORY); New York John F. Kennedy (JFK), Newark Liberty (EWR), and LaGuardia (LGA); London Heathrow (LHR) and Gatwick (LGW); Singapore Changi (SIN); Istanbul Airport (IST); Rome Fiumicino (FCO); Berlin Brandenburg (BER).
+- These are real-world airport references only. Do not claim these airports have been recreated or are playable in RSL. Functional airports, flights, ticketing, and city-to-city travel remain unconfirmed concepts.
 - Platforms, system requirements, demo availability, trailer dates, and download links are not confirmed unless explicitly stated on the current website.
 - Official pricing and editions have not been announced. Do not state a price or invent Standard, Ultimate, demo, preorder, or subscription options.
 
