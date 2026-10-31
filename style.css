@@ -1208,3 +1208,47 @@ body{min-width:320px}
 @media(prefers-reduced-motion:reduce){
   .brand-v,.brand-s{animation:none;text-shadow:0 0 8px #4da3ff,0 0 18px rgba(77,163,255,.6)}
 }
+
+
+/* Fix: keep the All Pages panel fully inside the viewport and restore the original logo beside the VS wordmark. */
+.brand{display:flex;align-items:center;gap:12px;flex-direction:row}
+.brand img.brand-logo{display:block!important;flex:0 0 auto;width:48px;height:48px;max-width:48px;max-height:48px;object-fit:contain}
+.brand-wordmark{flex:0 0 auto}
+.all-pages-panel{
+  position:fixed!important;top:calc(var(--header-height, 78px) + 24px)!important;
+  left:50%!important;right:auto!important;bottom:auto!important;
+  transform:translateX(-50%) translateY(12px)!important;
+  width:min(980px,calc(100vw - 40px))!important;
+  max-width:calc(100vw - 40px)!important;
+  max-height:calc(100dvh - 130px)!important;
+  overflow:auto!important;box-sizing:border-box!important;
+  padding:clamp(18px,2.2vw,30px)!important;
+  border:1px solid rgba(120,177,255,.34)!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,rgba(5,12,27,.98),rgba(3,7,16,.985))!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.72),0 0 40px rgba(77,163,255,.13)!important;
+  z-index:9999!important;
+}
+.all-pages-panel.is-open{transform:translateX(-50%) translateY(0)!important}
+.all-pages-panel[hidden]{display:none!important}
+.all-pages-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}
+.all-pages-heading>div{min-width:0}
+.all-pages-heading h2{margin:8px 0;font-size:clamp(26px,4vw,38px)}
+.all-pages-heading p{margin:0;line-height:1.6}
+.all-pages-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;width:100%}
+.all-pages-grid>a{min-width:0;box-sizing:border-box;padding:15px 12px!important;display:grid;grid-template-columns:22px minmax(0,1fr) 12px;align-items:center;gap:10px!important}
+.all-pages-grid>a>span:nth-child(2){min-width:0}
+.all-pages-grid b,.all-pages-grid small{overflow-wrap:anywhere}
+@media(max-width:760px){
+ .brand{gap:8px}
+ .brand img.brand-logo{width:36px;height:36px;max-width:36px;max-height:36px}
+ .all-pages-panel{top:82px!important;width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 96px)!important;padding:16px!important}
+ .all-pages-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .all-pages-grid>a{grid-template-columns:18px minmax(0,1fr) 10px;padding:12px 9px!important}
+}
+@media(max-width:420px){
+ .brand img.brand-logo{width:30px;height:30px;max-width:30px;max-height:30px}
+ .brand-wordmark-main{font-size:16px}
+ .brand-wordmark-sub{font-size:7px;letter-spacing:2.7px}
+ .all-pages-grid{grid-template-columns:1fr!important}
+}
