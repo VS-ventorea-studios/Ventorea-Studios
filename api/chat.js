@@ -57,7 +57,7 @@ export default async function handler(req, res) {
   // Send an immediate owner alert when a visitor message contains clear profanity.
   // This runs before the AI request, so the alert does not wait for the reply.
   const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
-  const profanityPattern = /(?:\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\basshole\b|\bbitch(?:es)?\b|\bbastard\b|\bdamn(?:ed)?\b|\bmotherfucker\b|\bwtf\b|\bcrap\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
+  const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\basshole\b|\bbitch(?:es)?\b|\bbastard\b|\bdamn(?:ed)?\b|\bmotherfucker\b|\bwtf\b|\bcrap\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
   if (profanityPattern.test(latestVisitorMessage) && process.env.RESEND_API_KEY) {
     const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
     const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
