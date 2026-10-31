@@ -52,7 +52,7 @@ export default async function handler(req, res) {
   }
 
   const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
-  const profanityPattern = /(?:\\bfck\\b|\\bfuck(?:ing|ed|er|ers)?\\b|\\bf\\*+k\\b|\\bshit(?:ty|ting)?\\b|\\bbullshit\\b|\\bass(?:hole|es)?\\b|\\bbitch(?:es|y)?\\b|\\bbastard(?:s)?\\b|\\bdamn(?:ed|it)?\\b|\\bmotherfucker\\b|\\bson of a bitch\\b|\\bwtf\\b|\\bstfu\\b|\\bcrap\\b|\\bdick(?:head|s)?\\b|\\bpiss(?:ed|ing)?\\b|\\bcunt\\b|\\bprick\\b|\\bdouchebag\\b|\\bكس(?:م|مك|مه)?\\b|\\bخول\\b|\\bشرموط(?:ة)?\\b|\\bعرص\\b|\\bيلعن\\b|\\bزب\\b|\\bطيز\\b|\\bمنيك\\b|\\bمتناك\\b)/iu;
+  const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\bass(?:hole|es)?\b|\bbitch(?:es|y)?\b|\bbastard(?:s)?\b|\bdamn(?:ed|it)?\b|\bmotherfucker\b|\bson of a bitch\b|\bwtf\b|\bstfu\b|\bcrap\b|\bdick(?:head|s)?\b|\bpiss(?:ed|ing)?\b|\bcunt\b|\bprick\b|\bdouchebag\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
 
   // Persistent abuse tracking is stored server-side in Supabase. Never trust client-side counters.
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
