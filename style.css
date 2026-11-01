@@ -1311,3 +1311,21 @@ body{min-width:320px}
 @media (max-width: 680px) {
   #aiDesktopOpen.ai-desktop-open { display: none !important; }
 }
+
+
+/* Shared homepage lighting and logo treatment for every secondary studio page. */
+.route-page #live-background{
+  opacity:1!important;
+  background:radial-gradient(ellipse at 16% 8%,rgba(22,117,223,.24),transparent 43%),radial-gradient(ellipse at 86% 76%,rgba(23,79,167,.22),transparent 46%),#050914!important;
+}
+.route-page #live-background .ambient-glow{opacity:.28!important;filter:blur(92px)!important;mix-blend-mode:screen}
+.route-page #live-background .glow-one{background:radial-gradient(circle,rgba(32,133,255,.95) 0,transparent 69%)!important}
+.route-page #live-background .glow-two{background:radial-gradient(circle,rgba(35,103,220,.85) 0,transparent 70%)!important}
+.route-page #live-background .ambient-grid{opacity:.1!important;background-image:linear-gradient(rgba(75,139,213,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(75,139,213,.12) 1px,transparent 1px)!important}
+.route-page .route-header{background:rgba(3,7,16,.86)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(112,178,255,.2);box-shadow:0 8px 34px rgba(0,0,0,.18)}
+.route-page .brand img.brand-logo{width:58px!important;height:58px!important;max-width:58px!important;max-height:58px!important;object-fit:contain;filter:drop-shadow(0 0 10px rgba(77,163,255,.18))}
+.route-page .brand-wordmark-main{font:700 clamp(18px,1.7vw,25px)/1 var(--display)!important;letter-spacing:-1.1px;color:#f3f7ff!important}
+.route-page .brand-wordmark-sub{margin-top:5px;font:600 10px/1 var(--mono)!important;letter-spacing:4.2px;text-transform:uppercase;color:#c5d6eb!important}
+.route-page .brand-v,.route-page .brand-s{color:#a8d5ff!important;text-shadow:0 0 5px #4da3ff,0 0 13px #4da3ff,0 0 27px rgba(77,163,255,.8)!important}
+.route-page .route-footer .brand img.brand-logo{width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important}
+@media(max-width:760px){.route-page .brand img.brand-logo{width:44px!important;height:44px!important;max-width:44px!important;max-height:44px!important}.route-page .route-header{gap:10px!important}}
