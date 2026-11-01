@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/studio-hub.html",
+      "destination": "/studio-hub",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/studio-hub",
+      "destination": "/studio-hub.html"
+    }
+  ]
+}
