@@ -55,4 +55,7 @@ trigger.addEventListener('click',()=>{if(panel.hidden||!panel.classList.contains
 close?.addEventListener('click',()=>closePanel(true));panel.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>closePanel(false)));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)closePanel(true);});
 document.addEventListener('click',e=>{if(!panel.hidden&&!panel.contains(e.target)&&!trigger.contains(e.target))closePanel(false);});
+
+// Shared device details and opt-in anonymous analytics on all public pages.
+const deviceScript=document.createElement('script');deviceScript.src='/device-insights.js?v=1';deviceScript.defer=true;document.head.appendChild(deviceScript);
 })();
