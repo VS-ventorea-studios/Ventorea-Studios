@@ -304,8 +304,41 @@ googleSignOutButton?.addEventListener('click',async()=>{
  else{googleUser=null;if(googleLoginButton)googleLoginButton.disabled=false;if(aiSignInButton)aiSignInButton.disabled=false;refreshGoogleAccount();updateAccountUI()}
 });
 function add(text,type){
-  if(!messages)return null;const p=document.createElement('p');p.className=type;if(type==='bot'&&text==='Thinking…'){p.classList.add('ai-thinking-glow');p.setAttribute('aria-live','polite');p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span>Thinking</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span>';}else p.textContent=text;messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p;
+  if(!messages)return null;
+  const p=document.createElement('div');p.className=type;
+  if(type==='bot'&&text==='Thinking…'){
+    p.classList.add('ai-thinking-glow');p.setAttribute('aria-live','polite');
+    p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span>Thinking</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span>';
+  }else if(type==='bot'){
+    // Render a small, safe Markdown subset. Never inject model text as HTML.
+    const lines=String(text??'').split(/\\r?\\n/);
+    const addInline=(parent,line)=>{
+      const re=/(https?:\\/\\/[^\\s<>"']+|\\*\\*[^*]+\\*\\*)/g;let last=0,m;
+      while((m=re.exec(line))){
+        if(m.index>last)parent.appendChild(document.createTextNode(line.slice(last,m.index)));
+        const token=m[0];
+        if(token.startsWith('http')){
+          const clean=token.replace(/[),.!?]+$/,'');const suffix=token.slice(clean.length);
+          try{const u=new URL(clean);if(u.protocol==='https:'||u.protocol==='http:'){const a=document.createElement('a');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';a.textContent=clean;a.className='ai-answer-link';parent.appendChild(a)}else parent.appendChild(document.createTextNode(clean))}catch{parent.appendChild(document.createTextNode(clean))}
+          if(suffix)parent.appendChild(document.createTextNode(suffix));
+        }else{const strong=document.createElement('strong');strong.textContent=token.slice(2,-2);parent.appendChild(strong)}
+        last=re.lastIndex;
+      }
+      if(last<line.length)parent.appendChild(document.createTextNode(line.slice(last)));
+    };
+    for(const line of lines){
+      if(!line.trim()){p.appendChild(document.createElement('br'));continue}
+      const row=document.createElement(/^#{1,3}\\s/.test(line)?'h4':/^(?:[-*]|\\d+\\.)\\s/.test(line)?'div':'div');
+      if(/^#{1,3}\\s/.test(line)){row.className='ai-answer-heading';addInline(row,line.replace(/^#{1,3}\\s/,''))}
+      else if(/^(?:[-*])\\s/.test(line)){row.className='ai-answer-list-item';row.appendChild(document.createTextNode('• '));addInline(row,line.replace(/^(?:[-*])\\s/,''))}
+      else if(/^\\d+\\.\\s/.test(line)){row.className='ai-answer-list-item';addInline(row,line)}
+      else addInline(row,line);
+      p.appendChild(row);
+    }
+  }else p.textContent=text;
+  messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p;
 }
+(()=>{if(document.getElementById('aiReadableReplyStyles'))return;const style=document.createElement('style');style.id='aiReadableReplyStyles';style.textContent=`.ai-messages .bot{font-size:16px!important;line-height:1.75!important;overflow-wrap:anywhere}.ai-messages .bot .ai-answer-heading{font-size:1.18em;font-weight:700;margin:.55em 0 .25em;color:#f2f7ff}.ai-messages .bot .ai-answer-list-item{padding-left:.25em;margin:.18em 0}.ai-messages .bot strong{font-weight:750;color:#fff}.ai-messages .bot .ai-answer-link{color:#83c6ff;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}.ai-messages .bot .ai-answer-link:hover{color:#c0e3ff}.ai-messages .user{font-size:15px!important;line-height:1.65!important}@media(max-width:680px){.ai-messages .bot{font-size:17px!important;line-height:1.75!important}.ai-messages .user{font-size:16px!important}}`;document.head.appendChild(style);})();
 (()=>{if(document.getElementById('aiThinkingGlowStyles'))return;const style=document.createElement('style');style.id='aiThinkingGlowStyles';style.textContent=`.ai-messages .ai-thinking-glow{display:flex;align-items:center;gap:9px;width:max-content;max-width:90%;border:1px solid rgba(77,163,255,.42);box-shadow:0 0 8px rgba(77,163,255,.14),inset 0 0 10px rgba(77,163,255,.06);animation:aiThinkingGlow 2.1s ease-in-out infinite;color:#e0edff}.ai-thinking-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#7fc1ff;box-shadow:0 0 5px 2px rgba(77,163,255,.42);animation:aiThinkingPulse 1.6s ease-in-out infinite}.ai-thinking-ellipsis{display:inline-block;min-width:18px;letter-spacing:2px;animation:aiThinkingDots 1.2s steps(4,end) infinite;overflow:hidden}@keyframes aiThinkingGlow{0%,100%{border-color:rgba(77,163,255,.28);box-shadow:0 0 5px rgba(77,163,255,.1),inset 0 0 8px rgba(77,163,255,.04)}50%{border-color:rgba(125,195,255,.95);box-shadow:0 0 8px 3px rgba(77,163,255,.32),0 0 22px rgba(77,163,255,.18),inset 0 0 13px rgba(77,163,255,.12)}}@keyframes aiThinkingPulse{0%,100%{opacity:.55;transform:scale(.85);box-shadow:0 0 4px 1px rgba(77,163,255,.28)}50%{opacity:1;transform:scale(1.15);box-shadow:0 0 8px 4px rgba(77,163,255,.8)}}@keyframes aiThinkingDots{0%{width:0}100%{width:18px}}@media(prefers-reduced-motion:reduce){.ai-thinking-glow,.ai-thinking-dot,.ai-thinking-ellipsis{animation:none!important}}`;document.head.appendChild(style);})();
 async function sendToAI(){
   if(!isDemoSignedIn()){openGoogleLogin();return}
