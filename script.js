@@ -311,9 +311,9 @@ function add(text,type){
     p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span>Thinking</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span>';
   }else if(type==='bot'){
     // Render a small, safe Markdown subset. Never inject model text as HTML.
-    const lines=String(text??'').split(/\\r?\\n/);
+    const lines=String(text??'').split(/\r?\n/);
     const addInline=(parent,line)=>{
-      const re=/(https?:\\/\\/[^\\s<>"']+|\\*\\*[^*]+\\*\\*)/g;let last=0,m;
+      const re=/(https?:\/\/[^\s<>"']+|\*\*[^*]+\*\*)/g;let last=0,m;
       while((m=re.exec(line))){
         if(m.index>last)parent.appendChild(document.createTextNode(line.slice(last,m.index)));
         const token=m[0];
@@ -328,10 +328,10 @@ function add(text,type){
     };
     for(const line of lines){
       if(!line.trim()){p.appendChild(document.createElement('br'));continue}
-      const row=document.createElement(/^#{1,3}\\s/.test(line)?'h4':/^(?:[-*]|\\d+\\.)\\s/.test(line)?'div':'div');
-      if(/^#{1,3}\\s/.test(line)){row.className='ai-answer-heading';addInline(row,line.replace(/^#{1,3}\\s/,''))}
-      else if(/^(?:[-*])\\s/.test(line)){row.className='ai-answer-list-item';row.appendChild(document.createTextNode('• '));addInline(row,line.replace(/^(?:[-*])\\s/,''))}
-      else if(/^\\d+\\.\\s/.test(line)){row.className='ai-answer-list-item';addInline(row,line)}
+      const row=document.createElement(/^#{1,3}\s/.test(line)?'h4':/^(?:[-*]|\d+\.)\s/.test(line)?'div':'div');
+      if(/^#{1,3}\s/.test(line)){row.className='ai-answer-heading';addInline(row,line.replace(/^#{1,3}\s/,''))}
+      else if(/^(?:[-*])\s/.test(line)){row.className='ai-answer-list-item';row.appendChild(document.createTextNode('• '));addInline(row,line.replace(/^(?:[-*])\s/,''))}
+      else if(/^\d+\.\s/.test(line)){row.className='ai-answer-list-item';addInline(row,line)}
       else addInline(row,line);
       p.appendChild(row);
     }
