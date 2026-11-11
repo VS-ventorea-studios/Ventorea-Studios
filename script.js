@@ -510,3 +510,52 @@ document.addEventListener('keydown',event=>{
     });
   });
 })();
+
+
+/* Ventorea 3D scroll and depth motion */
+(()=> {
+  const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if(reduceMotion)return;
+
+  const depthTargets=[
+    ...document.querySelectorAll('.hero-art .art-sun,.hero-art .city-back,.hero-art .city-front,.hero-art .art-orbit,.hero-art .art-label,.project-sky .sun-disc,.project-sky .skyline,.world-art .world-sun,.world-art .world-buildings')
+  ];
+  depthTargets.forEach((el,index)=>el.dataset.scrollDepth=String([.12,.08,.16,.1,.06,.1,.07,.09,.06][index%9]));
+
+  let frame=0;
+  const updateDepth=()=>{
+    frame=0;
+    const mid=window.innerHeight*.52;
+    depthTargets.forEach(el=>{
+      const rect=el.getBoundingClientRect();
+      const depth=Number(el.dataset.scrollDepth)||.08;
+      const offset=Math.max(-42,Math.min(42,(mid-(rect.top+rect.height*.5))*depth));
+      el.style.setProperty('--scroll-offset',offset.toFixed(1)+'px');
+    });
+  };
+  const requestDepth=()=>{if(!frame)frame=requestAnimationFrame(updateDepth)};
+  window.addEventListener('scroll',requestDepth,{passive:true});
+  window.addEventListener('resize',requestDepth,{passive:true});
+  updateDepth();
+
+  if(finePointer){
+    document.querySelectorAll('.system-card,.world-card').forEach(card=>{
+      card.addEventListener('pointermove',event=>{
+        const rect=card.getBoundingClientRect();
+        const x=(event.clientX-rect.left)/rect.width-.5;
+        const y=(event.clientY-rect.top)/rect.height-.5;
+        card.style.setProperty('--tilt-x',(-y*5).toFixed(2)+'deg');
+        card.style.setProperty('--tilt-y',(x*6).toFixed(2)+'deg');
+        card.classList.add('is-3d-tilting');
+      },{passive:true});
+      const reset=()=>{
+        card.classList.remove('is-3d-tilting');
+        card.style.removeProperty('--tilt-x');
+        card.style.removeProperty('--tilt-y');
+      };
+      card.addEventListener('pointerleave',reset,{passive:true});
+      card.addEventListener('pointercancel',reset,{passive:true});
+    });
+  }
+})();
