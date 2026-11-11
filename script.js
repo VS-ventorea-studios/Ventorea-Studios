@@ -559,3 +559,37 @@ document.addEventListener('keydown',event=>{
     });
   }
 })();
+
+
+/* Touch-friendly 3D movement driven by scroll position */
+(()=> {
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce)return;
+  const cards=[...document.querySelectorAll('.system-card,.world-card')];
+  const visuals=[...document.querySelectorAll('.project-visual,.route-hero')];
+  const moving=[...cards,...visuals];
+  if(!moving.length)return;
+  moving.forEach(el=>el.classList.add('is-scroll-3d'));
+  let raf=0;
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+  const update=()=>{
+    raf=0;
+    const mid=window.innerHeight*.52;
+    moving.forEach((el,index)=>{
+      const r=el.getBoundingClientRect();
+      const distance=(mid-(r.top+r.height*.5))/Math.max(1,window.innerHeight*.72);
+      const progress=clamp(distance,-1,1);
+      const phase=((r.top+window.scrollY)/Math.max(1,window.innerHeight))*1.35;
+      const tiltX=clamp(-progress*5.5,-5.5,5.5);
+      const tiltY=clamp(Math.sin(phase)*2.8,-2.8,2.8);
+      const lift=cards.includes(el)?(1-Math.abs(progress))*5:0;
+      el.style.setProperty('--scroll-tilt-x',tiltX.toFixed(2)+'deg');
+      el.style.setProperty('--scroll-tilt-y',tiltY.toFixed(2)+'deg');
+      el.style.setProperty('--scroll-lift',lift.toFixed(1)+'px');
+    });
+  };
+  const request=()=>{if(!raf)raf=requestAnimationFrame(update)};
+  window.addEventListener('scroll',request,{passive:true});
+  window.addEventListener('resize',request,{passive:true});
+  update();
+})();
