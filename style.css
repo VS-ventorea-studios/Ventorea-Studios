@@ -1356,3 +1356,28 @@ body{min-width:320px}
  [data-scroll-depth]{translate:none!important;will-change:auto}
  .system-card.is-3d-tilting,.world-card.is-3d-tilting{transform:none!important}
 }
+
+
+/* Stronger scroll-driven 3D motion, including touch screens */
+.system-card.is-scroll-3d,.world-card.is-scroll-3d{
+  transform:perspective(1050px) rotateX(var(--scroll-tilt-x,0deg)) rotateY(var(--scroll-tilt-y,0deg)) translateY(var(--scroll-lift,0px));
+  transform-style:preserve-3d;
+  transition:transform .18s ease-out,box-shadow .25s ease,border-color .25s ease;
+  will-change:transform;
+  box-shadow:0 16px 34px rgba(0,0,0,.16);
+}
+.project-visual.is-scroll-3d,.route-hero.is-scroll-3d{
+  transform:perspective(1250px) rotateX(var(--scroll-tilt-x,0deg)) rotateY(var(--scroll-tilt-y,0deg));
+  transform-origin:center center;
+}
+@media(max-width:680px){
+  .system-card.is-scroll-3d,.world-card.is-scroll-3d{
+    transform:perspective(850px) rotateX(var(--scroll-tilt-x,0deg)) rotateY(var(--scroll-tilt-y,0deg)) translateY(var(--scroll-lift,0px));
+    box-shadow:0 12px 26px rgba(0,0,0,.2);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .system-card.is-scroll-3d,.world-card.is-scroll-3d,.project-visual.is-scroll-3d,.route-hero.is-scroll-3d{
+    transform:none!important;transition:none!important;will-change:auto;
+  }
+}
