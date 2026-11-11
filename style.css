@@ -1329,3 +1329,30 @@ body{min-width:320px}
 .route-page .brand-v,.route-page .brand-s{color:#a8d5ff!important;text-shadow:0 0 5px #4da3ff,0 0 13px #4da3ff,0 0 27px rgba(77,163,255,.8)!important}
 .route-page .route-footer .brand img.brand-logo{width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important}
 @media(max-width:760px){.route-page .brand img.brand-logo{width:44px!important;height:44px!important;max-width:44px!important;max-height:44px!important}.route-page .route-header{gap:10px!important}}
+
+
+/* Ventorea 3D scroll experience */
+.hero-art,.project-visual,.project-sky,.world-art,.route-hero,.system-card,.world-card{transform-style:preserve-3d;perspective:1200px}
+.hero-art .art-sun{--depth-z:72px}
+.hero-art .city-back{--depth-z:-34px}
+.hero-art .city-front{--depth-z:38px}
+.hero-art .art-orbit{--depth-z:18px}
+.hero-art .art-label{--depth-z:48px}
+.project-sky .sun-disc{--depth-z:55px}
+.project-sky .skyline{--depth-z:24px}
+.world-art .world-sun{--depth-z:38px}
+.world-art .world-buildings{--depth-z:22px}
+[data-scroll-depth]{translate:0 var(--scroll-offset,0px) var(--depth-z,0px);will-change:translate}
+.system-card.is-3d-tilting,.world-card.is-3d-tilting{transform:perspective(950px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translateY(-3px);transition:transform .12s ease-out,border-color .25s,background .25s}
+.project-visual,.route-hero{transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .5s}
+@media(hover:hover) and (pointer:fine){
+ .project-visual:hover,.route-hero:hover{transform:perspective(1200px) rotateX(1deg) rotateY(-1deg) translateY(-3px);box-shadow:0 24px 70px rgba(0,0,0,.28)}
+}
+@media(max-width:680px){
+ [data-scroll-depth]{translate:0 calc(var(--scroll-offset,0px)*.55) 0}
+ .system-card.is-3d-tilting,.world-card.is-3d-tilting{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+ [data-scroll-depth]{translate:none!important;will-change:auto}
+ .system-card.is-3d-tilting,.world-card.is-3d-tilting{transform:none!important}
+}

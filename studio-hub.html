@@ -15,6 +15,16 @@
 
 /* Match the homepage lighting and official logo. */
 .brand{display:flex;align-items:center;gap:12px;min-width:0}.brand-logo{display:block;width:58px;height:58px;max-width:58px;max-height:58px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(77,163,255,.2))}.brand-wordmark{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;line-height:.92;white-space:nowrap;min-width:max-content}.brand-wordmark-main{font:700 clamp(18px,1.7vw,25px)/1 var(--display);letter-spacing:-1.1px;color:#f3f7ff}.brand-wordmark-sub{margin-top:5px;font:600 10px/1 var(--mono);letter-spacing:4.2px;text-transform:uppercase;color:#c5d6eb}.brand-v,.brand-s{color:#a8d5ff;text-shadow:0 0 5px #4da3ff,0 0 13px #4da3ff,0 0 27px rgba(77,163,255,.8);animation:brandPulse 2.8s ease-in-out infinite alternate}.brand-s{animation-delay:.45s}@keyframes brandPulse{from{filter:brightness(.9);text-shadow:0 0 4px #4da3ff,0 0 10px rgba(77,163,255,.55)}to{filter:brightness(1.35);text-shadow:0 0 7px #8bc5ff,0 0 18px #4da3ff,0 0 34px rgba(77,163,255,.8)}}.hero{background:radial-gradient(ellipse at 18% 12%,rgba(22,117,223,.25),transparent 42%),radial-gradient(ellipse at 82% 78%,rgba(23,79,167,.24),transparent 44%),linear-gradient(120deg,#050914,#0a1220)}.top{background:rgba(3,7,16,.86);backdrop-filter:blur(18px);box-shadow:0 8px 34px rgba(0,0,0,.18)}@media(max-width:520px){.brand-logo{width:40px;height:40px;max-width:40px;max-height:40px}.brand-wordmark-main{font-size:17px}.brand-wordmark-sub{font-size:8px;letter-spacing:3px}}
+
+/* 3D depth and scroll reveals for the Studio Hub */
+.hero,.card,.note{transform-style:preserve-3d;perspective:1100px}
+.hero:before{transform:translateZ(-30px)}
+.card{transition:transform .25s ease,border-color .25s,box-shadow .25s;will-change:transform}
+.card.is-hub-tilting{transform:perspective(900px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translateY(-4px);box-shadow:0 22px 50px #0007,0 0 24px #4da3ff18}
+.hub-reveal{opacity:0;transform:translateY(24px) rotateX(2deg);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.72,.2,1)}
+.hub-reveal.is-visible{opacity:1;transform:none}
+@media(max-width:780px){.hub-reveal{transform:translateY(14px)}.card.is-hub-tilting{transform:none}}
+@media(prefers-reduced-motion:reduce){.hub-reveal{opacity:1;transform:none;transition:none}.card{transition:none}}
 </style>
 </head>
 <body>
@@ -66,6 +76,32 @@ if(hubDevice){const ua=navigator.userAgent||'',w=window.innerWidth||0,touch=('on
 const reminder=document.getElementById('hubReminder');
 if(reminder)reminder.addEventListener('click',()=>{const out=document.getElementById('hubReminderStatus');out.hidden=false;out.textContent='Reminder: check the official Ventorea Studios roadmap for confirmed project updates.';});
 
+
+/* Scroll reveal and subtle 3D card movement */
+(()=>{
+ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const fine=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+ const reveal=document.querySelectorAll('.hero,.section-head,.card,.note,.footer');
+ if(!reduce&&'IntersectionObserver' in window){
+  reveal.forEach(el=>el.classList.add('hub-reveal'));
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+   if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}
+  }),{threshold:.08,rootMargin:'0px 0px -5% 0px'});
+  reveal.forEach(el=>observer.observe(el));
+ }else reveal.forEach(el=>el.classList.add('is-visible'));
+ if(!fine||reduce)return;
+ document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('pointermove',event=>{
+   const r=card.getBoundingClientRect(),x=(event.clientX-r.left)/r.width-.5,y=(event.clientY-r.top)/r.height-.5;
+   card.style.setProperty('--tilt-x',(-y*4).toFixed(2)+'deg');
+   card.style.setProperty('--tilt-y',(x*5).toFixed(2)+'deg');
+   card.classList.add('is-hub-tilting');
+  },{passive:true});
+  const reset=()=>{card.classList.remove('is-hub-tilting');card.style.removeProperty('--tilt-x');card.style.removeProperty('--tilt-y')};
+  card.addEventListener('pointerleave',reset,{passive:true});
+  card.addEventListener('pointercancel',reset,{passive:true});
+ });
+})();
 </script>
 </body>
 </html>
