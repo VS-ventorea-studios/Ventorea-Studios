@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     return fail(400, 'Google sign-in could not be verified. Start again.');
   }
 
-  const redirectUri = getAppOrigin() + '/api/auth/callback';
+  const redirectUri = getAppOrigin(req) + '/api/auth/callback';
   try {
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
       'ventorea_session=' + token + '; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800',
       clearOAuth
     ]);
-    return res.redirect(302, getAppOrigin() + '/account/');
+    return res.redirect(302, getAppOrigin(req) + '/account/');
   } catch (error) {
     console.error('Google callback failed:', error?.message || 'unknown error');
     return fail(500, 'Sign-in could not be completed. Please try again.');
