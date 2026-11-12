@@ -53,7 +53,7 @@ let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
 function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
-  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
+  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href='/account/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
   if(aiAuthRequired)aiAuthRequired.hidden=signed;
   if(form)form.hidden=!signed;
