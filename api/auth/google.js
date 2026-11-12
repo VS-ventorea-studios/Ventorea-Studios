@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const verifier = randomBytes(48).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const temporary = Buffer.from(JSON.stringify({ state, nonce, verifier })).toString('base64url');
-  const redirectUri = getAppOrigin() + '/api/auth/callback';
+  const redirectUri = getAppOrigin(req) + '/api/auth/callback';
   const cookie = 'ventorea_oauth=' + temporary + '; HttpOnly; Secure; SameSite=Lax; Path=/api/auth; Max-Age=600';
 
   const params = new URLSearchParams({
