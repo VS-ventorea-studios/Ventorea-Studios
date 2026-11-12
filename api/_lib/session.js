@@ -10,19 +10,24 @@ function secretKey() {
   return new TextEncoder().encode(process.env.SESSION_SECRET);
 }
 
-export function getAppOrigin() {
-  if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
-    return 'https://' + process.env.VERCEL_URL;
+export function getAppOrigin(req) {
+  const host = String(req?.headers?.['x-forwarded-host'] || req?.headers?.host || '').split(',')[0].trim().toLowerCase();
+  const isPreviewHost = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL && host === process.env.VERCEL_URL.toLowerCase();
+  const allowedProductionHost = host === 'ventoreastudios.online' || host === 'www.ventoreastudios.online';
+  const isLocalHost = host === 'localhost:3000' || host === '127.0.0.1:3000';
+  if (isPreviewHost || allowedProductionHost || isLocalHost) {
+    const protocol = isLocalHost ? 'http' : 'https';
+    return protocol + '://' + host;
   }
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  if (process.env.VERCEL_URL) return 'https://' + process.env.VERCEL_URL;
-  return 'http://localhost:3000';
+  if (!req && process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  if (!req && process.env.VERCEL_URL) return 'https://' + process.env.VERCEL_URL;
+  throw new Error('Unrecognized application host.');
 }
 
 export function isSameOrigin(req) {
   const origin = req.headers.origin;
   if (!origin) return false;
-  try { return new URL(origin).origin === getAppOrigin(); }
+  try { return new URL(origin).origin === getAppOrigin(req); }
   catch { return false; }
 }
 
