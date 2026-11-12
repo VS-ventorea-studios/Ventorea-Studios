@@ -1,4 +1,4 @@
-import { getSessionUser, noStore } from './_lib/auth.js';
+import { assertSameOrigin, getSessionUser, noStore } from './_lib/auth.js';
 import { getDb } from './_lib/db.js';
 
 export default async function handler(req, res) {
@@ -11,6 +11,7 @@ export default async function handler(req, res) {
     keyConfigured: Boolean(process.env.GEMINI_API_KEY)
   });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!assertSameOrigin(req)) return res.status(403).json({ error: 'Invalid request origin.' });
 
   const body = req.body || {};
   let authenticatedUser;
