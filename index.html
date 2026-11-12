@@ -57,7 +57,23 @@
 <article class="world-card"><div class="world-art istanbul-art"><span>41°01' N</span><div class="world-sun"></div><div class="world-buildings"><i></i><i></i><i></i><i></i><i></i></div><b>ISTANBUL</b></div><div class="world-meta"><div><h3>Istanbul</h3><p>TURKEY · CROSSROADS OF CULTURE</p></div><span>08</span></div></article>
 </div></section>
 <footer class="site-footer"><div class="footer-top"><a class="brand" href="./"><img class="brand-logo" src="./Ventorea%20Studios.jpg" alt="Ventorea Studios"></a><nav><a href="./Vision/">Vision</a><a href="./RSL/">The Game</a><a href="./Systems/">Systems</a><a href="./Roadmap/">Roadmap</a><a href="./FAQ/">FAQ</a><a href="./Contact/">Contact</a></nav></div><div class="footer-bottom"><span>© 2026 Ventorea Studios. All rights reserved.</span><span>New World. New Lifestyle.</span></div></footer>
-<script src="./script.js?v=82"></script>
+<section id="aiPanel" class="ai-panel" role="dialog" aria-label="Ventorea AI assistant" aria-modal="false" aria-hidden="true">
+  <div class="ai-head">
+    <div><span class="ai-orb" aria-hidden="true">✦</span><div><b>Ventorea AI</b><small><span id="aiPresenceDot" class="status-dot"></span><span id="aiPresenceText">Checking service…</span></small></div></div>
+    <button id="aiClose" type="button" aria-label="Close Ventorea AI">×</button>
+  </div>
+  <div id="aiMessages" class="ai-messages" aria-live="polite"></div>
+  <div id="aiAuthRequired" class="ai-auth-required" style="padding:14px;border-top:1px solid var(--line)">
+    <p class="modal-intro">Sign in with Google to chat with Ventorea AI.</p>
+    <button id="aiSignInButton" class="button button-bright" type="button">SIGN IN WITH GOOGLE <span>↗</span></button>
+  </div>
+  <form id="aiForm" hidden>
+    <input id="aiInput" type="text" maxlength="2000" autocomplete="off" placeholder="Message Ventorea AI…" aria-label="Message Ventorea AI">
+    <button id="aiSendButton" type="submit" aria-label="Send message">↑</button>
+  </form>
+</section>
+<button id="aiMobileOpen" class="ai-launcher" type="button" aria-label="Open Ventorea AI" aria-controls="aiPanel" aria-expanded="false">✦</button>
+<script src="./script.js?v=83"></script>
 <script>
 // FAQ accordion exclusivity
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));

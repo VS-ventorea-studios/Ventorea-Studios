@@ -1,44 +1,28 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Cache-Control', 'no-store');
+import { assertSameOrigin, getSessionUser, noStore } from './_lib/auth.js';
+import { getDb } from './_lib/db.js';
 
+export default async function handler(req, res) {
+  noStore(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash'], keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
+  if (req.method === 'GET') return res.status(200).json({
+    ok: true,
+    provider: 'gemini',
+    models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash'],
+    keyConfigured: Boolean(process.env.GEMINI_API_KEY)
+  });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!assertSameOrigin(req)) return res.status(403).json({ error: 'Invalid request origin.' });
 
   const body = req.body || {};
-
-  // Verify the signed-in Supabase user from the bearer token sent by the frontend.
-  // Never trust user IDs or email addresses supplied in the request body.
-  const authorization = req.headers.authorization || req.headers.Authorization || '';
-  const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
-  if (!accessToken) {
-    return res.status(401).json({ error: 'Sign in with Google to use Ventorea AI.' });
-  }
-
-  const supabaseUrl = 'https://ncmthgqsrkasesfqvuzk.supabase.co';
-  const supabasePublishableKey = 'sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
   let authenticatedUser;
   try {
-    const authResponse = await fetch(supabaseUrl + '/auth/v1/user', {
-      method: 'GET',
-      headers: {
-        apikey: supabasePublishableKey,
-        Authorization: 'Bearer ' + accessToken
-      },
-      cache: 'no-store'
-    });
-    if (!authResponse.ok) {
-      return res.status(401).json({ error: 'Your sign-in session is invalid or expired. Please sign in again.' });
-    }
-    authenticatedUser = await authResponse.json();
-    if (!authenticatedUser || typeof authenticatedUser.id !== 'string') {
-      return res.status(401).json({ error: 'Could not verify your Ventorea account. Please sign in again.' });
-    }
-  } catch {
+    authenticatedUser = await getSessionUser(req);
+  } catch (error) {
+    console.error('Ventorea AI account verification failed:', error?.message || 'database error');
     return res.status(503).json({ error: 'Account verification is temporarily unavailable. Please try again.' });
+  }
+  if (!authenticatedUser) {
+    return res.status(401).json({ error: 'Sign in with Google to use Ventorea AI.' });
   }
 
   const messages = Array.isArray(body.messages) ? body.messages : [];
@@ -54,52 +38,50 @@ export default async function handler(req, res) {
   const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
   const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\bass(?:hole|es)?\b|\bbitch(?:es|y)?\b|\bbastard(?:s)?\b|\bdamn(?:ed|it)?\b|\bmotherfucker\b|\bson of a bitch\b|\bwtf\b|\bstfu\b|\bcrap\b|\bdick(?:head|s)?\b|\bpiss(?:ed|ing)?\b|\bcunt\b|\bprick\b|\bdouchebag\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
 
-  // Persistent abuse tracking is stored server-side in Supabase. Never trust client-side counters.
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const databaseUrl = supabaseUrl + '/rest/v1/ai_abuse_status';
-  const abuseHeaders = serviceKey ? { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey, 'Content-Type': 'application/json' } : null;
-  async function loadAbuseStatus() {
-    if (!abuseHeaders) return null;
-    const response = await fetch(databaseUrl + '?user_id=eq.' + encodeURIComponent(authenticatedUser.id) + '&select=user_id,swear_count,suspension_level,suspended_until', {
-      headers: abuseHeaders, cache: 'no-store'
-    });
-    if (!response.ok) throw new Error('Could not read abuse status');
-    const rows = await response.json();
-    return rows[0] || { user_id: authenticatedUser.id, swear_count: 0, suspension_level: 0, suspended_until: null };
-  }
+  // Moderation counters are stored in the private Neon database and never trusted to the browser.
+  let abuseStatus;
   async function saveAbuseStatus(status) {
-    const response = await fetch(databaseUrl, {
-      method: 'POST',
-      headers: { ...abuseHeaders, Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(status)
-    });
-    if (!response.ok) throw new Error('Could not save abuse status');
+    await getDb().query(
+      `insert into app.ai_abuse_status (user_id, swear_count, suspension_level, suspended_until, updated_at)
+       values ($1, $2, $3, $4, now())
+       on conflict (user_id) do update set
+         swear_count = excluded.swear_count,
+         suspension_level = excluded.suspension_level,
+         suspended_until = excluded.suspended_until,
+         updated_at = now()`,
+      [authenticatedUser.id, status.swear_count, status.suspension_level, status.suspended_until]
+    );
   }
-
-  let abuseStatus = null;
-  if (abuseHeaders) {
-    try {
-      abuseStatus = await loadAbuseStatus();
-      if (abuseStatus.suspended_until && Date.parse(abuseStatus.suspended_until) > Date.now()) {
-        const remaining = Math.ceil((Date.parse(abuseStatus.suspended_until) - Date.now()) / 60000);
-        return res.status(429).json({
-          error: 'Your Ventorea AI chat is suspended for repeated profanity. Try again in about ' + remaining + ' minute' + (remaining === 1 ? '' : 's') + '.',
-          suspendedUntil: abuseStatus.suspended_until
-        });
-      }
-      if (abuseStatus.suspended_until && Date.parse(abuseStatus.suspended_until) <= Date.now()) {
-        abuseStatus.suspended_until = null;
-        await saveAbuseStatus(abuseStatus);
-      }
-    } catch (error) {
-      console.error('Ventorea AI abuse status check failed:', error?.message || 'database error');
-      return res.status(503).json({ error: 'Ventorea AI safety checks are temporarily unavailable. Please try again shortly.' });
+  try {
+    const abuseResult = await getDb().query(
+      'select user_id::text as user_id, swear_count, suspension_level, suspended_until from app.ai_abuse_status where user_id = $1',
+      [authenticatedUser.id]
+    );
+    abuseStatus = abuseResult.rows[0] || {
+      user_id: authenticatedUser.id,
+      swear_count: 0,
+      suspension_level: 0,
+      suspended_until: null
+    };
+    if (abuseStatus.suspended_until && Date.parse(abuseStatus.suspended_until) > Date.now()) {
+      const remaining = Math.ceil((Date.parse(abuseStatus.suspended_until) - Date.now()) / 60000);
+      return res.status(429).json({
+        error: 'Your Ventorea AI chat is suspended for repeated profanity. Try again in about ' + remaining + ' minute' + (remaining === 1 ? '' : 's') + '.',
+        suspendedUntil: abuseStatus.suspended_until
+      });
     }
+    if (abuseStatus.suspended_until && Date.parse(abuseStatus.suspended_until) <= Date.now()) {
+      abuseStatus.suspended_until = null;
+      await saveAbuseStatus(abuseStatus);
+    }
+  } catch (error) {
+    console.error('Ventorea AI abuse status check failed:', error?.message || 'database error');
+    return res.status(503).json({ error: 'Ventorea AI safety checks are temporarily unavailable. Please try again shortly.' });
   }
 
   if (profanityPattern.test(latestVisitorMessage)) {
     // Existing one-message warning stays in place. Three profanity messages trigger a timed suspension.
-    if (abuseHeaders && abuseStatus) {
+    if (abuseStatus) {
       try {
         const nextCount = Number(abuseStatus.swear_count || 0) + 1;
         const nextStatus = {

@@ -1,3 +1,9 @@
 {
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "migrate:supabase-to-neon": "node scripts/migrate-supabase-to-neon.mjs"
+  },
+  "dependencies": {
+    "pg": "8.16.3"
+  }
 }

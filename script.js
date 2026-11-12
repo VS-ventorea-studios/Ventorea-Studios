@@ -23,7 +23,7 @@ if(menu&&nav){
   }));
 }
 
-const AI_ENDPOINT='https://ventorea-studios.vercel.app/api/chat';
+const AI_ENDPOINT='/api/chat';
 const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),desktopLauncher=$('aiDesktopOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const aiAuthRequired=$('aiAuthRequired'),aiSignInButton=$('aiSignInButton');
@@ -53,7 +53,7 @@ let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
 function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
-  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
+  if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href='/account/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
   if(aiAuthRequired)aiAuthRequired.hidden=signed;
   if(form)form.hidden=!signed;
@@ -75,14 +75,9 @@ function aiOpen(){
   mobileLauncher?.setAttribute('aria-expanded','true');
   setUnread(0);
   if(isDemoSignedIn())setTimeout(()=>input?.focus({preventScroll:true}),180);
-  if(supabaseClient){
-    supabaseClient.auth.getSession().then(({data,error})=>{
-      if(error){console.warn('Could not verify Ventorea AI sign-in:',error);return}
-      googleUser=data?.session?.user||null;
-      updateAccountUI();
-      if(isDemoSignedIn()&&panel?.classList.contains('open'))setTimeout(()=>input?.focus({preventScroll:true}),80);
-    }).catch(error=>console.warn('Could not verify Ventorea AI sign-in:',error));
-  }
+  loadSession().then(user=>{
+    if(user&&panel?.classList.contains('open'))setTimeout(()=>input?.focus({preventScroll:true}),80);
+  }).catch(error=>console.warn('Could not verify Ventorea AI sign-in:',error));
 }
 function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');desktopLauncher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else if(desktopLauncher)desktopLauncher.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
@@ -99,45 +94,8 @@ if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobile
 closeButton?.addEventListener('click',aiClose);
 aiSignInButton?.addEventListener('click',startGoogleLogin);
 
-const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
-let supabaseClient=null,googleUser=null;
+let googleUser=null,googleOAuthPending=false;
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
-const oauthReturnError=(()=>{const params=new URLSearchParams(window.location.search);const error=params.get('error_description')||params.get('error_code')||params.get('error');if(!error)return '';params.delete('error_description');params.delete('error_code');params.delete('error');const query=params.toString();window.history.replaceState(null,document.title,window.location.pathname+(query?'?'+query:'')+window.location.hash);return error})();
-function showOAuthReturnError(){if(!oauthReturnError||!googleLoginStatus)return;showModal(googleLoginModal);const expired=/state.*expired|expired.*state|state.*invalid|invalid.*state/i.test(oauthReturnError);googleLoginStatus.textContent=expired?'Google sign-in expired before returning to Ventorea. Start a fresh sign-in and finish it in the same browser tab.':'Google sign-in failed: '+oauthReturnError;googleLoginStatus.className='form-status error'}
-
-function openGoogleLogin(){
- showModal(googleLoginModal);
- refreshGoogleAccount();
- // Prevent iOS Safari from scrolling the page when focus is applied to the login button.
- if(!window.matchMedia('(pointer: coarse)').matches)setTimeout(()=>googleLoginButton?.focus({preventScroll:true}),80);
-}
-function refreshGoogleAccount(){
- if(!googleLoginStatus)return;
- if(!window.supabase||SUPABASE_PUBLISHABLE_KEY==='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){googleLoginStatus.textContent='Setup needed: add your Supabase publishable key in script.js before testing login.';googleLoginStatus.className='form-status error';return}
- if(googleUser){googleLoginStatus.textContent='Signed in as '+(googleUser.email||googleUser.user_metadata?.full_name||'Google user')+'.';googleLoginStatus.className='form-status success';if(googleLoginButton)googleLoginButton.hidden=true;if(googleSignOutButton)googleSignOutButton.hidden=false}
- else{googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';googleLoginStatus.className='form-status';if(googleLoginButton)googleLoginButton.hidden=false;if(googleSignOutButton)googleSignOutButton.hidden=true}
-}
-if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
- supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
- supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;refreshGoogleAccount();updateAccountUI();if(oauthReturnError)showOAuthReturnError()}).catch(error=>{console.error('Supabase session restore failed:',error);if(oauthReturnError)showOAuthReturnError()});
- supabaseClient.auth.onAuthStateChange((event,session)=>{
-  googleUser=session?.user||null;
-  refreshGoogleAccount();
-  updateAccountUI();
-  if(oauthReturnError)showOAuthReturnError();
-  if(googleUser&&googleLoginStatus){
-    googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'. Your profile is available from My Account.';
-    googleLoginStatus.className='form-status success';
-  }
-  // Do not automatically open Account Settings after OAuth. It caused a page jump
-  // and made sign-in look frozen while profile/friend data loaded on mobile.
-});
-}
-if(oauthReturnError&&!supabaseClient)showOAuthReturnError();
-if(new URLSearchParams(window.location.search).get('login')==='required'){
-  aiOpen();
-}
 const accountSettingsModal=$('accountSettingsModal');
 const accountProfileForm=$('accountProfileForm');
 const accountDisplayName=$('accountDisplayName');
@@ -151,158 +109,213 @@ const accountProfileStatus=$('accountProfileStatus');
 const settingsStatus=$('settingsStatus');
 const rememberChatSetting=$('rememberChatSetting');
 const reduceMotionSetting=$('reduceMotionSetting');
-function displayNameFor(user){return user?.user_metadata?.display_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Ventorea member'}
-function populateAccountSettings(){
- if(!googleUser)return;
- const name=displayNameFor(googleUser),email=googleUser.email||'';
+const accountFriendCode=$('accountFriendCode');
+const friendCodeInput=$('friendCodeInput');
+const friendsStatus=$('friendsStatus');
+const friendRequestsList=$('friendRequestsList');
+const friendsList=$('friendsList');
+
+function displayNameFor(user){return user?.display_name||user?.email?.split('@')[0]||'Ventorea member'}
+function safeText(tag,text,className){const el=document.createElement(tag);el.textContent=text;if(className)el.className=className;return el}
+function setFriendsStatus(message,kind=''){if(friendsStatus){friendsStatus.textContent=message;friendsStatus.className='form-status'+(kind?' '+kind:'')}}
+function populateAccountSettings(user=googleUser){
+ if(!user)return;
+ const name=displayNameFor(user),email=user.email||'';
  if(accountDisplayName&&document.activeElement!==accountDisplayName)accountDisplayName.value=name;
  if(accountEmail)accountEmail.value=email;
- if(accountPhone&&document.activeElement!==accountPhone)accountPhone.value=googleUser.user_metadata?.phone_number||'';
- if(accountBio&&document.activeElement!==accountBio)accountBio.value=googleUser.user_metadata?.bio||'';
+ if(accountPhone&&document.activeElement!==accountPhone)accountPhone.value=user.phone_number||'';
+ if(accountBio&&document.activeElement!==accountBio)accountBio.value=user.bio||'';
  if(accountIdentityName)accountIdentityName.textContent=name;
  if(accountIdentityEmail)accountIdentityEmail.textContent=email;
  if(accountAvatar)accountAvatar.textContent=(name.trim()[0]||'V').toUpperCase();
  if(rememberChatSetting)rememberChatSetting.checked=readSetting(REMEMBER_CHAT_KEY,true);
  if(reduceMotionSetting)reduceMotionSetting.checked=readSetting(REDUCE_MOTION_KEY,false);
+ if(accountFriendCode&&user.friend_code)accountFriendCode.value=user.friend_code;
 }
-function openAccountSettings(){
+function refreshGoogleAccount(){
+ if(!googleLoginStatus)return;
+ if(googleUser){
+  googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'. Your profile is available from My Account.';
+  googleLoginStatus.className='form-status success';
+  if(googleLoginButton)googleLoginButton.hidden=true;
+  if(googleSignOutButton)googleSignOutButton.hidden=false;
+ }else{
+  googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';
+  googleLoginStatus.className='form-status';
+  if(googleLoginButton)googleLoginButton.hidden=false;
+  if(googleSignOutButton)googleSignOutButton.hidden=true;
+ }
+}
+async function loadSession(){
+ const response=await fetch('/api/auth/session',{method:'GET',credentials:'same-origin',cache:'no-store'});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(data.error||'Account service is unavailable.');
+ googleUser=data.user||null;
+ refreshGoogleAccount();
+ updateAccountUI();
+ return googleUser;
+}
+function openGoogleLogin(){
+ showModal(googleLoginModal);
+ refreshGoogleAccount();
+ if(!window.matchMedia('(pointer: coarse)').matches)setTimeout(()=>googleLoginButton?.focus({preventScroll:true}),80);
+}
+function startGoogleLogin(){
+ if(googleOAuthPending)return;
+ googleOAuthPending=true;
+ if(googleLoginButton)googleLoginButton.disabled=true;
+ if(aiSignInButton)aiSignInButton.disabled=true;
+ if(googleLoginStatus){googleLoginStatus.textContent='Connecting to Google securely…';googleLoginStatus.className='form-status'}
+ window.location.assign('/api/auth/google/start');
+}
+async function signOut(){
+ const response=await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'}});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(data.error||'Could not sign out.');
+ googleUser=null;
+ chat.length=0;
+ try{localStorage.removeItem(CHAT_STORAGE_KEY)}catch{}
+ refreshGoogleAccount();
+ updateAccountUI();
+}
+async function openAccountSettings(){
  if(!googleUser){openGoogleLogin();return}
  populateAccountSettings();
  showModal(accountSettingsModal);
- // Let the browser paint the account panel before any database requests start.
  if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p','Loading requests…','settings-help'));
  if(friendsList)friendsList.replaceChildren(safeText('p','Loading friends…','settings-help'));
- if(accountFriendCode)accountFriendCode.value='Loading…';
- window.setTimeout(()=>{if(accountSettingsModal?.classList.contains('open'))loadFriends()},0);
-}
-$('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
-accountSettingsModal?.addEventListener('click',e=>{if(e.target===accountSettingsModal)hideModal(accountSettingsModal)});
-accountProfileForm?.addEventListener('submit',async e=>{
- e.preventDefault();if(!supabaseClient||!googleUser)return;
- const name=accountDisplayName.value.trim();
- if(!name){accountProfileStatus.textContent='Please enter a display name.';accountProfileStatus.className='form-status error';return}
- const save=$('accountSaveProfile');if(save)save.disabled=true;
- accountProfileStatus.textContent='Saving profile…';accountProfileStatus.className='form-status';
  try{
-  const phone=accountPhone?.value.trim()||'';
- const bio=accountBio?.value.trim()||'';
- const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name,phone_number:phone,bio,profile_setup_complete:true}});
-  if(error)throw error;
-  googleUser=data.user||googleUser;populateAccountSettings();updateAccountUI();try{await ensurePublicProfile()}catch(profileError){console.warn('Friends profile setup is not complete:',profileError)}
-  accountProfileStatus.textContent='Profile saved successfully.';accountProfileStatus.className='form-status success';
- }catch(error){accountProfileStatus.textContent=error?.message||'Could not save your profile.';accountProfileStatus.className='form-status error'}
- finally{if(save)save.disabled=false}
-});
-
-const accountFriendCode=$('accountFriendCode'),friendCodeInput=$('friendCodeInput'),friendsStatus=$('friendsStatus'),friendRequestsList=$('friendRequestsList'),friendsList=$('friendsList');
-function setFriendsStatus(message,kind=''){if(friendsStatus){friendsStatus.textContent=message;friendsStatus.className='form-status'+(kind?' '+kind:'')}}
-function makeFriendCode(){return 'VENT-'+Math.random().toString(36).slice(2,8).toUpperCase()}
-function safeText(tag,text,className){const el=document.createElement(tag);el.textContent=text;if(className)el.className=className;return el}
-async function ensurePublicProfile(){
- if(!supabaseClient||!googleUser)return;
- const user=googleUser;let code='';
- const {data:existing,error:readError}=await supabaseClient.from('profiles').select('friend_code').eq('user_id',user.id).maybeSingle();
- if(readError)throw readError;
- code=existing?.friend_code||makeFriendCode();
- const {error}=await supabaseClient.from('profiles').upsert({user_id:user.id,display_name:displayNameFor(user),bio:user.user_metadata?.bio||'',friend_code:code,updated_at:new Date().toISOString()},{onConflict:'user_id'});
- if(error)throw error;
- if(accountFriendCode)accountFriendCode.value=code;
+  const response=await fetch('/api/account/profile',{credentials:'same-origin',cache:'no-store'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not load your profile.');
+  googleUser=data.user||googleUser;
+  populateAccountSettings();
+ }catch(error){
+  if(accountProfileStatus){accountProfileStatus.textContent=error.message;accountProfileStatus.className='form-status error'}
+ }
+ await loadFriends();
 }
 async function loadFriends(){
- if(!supabaseClient||!googleUser)return;
+ if(!googleUser)return;
  if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p','Loading requests…','settings-help'));
  if(friendsList)friendsList.replaceChildren(safeText('p','Loading friends…','settings-help'));
  try{
-  await ensurePublicProfile();
-  const {data:requests,error:reqError}=await supabaseClient.from('friend_requests').select('id,sender_id,receiver_id,status,created_at,sender:profiles!friend_requests_sender_id_fkey(display_name,friend_code),receiver:profiles!friend_requests_receiver_id_fkey(display_name,friend_code)').eq('receiver_id',googleUser.id).eq('status','pending').order('created_at',{ascending:false});
-  if(reqError)throw reqError;
-  if(friendRequestsList){friendRequestsList.replaceChildren();if(!requests?.length)friendRequestsList.append(safeText('p','No pending requests.','settings-help'));for(const request of requests){const row=document.createElement('div');row.className='friend-row';const info=document.createElement('div');info.append(safeText('b',request.sender?.display_name||'Ventorea member'),safeText('small',request.sender?.friend_code||''));const accept=document.createElement('button');accept.type='button';accept.className='button button-bright';accept.textContent='ACCEPT';accept.addEventListener('click',()=>acceptFriendRequest(request));row.append(info,accept);friendRequestsList.append(row)}}
-  const {data:links,error:linkError}=await supabaseClient.from('friendships').select('friend_id,friend:profiles!friendships_friend_id_fkey(display_name,friend_code,bio)').eq('user_id',googleUser.id).order('created_at',{ascending:false});
-  if(linkError)throw linkError;
-  if(friendsList){friendsList.replaceChildren();if(!links?.length)friendsList.append(safeText('p','No friends yet. Add someone using their friend code.','settings-help'));for(const link of links){const row=document.createElement('div');row.className='friend-row';const info=document.createElement('div');info.append(safeText('b',link.friend?.display_name||'Ventorea member'),safeText('small',link.friend?.friend_code||''));const remove=document.createElement('button');remove.type='button';remove.className='button button-outline';remove.textContent='REMOVE';remove.addEventListener('click',()=>removeFriend(link.friend_id));row.append(info,remove);friendsList.append(row)}}
- }catch(error){const msg=error?.code==='42P01'||String(error?.message||'').includes('schema cache')?'Friends need database setup first. Run supabase/schema.sql in your Supabase SQL Editor, then reload.':(error?.message||'Could not load friends.');if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p',msg,'settings-help'));if(friendsList)friendsList.replaceChildren(safeText('p',msg,'settings-help'));if(accountFriendCode)accountFriendCode.value='Set up required';}
+  const response=await fetch('/api/account/friends',{credentials:'same-origin',cache:'no-store'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not load friends.');
+  if(accountFriendCode)accountFriendCode.value=data.friendCode||'Not available';
+  if(friendRequestsList){
+   friendRequestsList.replaceChildren();
+   if(!data.requests?.length)friendRequestsList.append(safeText('p','No pending requests.','settings-help'));
+   for(const request of data.requests||[]){
+    const row=document.createElement('div');row.className='friend-row';
+    const info=document.createElement('div');info.append(safeText('b',request.sender_name||'Ventorea member'),safeText('small',request.sender_code||''));
+    const accept=document.createElement('button');accept.type='button';accept.className='button button-bright';accept.textContent='ACCEPT';
+    accept.addEventListener('click',()=>acceptFriendRequest(request.id));row.append(info,accept);friendRequestsList.append(row);
+   }
+  }
+  if(friendsList){
+   friendsList.replaceChildren();
+   if(!data.friends?.length)friendsList.append(safeText('p','No friends yet. Add someone using their friend code.','settings-help'));
+   for(const friend of data.friends||[]){
+    const row=document.createElement('div');row.className='friend-row';
+    const info=document.createElement('div');info.append(safeText('b',friend.display_name||'Ventorea member'),safeText('small',friend.friend_code||''));
+    const remove=document.createElement('button');remove.type='button';remove.className='button button-outline';remove.textContent='REMOVE';
+    remove.addEventListener('click',()=>removeFriend(friend.friend_id));row.append(info,remove);friendsList.append(row);
+   }
+  }
+ }catch(error){
+  if(friendRequestsList)friendRequestsList.replaceChildren(safeText('p',error.message||'Could not load requests.','settings-help'));
+  if(friendsList)friendsList.replaceChildren(safeText('p',error.message||'Could not load friends.','settings-help'));
+ }
 }
-async function sendFriendRequest(e){
- e.preventDefault();if(!supabaseClient||!googleUser)return;
- const code=friendCodeInput?.value.trim().toUpperCase();if(!code)return;
- const button=$('addFriendButton');if(button)button.disabled=true;setFriendsStatus('Looking up friend code…');
+async function acceptFriendRequest(requestId){
  try{
-  await ensurePublicProfile();
-  const {data:profile,error}=await supabaseClient.from('profiles').select('user_id,display_name').eq('friend_code',code).maybeSingle();
-  if(error)throw error;if(!profile)throw new Error('That friend code was not found.');
-  if(profile.user_id===googleUser.id)throw new Error('You cannot add yourself.');
-  const {data:existing,error:existingError}=await supabaseClient.from('friendships').select('friend_id').eq('user_id',googleUser.id).eq('friend_id',profile.user_id).maybeSingle();
-  if(existingError)throw existingError;if(existing)throw new Error('You are already friends.');
-  const {error:insertError}=await supabaseClient.from('friend_requests').insert({sender_id:googleUser.id,receiver_id:profile.user_id,status:'pending'});
-  if(insertError){if(insertError.code==='23505')throw new Error('You already sent a request to this person.');throw insertError}
-  if(friendCodeInput)friendCodeInput.value='';setFriendsStatus('Friend request sent to '+profile.display_name+'.','success');
- }catch(error){setFriendsStatus(error?.message||'Could not send friend request.','error')}
- finally{if(button)button.disabled=false}
-}
-async function acceptFriendRequest(request){
- try{
-  const {error:updateError}=await supabaseClient.from('friend_requests').update({status:'accepted'}).eq('id',request.id).eq('receiver_id',googleUser.id);
-  if(updateError)throw updateError;
-  const rows=[{user_id:googleUser.id,friend_id:request.sender_id},{user_id:request.sender_id,friend_id:googleUser.id}];
-  const {error:insertError}=await supabaseClient.from('friendships').insert(rows);
-  if(insertError&&insertError.code!=='23505')throw insertError;setFriendsStatus('Friend added.','success');await loadFriends();
- }catch(error){setFriendsStatus(error?.message||'Could not accept request.','error')}
+  const response=await fetch('/api/account/friends',{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not accept request.');
+  setFriendsStatus('Friend added.','success');await loadFriends();
+ }catch(error){setFriendsStatus(error.message||'Could not accept request.','error')}
 }
 async function removeFriend(friendId){
  if(!confirm('Remove this friend?'))return;
- try{const {error}=await supabaseClient.from('friendships').delete().eq('user_id',googleUser.id).eq('friend_id',friendId);if(error)throw error;await supabaseClient.from('friendships').delete().eq('user_id',friendId).eq('friend_id',googleUser.id);setFriendsStatus('Friend removed.','success');await loadFriends()}catch(error){setFriendsStatus(error?.message||'Could not remove friend.','error')}
+ try{
+  const response=await fetch('/api/account/friends',{method:'DELETE',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({friendId})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not remove friend.');
+  setFriendsStatus('Friend removed.','success');await loadFriends();
+ }catch(error){setFriendsStatus(error.message||'Could not remove friend.','error')}
 }
-$('addFriendForm')?.addEventListener('submit',sendFriendRequest);
-$('copyFriendCode')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(accountFriendCode?.value||'');setFriendsStatus('Friend code copied.','success')}catch{setFriendsStatus('Copy failed. Select the code and copy it manually.','error')}});
+async function sendFriendRequest(event){
+ event.preventDefault();
+ if(!googleUser)return;
+ const friendCode=friendCodeInput?.value.trim().toUpperCase();
+ if(!friendCode)return;
+ const button=$('addFriendButton');if(button)button.disabled=true;
+ setFriendsStatus('Looking up friend code…');
+ try{
+  const response=await fetch('/api/account/friends',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'send',friendCode})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not send friend request.');
+  if(friendCodeInput)friendCodeInput.value='';
+  setFriendsStatus(data.message||'Friend request sent.','success');
+ }catch(error){setFriendsStatus(error.message||'Could not send friend request.','error')}
+ finally{if(button)button.disabled=false}
+}
 
+$('accountSettingsClose')?.addEventListener('click',()=>hideModal(accountSettingsModal));
+accountSettingsModal?.addEventListener('click',event=>{if(event.target===accountSettingsModal)hideModal(accountSettingsModal)});
+accountProfileForm?.addEventListener('submit',async event=>{
+ event.preventDefault();
+ if(!googleUser)return;
+ const displayName=accountDisplayName?.value.trim()||'';
+ if(!displayName){accountProfileStatus.textContent='Please enter a display name.';accountProfileStatus.className='form-status error';return}
+ const save=$('accountSaveProfile');if(save)save.disabled=true;
+ accountProfileStatus.textContent='Saving profile…';accountProfileStatus.className='form-status';
+ try{
+  const response=await fetch('/api/account/profile',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({displayName,phone:accountPhone?.value.trim()||'',bio:accountBio?.value.trim()||''})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not save your profile.');
+  googleUser=data.user||googleUser;populateAccountSettings();
+  accountProfileStatus.textContent='Profile saved successfully.';accountProfileStatus.className='form-status success';
+ }catch(error){accountProfileStatus.textContent=error.message||'Could not save your profile.';accountProfileStatus.className='form-status error'}
+ finally{if(save)save.disabled=false}
+});
+$('addFriendForm')?.addEventListener('submit',sendFriendRequest);
+$('copyFriendCode')?.addEventListener('click',async()=>{
+ try{await navigator.clipboard.writeText(accountFriendCode?.value||'');setFriendsStatus('Friend code copied.','success')}
+ catch{setFriendsStatus('Copy failed. Select the code and copy it manually.','error')}
+});
 rememberChatSetting?.addEventListener('change',()=>{
- try{localStorage.setItem(REMEMBER_CHAT_KEY,String(rememberChatSetting.checked));if(!rememberChatSetting.checked)localStorage.removeItem(CHAT_STORAGE_KEY);else saveChatHistory();settingsStatus.textContent=rememberChatSetting.checked?'AI chat history will be saved on this device.':'AI chat history will not be saved on this device.';settingsStatus.className='form-status success'}catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
+ try{localStorage.setItem(REMEMBER_CHAT_KEY,String(rememberChatSetting.checked));if(!rememberChatSetting.checked)localStorage.removeItem(CHAT_STORAGE_KEY);else saveChatHistory();settingsStatus.textContent=rememberChatSetting.checked?'AI chat history will be saved on this device.':'AI chat history will not be saved on this device.';settingsStatus.className='form-status success'}
+ catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
 });
 reduceMotionSetting?.addEventListener('change',()=>{
- try{localStorage.setItem(REDUCE_MOTION_KEY,String(reduceMotionSetting.checked));applyMotionSetting();settingsStatus.textContent='Motion preference updated.';settingsStatus.className='form-status success'}catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
+ try{localStorage.setItem(REDUCE_MOTION_KEY,String(reduceMotionSetting.checked));applyMotionSetting();settingsStatus.textContent='Motion preference updated.';settingsStatus.className='form-status success'}
+ catch{settingsStatus.textContent='Your browser blocked this setting.';settingsStatus.className='form-status error'}
 });
 $('clearChatButton')?.addEventListener('click',()=>{
- chat.length=0;try{localStorage.removeItem(CHAT_STORAGE_KEY)}catch{};renderSavedChat();settingsStatus.textContent='Saved AI chat history cleared from this device.';settingsStatus.className='form-status success'
+ chat.length=0;try{localStorage.removeItem(CHAT_STORAGE_KEY)}catch{};renderSavedChat();settingsStatus.textContent='Saved AI chat history cleared from this device.';settingsStatus.className='form-status success';
 });
 $('accountSignOutButton')?.addEventListener('click',async()=>{
- if(!supabaseClient)return;
- const signout=$('accountSignOutButton');if(signout)signout.disabled=true;
- try{const {error}=await supabaseClient.auth.signOut();if(error)throw error;googleUser=null;chat.length=0;try{localStorage.removeItem(CHAT_STORAGE_KEY)}catch{};hideModal(accountSettingsModal);refreshGoogleAccount();updateAccountUI()}
- catch(error){settingsStatus.textContent=error?.message||'Could not sign out.';settingsStatus.className='form-status error'}
- finally{if(signout)signout.disabled=false}
+ const button=$('accountSignOutButton');if(button)button.disabled=true;
+ try{await signOut();hideModal(accountSettingsModal)}
+ catch(error){settingsStatus.textContent=error.message||'Could not sign out.';settingsStatus.className='form-status error'}
+ finally{if(button)button.disabled=false}
 });
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
-googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
-let googleOAuthPending=false;
-async function startGoogleLogin(){
- if(googleOAuthPending)return;
- openGoogleLogin();
- if(!supabaseClient){refreshGoogleAccount();return}
- googleOAuthPending=true;
- if(googleLoginButton)googleLoginButton.disabled=true;
- if(googleLoginStatus){googleLoginStatus.textContent='Connecting to Google securely…';googleLoginStatus.className='form-status'}
-  if(aiSignInButton)aiSignInButton.disabled=true;
- try {
-  const {error}=await supabaseClient.auth.signInWithOAuth({
-   provider:'google',
-   options:{redirectTo:'https://ventoreastudios.online/',queryParams:{prompt:'select_account'}}
-  });
-  if(error)throw error;
-  // Supabase redirects the current tab to Google. Do not show a false
-  // timeout error while mobile browsers are still completing the redirect.
-  // If OAuth returns with an error, showOAuthReturnError() handles it.
- } catch(error) {
-  googleOAuthPending=false;
-  if(googleLoginStatus){googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error'}
-  if(googleLoginButton)googleLoginButton.disabled=false;
- }
-}
+googleLoginModal?.addEventListener('click',event=>{if(event.target===googleLoginModal)hideModal(googleLoginModal)});
 googleLoginButton?.addEventListener('click',startGoogleLogin);
 googleSignOutButton?.addEventListener('click',async()=>{
- if(!supabaseClient)return;const {error}=await supabaseClient.auth.signOut();
- if(error){googleLoginStatus.textContent=error.message;googleLoginStatus.className='form-status error'}
- else{googleUser=null;if(googleLoginButton)googleLoginButton.disabled=false;if(aiSignInButton)aiSignInButton.disabled=false;refreshGoogleAccount();updateAccountUI()}
+ try{await signOut();googleLoginStatus.textContent='You have signed out successfully.';googleLoginStatus.className='form-status success'}
+ catch(error){googleLoginStatus.textContent=error.message||'Could not sign out.';googleLoginStatus.className='form-status error'}
 });
+loadSession().catch(error=>{
+ console.warn('Ventorea account session unavailable:',error);
+ googleUser=null;refreshGoogleAccount();updateAccountUI();
+});
+if(new URLSearchParams(window.location.search).get('login')==='required')aiOpen();
+
 function add(text,type){
   if(!messages)return null;
   const p=document.createElement('div');p.className=type;
@@ -348,11 +361,13 @@ async function sendToAI(){
   const submit=form?.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
   const loading=add('Thinking…','bot');
   try{
-    const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}googleUser=sessionData.session.user;updateAccountUI();const requestController=new AbortController();
+    const sessionUser=await loadSession();
+    if(!sessionUser)throw new Error('Your sign-in session expired. Please sign in with Google again.');
+    const requestController=new AbortController();
     const requestTimeout=window.setTimeout(()=>requestController.abort(),25000);
     let response;
     try {
-      response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionData.session.access_token},body:JSON.stringify({messages:chat,user:{id:sessionData.session.user.id,email:sessionData.session.user.email}}),signal:requestController.signal});
+      response=await fetch(AI_ENDPOINT,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:chat}),signal:requestController.signal});
     } finally { window.clearTimeout(requestTimeout); }
     const data=await response.json().catch(()=>({}));loading?.remove();if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
     const answer=typeof data.content==='string'?data.content.trim():'';add(answer||'Ventorea AI returned an empty response.','bot');
