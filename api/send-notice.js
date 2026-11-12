@@ -1,35 +1,24 @@
+import { getSessionUser, isSameOrigin } from './_lib/session.js';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://ventoreastudios.online');
+  const origin = req.headers.origin;
+  if (origin && !isSameOrigin(req)) return res.status(403).json({ error: 'Request origin could not be verified.' });
+  if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const auth = req.headers.authorization || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
-  if (!token) return res.status(401).json({ error: 'Sign in with the studio owner account.' });
-
-  const supabaseUrl = 'https://ncmthgqsrkasesfqvuzk.supabase.co';
-  const supabaseKey = 'sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
-  let user;
-  try {
-    const response = await fetch(supabaseUrl + '/auth/v1/user', {
-      headers: { apikey: supabaseKey, Authorization: 'Bearer ' + token },
-      cache: 'no-store'
-    });
-    if (!response.ok) return res.status(401).json({ error: 'Your sign-in session expired. Sign in again.' });
-    user = await response.json();
-  } catch {
-    return res.status(503).json({ error: 'Account verification is temporarily unavailable.' });
-  }
-
-  // Owner-only endpoint. The identity is verified by Supabase, never by request-body fields.
+  const user = await getSessionUser(req);
+  if (!user) return res.status(401).json({ error: 'Sign in with the studio owner account.' });
   const ownerEmail = String(process.env.ADMIN_EMAIL || 'ventoreastudios.support@gmail.com').toLowerCase();
-  if (String(user?.email || '').toLowerCase() !== ownerEmail) {
+  if (String(user.email || '').toLowerCase() !== ownerEmail) {
     return res.status(403).json({ error: 'Owner access only. Sign in with the configured owner account.' });
   }
+
+  if (!process.env.RESEND_API_KEY) return res.status(503).json({ error: 'Email sending is not configured. Add RESEND_API_KEY in Vercel.' });
 
   const body = req.body || {};
   const to = typeof body.to === 'string' ? body.to.trim() : '';
