@@ -78,19 +78,20 @@ export default async function handler(req, res) {
       );
       const userId = userResult.rows[0].id;
 
-      let profileCreated = false;
+      const existingProfile = await client.query(
+        'select user_id from app.profiles where user_id = $1',
+        [userId]
+      );
+      let profileCreated = existingProfile.rowCount > 0;
       for (let attempt = 0; attempt < 8 && !profileCreated; attempt++) {
-        try {
-          await client.query(
-            `insert into app.profiles (user_id, display_name, friend_code, avatar_url)
-             values ($1, $2, $3, $4)
-             on conflict (user_id) do nothing`,
-            [userId, String(profile.name || profile.email.split('@')[0]).slice(0, 80), newFriendCode(), profile.picture || null]
-          );
-          profileCreated = true;
-        } catch (error) {
-          if (error?.code !== '23505') throw error;
-        }
+        const insertedProfile = await client.query(
+          `insert into app.profiles (user_id, display_name, friend_code, avatar_url)
+           values ($1, $2, $3, $4)
+           on conflict do nothing
+           returning user_id`,
+          [userId, String(profile.name || profile.email.split('@')[0]).slice(0, 80), newFriendCode(), profile.picture || null]
+        );
+        profileCreated = insertedProfile.rowCount > 0;
       }
       if (!profileCreated) throw new Error('Could not initialize account profile');
 
