@@ -40,6 +40,7 @@ create table if not exists app.profiles (
   display_name text not null default 'Ventorea member'
     check (char_length(display_name) between 1 and 80),
   bio text not null default '' check (char_length(bio) <= 280),
+  phone_number text not null default '' check (char_length(phone_number) <= 32),
   friend_code text not null unique
     check (char_length(friend_code) between 5 and 16),
   avatar_url text,
