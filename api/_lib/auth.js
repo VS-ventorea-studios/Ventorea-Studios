@@ -82,7 +82,7 @@ export async function deleteSession(req) {
 
 export function assertSameOrigin(req) {
   const origin = req.headers.origin;
-  if (!origin) return true;
+  if (typeof origin !== 'string' || !origin) return false;
   try {
     const parsed = new URL(origin);
     const allowed = new Set([APP_ORIGIN, 'https://www.ventoreastudios.online']);
