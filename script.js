@@ -23,7 +23,7 @@ if(menu&&nav){
   }));
 }
 
-const AI_ENDPOINT='https://ventorea-studios.vercel.app/api/chat';
+const AI_ENDPOINT='/api/chat';
 const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),desktopLauncher=$('aiDesktopOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const allPagesAI=$('allPagesAI');
@@ -92,8 +92,19 @@ function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBa
 function setPresence(online,label){if(presenceText)presenceText.textContent=label;if(presenceDot){presenceDot.classList.toggle('is-online',online);presenceDot.classList.toggle('is-offline',!online)}if(menuPresence){menuPresence.textContent=online?'ONLINE':'OFFLINE';menuPresence.classList.toggle('is-online',online);menuPresence.classList.toggle('is-offline',!online)}}
 function duration(ms){const sec=Math.max(0,Math.floor(ms/1000)),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
 async function checkPresence(){
-  try{const response=await fetch(AI_ENDPOINT,{method:'GET',cache:'no-store'});const data=await response.json().catch(()=>({}));serviceOnline=response.ok&&data.ok===true&&data.keyConfigured===true;const needsSetup=response.ok&&data.ok===true&&data.keyConfigured===false;setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):needsSetup?'Setup needed':'Offline · active '+duration(Date.now()-sessionStartedAt));if(needsSetup&&presenceText)presenceText.title='The server needs its AI API key configured.'}
-  catch{serviceOnline=false;setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt))}
+  const controller=new AbortController();
+  const timeout=window.setTimeout(()=>controller.abort(),6000);
+  try{
+    const response=await fetch(AI_ENDPOINT,{method:'GET',cache:'no-store',signal:controller.signal});
+    const data=await response.json().catch(()=>({}));
+    serviceOnline=response.ok&&data.ok===true&&data.keyConfigured===true;
+    const needsSetup=response.ok&&data.ok===true&&data.keyConfigured===false;
+    setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):needsSetup?'Setup needed':'Offline · active '+duration(Date.now()-sessionStartedAt));
+    if(needsSetup&&presenceText)presenceText.title='The server needs its AI API key configured.';
+  }catch{
+    serviceOnline=false;
+    setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt));
+  }finally{window.clearTimeout(timeout)}
 }
 renderSavedChat();
 document.addEventListener('click',event=>{const trigger=event.target.closest('#aiMenuOpen,#aiDesktopOpen,#aiMobileOpen,#allPagesAI,[data-open-ventorea-ai]');if(!trigger)return;event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()},true);
@@ -355,15 +366,23 @@ function getLocalPublicAnswer(message){
 }
 async function verifySignedInUser(){
   if(!supabaseClient)return {user:null,unavailable:true};
+  let timeout;
   try{
-    const {data,error}=await supabaseClient.auth.getSession();
-    if(error)return {user:null,unavailable:true};
-    const token=data?.session?.access_token;
-    if(!token)return {user:null,unavailable:false};
-    const {data:userData,error:userError}=await supabaseClient.auth.getUser(token);
-    if(userError||!userData?.user)return {user:null,unavailable:true};
-    return {user:userData.user,unavailable:false};
+    const verification=(async()=>{
+      const {data,error}=await supabaseClient.auth.getSession();
+      if(error)throw error;
+      const token=data?.session?.access_token;
+      if(!token)return {user:null,unavailable:false};
+      const {data:userData,error:userError}=await supabaseClient.auth.getUser(token);
+      if(userError||!userData?.user)throw userError||new Error('Account verification failed');
+      return {user:userData.user,unavailable:false};
+    })();
+    return await Promise.race([
+      verification,
+      new Promise((_,reject)=>{timeout=window.setTimeout(()=>reject(new Error('Account verification timed out')),8000)})
+    ]);
   }catch{return {user:null,unavailable:true}}
+  finally{window.clearTimeout(timeout)}
 }
 async function sendToAI(){
   const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH);if(!q||input.disabled)return;
@@ -387,7 +406,7 @@ async function sendToAI(){
   const loading=add('Thinking…','bot');
   try{
     const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}const {data:verifiedData,error:verifiedError}=await supabaseClient.auth.getUser(sessionData.session.access_token);if(verifiedError||!verifiedData?.user){googleUser=null;updateAccountUI();throw new Error('Your sign-in could not be verified. Please sign in again.')}googleUser=verifiedData.user;updateAccountUI();const requestController=new AbortController();
-    const requestTimeout=window.setTimeout(()=>requestController.abort(),25000);
+    const requestTimeout=window.setTimeout(()=>requestController.abort(),45000);
     let response,data;
     try {
       response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionData.session.access_token},body:JSON.stringify({messages:chat,user:{id:sessionData.session.user.id,email:sessionData.session.user.email}}),signal:requestController.signal});
