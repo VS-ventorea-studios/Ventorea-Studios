@@ -55,7 +55,7 @@ function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
-  if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign in with Google to use Ventorea AI'}
+  if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign-in required'}
   if(aiAuthRequired)aiAuthRequired.hidden=signed;
   if(form)form.hidden=!signed;
   if(aiSignInButton)aiSignInButton.disabled=!!googleOAuthPending;
@@ -351,11 +351,11 @@ async function sendToAI(){
   try{
     const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}googleUser=sessionData.session.user;updateAccountUI();const requestController=new AbortController();
     const requestTimeout=window.setTimeout(()=>requestController.abort(),25000);
-    let response;
+    let response,data;
     try {
       response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionData.session.access_token},body:JSON.stringify({messages:chat,user:{id:sessionData.session.user.id,email:sessionData.session.user.email}}),signal:requestController.signal});
-    } finally { window.clearTimeout(requestTimeout); }
-    const data=await response.json().catch(()=>({}));loading?.remove();if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
+      data=await response.json().catch(()=>({}));
+    } finally { window.clearTimeout(requestTimeout); }loading?.remove();if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
     const answer=typeof data.content==='string'?data.content.trim():'';add(answer||'Ventorea AI returned an empty response.','bot');
     if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
   }catch(error){loading?.remove();if(receipt)receipt.textContent='Not sent';add(error?.name==='AbortError'?'Ventorea AI is taking too long to respond. Please try again.':(error?.message||'Ventorea AI could not be reached. Please try again.'),'bot');checkPresence()}
