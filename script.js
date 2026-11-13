@@ -378,6 +378,7 @@ async function sendToAI(){
     const answer=getLocalPublicAnswer(q);
     add(q,'user');
     add(answer,'bot');
+    if(input)input.value='';
     return;
   }
   const userBubble=add(q,'user'),receipt=document.createElement('small');receipt.className='ai-receipt';receipt.textContent='Sent ✓';userBubble?.appendChild(receipt);
