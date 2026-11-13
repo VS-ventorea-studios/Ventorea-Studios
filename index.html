@@ -77,4 +77,30 @@
 <script>
 // FAQ accordion exclusivity
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));
-</script><script src="./all-pages.js?v=6"></script></body></html>
+</script><script src="./all-pages.js?v=6"></script><script>
+/* Independent AI launcher fallback. Keeps the chat panel operable if the main app script stops early. */
+(()=> {
+  const openChat=()=>{
+    const panel=document.getElementById('aiPanel');
+    if(!panel)return;
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+    document.body.classList.add('ai-chat-open');
+  };
+  const closeChat=()=>{
+    const panel=document.getElementById('aiPanel');
+    if(!panel)return;
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    document.body.classList.remove('ai-chat-open');
+  };
+  document.addEventListener('click',event=>{
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    const trigger=target.closest('#aiMenuOpen,#aiDesktopOpen,#aiMobileOpen,#allPagesAI,[data-open-ventorea-ai]');
+    if(trigger){event.preventDefault();openChat();return;}
+    if(target.closest('#aiClose')){event.preventDefault();closeChat();}
+  },true);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeChat();});
+})();
+</script></body></html>
