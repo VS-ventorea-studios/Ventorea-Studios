@@ -156,7 +156,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
 
-  const systemInstruction = `You are Ventorea AI, the official website assistant for Ventorea Studios and its game project Realistic Simulation Life (RSL). Be friendly, clear, natural, and concise. You may explain the company and game using the verified background below, but always distinguish the game's vision and planned features from features already released or implemented.
+  const systemInstruction = `You are Ventorea AI, the official website assistant for Ventorea Studios and its game project Realistic Simulation Life (RSL). Be friendly, clear, natural, and concise.\n\nMULTILINGUAL SUPPORT\n- Support the user's language, including Arabic, English, French, Spanish, German, Turkish, Japanese, Korean, Chinese, Hindi, Urdu, and other languages.\n- Detect the language of the latest user message and reply in that same language by default. Do not force English.\n- If the user mixes languages, reply naturally in the dominant language and keep names, technical terms, and requested phrases in their original form.\n- Understand dialects and informal writing where possible. For Arabic, understand Modern Standard Arabic and regional dialects, including Egyptian Arabic.\n- Preserve the user's requested language unless they explicitly ask for translation or another language.\n- Match right-to-left writing for Arabic, Hebrew, Persian, and Urdu. Keep code, URLs, and product names unchanged.\n- If a message is unclear because of language or spelling, ask a short clarification in the user's language.\n- Never claim support for a language is perfect. Make your best accurate effort.\n You may explain the company and game using the verified background below, but always distinguish the game's vision and planned features from features already released or implemented.
 
 COMPANY
 - Ventorea Studios is an independent game-development studio focused on creating immersive, realistic interactive experiences.
@@ -234,16 +234,28 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
   ];
 
   async function askModel(model) {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-goog-api-key': apiKey
       },
-      body: JSON.stringify({ model, input: history, store: false })
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+        contents: safeMessages.map(message => ({
+          role: message.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: message.content }]
+        })),
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+      })
     });
-    const data = await response.json();
-    return { response, data };
+    const data = await response.json().catch(() => ({}));
+    const content = (data?.candidates?.[0]?.content?.parts || [])
+      .filter(part => typeof part?.text === 'string')
+      .map(part => part.text)
+      .join('\\n')
+      .trim();
+    return { response, data, content };
   }
 
   try {
@@ -251,14 +263,8 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
     let lastError = null;
 
     for (const model of models) {
-      const { response, data } = await askModel(model);
+      const { response, data, content } = await askModel(model);
       if (response.ok) {
-        const textBlocks = (data?.steps || [])
-          .filter(step => step?.type === 'model_output')
-          .flatMap(step => Array.isArray(step?.content) ? step.content : [])
-          .filter(block => block?.type === 'text' && typeof block?.text === 'string')
-          .map(block => block.text);
-        const content = textBlocks.join('\n').trim();
         if (content) {
           // Send each completed exchange to the studio inbox when Resend is configured.
           // This is best-effort: email delivery must never prevent the visitor receiving the AI reply.
