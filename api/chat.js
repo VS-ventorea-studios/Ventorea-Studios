@@ -253,7 +253,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
     const content = (data?.candidates?.[0]?.content?.parts || [])
       .filter(part => typeof part?.text === 'string')
       .map(part => part.text)
-      .join('\\n')
+      .join('\n')
       .trim();
     return { response, data, content };
   }
