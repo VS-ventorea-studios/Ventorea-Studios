@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const timeoutSignal = ms => AbortSignal.timeout(ms);
 
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash'], keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
+  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', models: ['gemini-3.5-flash-lite'], keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
@@ -264,7 +264,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
   }
 
   try {
-    const models = ['gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+    const models = ['gemini-3.5-flash-lite'];
     let lastError = null;
 
     for (const model of models) {
