@@ -26,6 +26,7 @@ if(menu&&nav){
 const AI_ENDPOINT='https://ventorea-studios.vercel.app/api/chat';
 const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),desktopLauncher=$('aiDesktopOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
+const allPagesAI=$('allPagesAI');
 const aiAuthRequired=$('aiAuthRequired'),aiSignInButton=$('aiSignInButton');
 const accountOpen=$('accountOpen');
 const cookieNotice=$('cookieNotice');
@@ -48,7 +49,7 @@ function renderSavedChat(){
   chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
 }
 
-let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false;
+let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false,googleOAuthPending=false;
 
 function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
@@ -94,6 +95,7 @@ async function checkPresence(){
 }
 renderSavedChat();
 if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
+if(allPagesAI){allPagesAI.addEventListener('click',event=>{event.preventDefault();aiOpen()})}
 if(desktopLauncher){desktopLauncher.setAttribute('aria-controls','aiPanel');desktopLauncher.setAttribute('aria-expanded','false');desktopLauncher.addEventListener('click',()=>{if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
 closeButton?.addEventListener('click',aiClose);
@@ -273,7 +275,6 @@ $('accountSignOutButton')?.addEventListener('click',async()=>{
 });
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
 googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
-let googleOAuthPending=false;
 async function startGoogleLogin(){
  if(googleOAuthPending)return;
  openGoogleLogin();
