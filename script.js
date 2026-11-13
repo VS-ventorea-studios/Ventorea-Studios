@@ -45,9 +45,9 @@ function applyMotionSetting(){document.body.classList.toggle('reduce-motion',rea
 function renderSavedChat(){
   if(!messages)return;
   messages.replaceChildren();
-  if(isDemoSignedIn())add("Hey there. I’m Ventorea AI. Ask me about the studio, RSL, our systems or development progress.",'bot');
-  else add("Log in required. Sign in or create an account to chat with Ventorea AI. Simple service notifications still work here without calling the AI API or using API credits.",'bot');
-  chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
+  if(isDemoSignedIn())add("Hey there. I’m Ventorea AI. Ask me about Ventorea Studios, RSL, our systems or development progress.",'bot');
+  else add("Welcome to Ventorea. Ask me for quick public information such as RSL prices, planned editions or release status. These instant answers do not use AI API credits. Sign in to unlock full Ventorea AI chat.",'bot');
+  if(isDemoSignedIn())chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
 }
 
 let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false,googleOAuthPending=false;
@@ -57,9 +57,9 @@ function updateAccountUI(){
   const signed=!!googleUser;
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(profileIconOpen){profileIconOpen.href=signed?'/account/':'/login/';profileIconOpen.setAttribute('aria-label',signed?'Open your profile':'Sign in or create an account');profileIconOpen.title=signed?'Your profile':'Sign in or create an account'}
-  if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign-in required'}
+  if(input){input.disabled=false;input.placeholder=signed?'Message Ventorea AI…':'Ask about prices, RSL or the studio…'}
   if(aiAuthRequired)aiAuthRequired.hidden=signed;
-  if(form)form.hidden=!signed;
+  if(form)form.hidden=false;
   if(aiSignInButton)aiSignInButton.disabled=!!googleOAuthPending;
   if(signed)populateAccountSettings();
 }
@@ -343,15 +343,49 @@ function add(text,type){
 }
 (()=>{if(document.getElementById('aiReadableReplyStyles'))return;const style=document.createElement('style');style.id='aiReadableReplyStyles';style.textContent=`.ai-messages .bot{font-size:16px!important;line-height:1.75!important;overflow-wrap:anywhere}.ai-messages .bot .ai-answer-heading{font-size:1.18em;font-weight:700;margin:.55em 0 .25em;color:#f2f7ff}.ai-messages .bot .ai-answer-list-item{padding-left:.25em;margin:.18em 0}.ai-messages .bot strong{font-weight:750;color:#fff}.ai-messages .bot .ai-answer-link{color:#83c6ff;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}.ai-messages .bot .ai-answer-link:hover{color:#c0e3ff}.ai-messages .user{font-size:15px!important;line-height:1.65!important}@media(max-width:680px){.ai-messages .bot{font-size:17px!important;line-height:1.75!important}.ai-messages .user{font-size:16px!important}}`;document.head.appendChild(style);})();
 (()=>{if(document.getElementById('aiThinkingGlowStyles'))return;const style=document.createElement('style');style.id='aiThinkingGlowStyles';style.textContent=`.ai-messages .ai-thinking-glow{display:flex;align-items:center;gap:9px;width:max-content;max-width:90%;border:1px solid rgba(77,163,255,.42);box-shadow:0 0 8px rgba(77,163,255,.14),inset 0 0 10px rgba(77,163,255,.06);animation:aiThinkingGlow 2.1s ease-in-out infinite;color:#e0edff}.ai-thinking-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#7fc1ff;box-shadow:0 0 5px 2px rgba(77,163,255,.42);animation:aiThinkingPulse 1.6s ease-in-out infinite}.ai-thinking-ellipsis{display:inline-block;min-width:18px;letter-spacing:2px;animation:aiThinkingDots 1.2s steps(4,end) infinite;overflow:hidden}@keyframes aiThinkingGlow{0%,100%{border-color:rgba(77,163,255,.28);box-shadow:0 0 5px rgba(77,163,255,.1),inset 0 0 8px rgba(77,163,255,.04)}50%{border-color:rgba(125,195,255,.95);box-shadow:0 0 8px 3px rgba(77,163,255,.32),0 0 22px rgba(77,163,255,.18),inset 0 0 13px rgba(77,163,255,.12)}}@keyframes aiThinkingPulse{0%,100%{opacity:.55;transform:scale(.85);box-shadow:0 0 4px 1px rgba(77,163,255,.28)}50%{opacity:1;transform:scale(1.15);box-shadow:0 0 8px 4px rgba(77,163,255,.8)}}@keyframes aiThinkingDots{0%{width:0}100%{width:18px}}@media(prefers-reduced-motion:reduce){.ai-thinking-glow,.ai-thinking-dot,.ai-thinking-ellipsis{animation:none!important}}`;document.head.appendChild(style);})();
+function getLocalPublicAnswer(message){
+  const q=String(message||'').toLowerCase();
+  const priceMatch=/(price|pricing|cost|how much|edition|demo|standard|ultimate|سعر|الاسعار|الأسعار|بكام|كام|نسخة|الإصدار|الاصدار)/i.test(q);
+  if(priceMatch)return "RSL planned editions and prices:\n• Demo: $0 USD\n• Standard: $20 USD\n• Ultimate: $30 USD\nThese are planned prices, not active offers. Final prices and edition contents may change before release. RSL is still in development.";
+  if(/release|launch|when.*(out|release)|date|موعد|هتنزل|النزول|الإصدار|إمتى|متى/i.test(q))return "RSL is in development. Ventorea Studios has not announced an official release date yet.";
+  if(/platform|pc|playstation|ps5|xbox|mobile|android|ios|منص|بلايستيشن|كمبيوتر|موبايل/i.test(q))return "RSL platforms and system requirements have not been officially announced yet.";
+  if(/what is rsl|about rsl|realistic simulation life|يعني ايه rsl|ما هي rsl|ايه rsl/i.test(q))return "RSL means Realistic Simulation Life. It is Ventorea Studios’ planned open-world life simulation focused on everyday activities and connected city systems. The project is still in development.";
+  if(/ventorea|studio|الشركة|الاستوديو/i.test(q))return "Ventorea Studios is an independent game-development studio. Its featured project is Realistic Simulation Life (RSL). The studio slogan is “New World, New Lifestyle.”";
+  return "I can answer quick public questions about RSL prices, planned editions, release status and Ventorea Studios without using AI API credits. For general questions and full conversations, sign in to unlock Ventorea AI.";
+}
+async function verifySignedInUser(){
+  if(!supabaseClient)return {user:null,unavailable:true};
+  try{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error)return {user:null,unavailable:true};
+    const token=data?.session?.access_token;
+    if(!token)return {user:null,unavailable:false};
+    const {data:userData,error:userError}=await supabaseClient.auth.getUser(token);
+    if(userError||!userData?.user)return {user:null,unavailable:true};
+    return {user:userData.user,unavailable:false};
+  }catch{return {user:null,unavailable:true}}
+}
 async function sendToAI(){
-  if(!isDemoSignedIn()){openGoogleLogin();return}
   const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH);if(!q||input.disabled)return;
+  const verified=await verifySignedInUser();
+  if(verified.unavailable){
+    add("I couldn’t verify your sign-in right now. Check your connection and try again. No AI request was sent.",'bot');
+    return;
+  }
+  googleUser=verified.user;
+  updateAccountUI();
+  if(!verified.user){
+    const answer=getLocalPublicAnswer(q);
+    add(q,'user');
+    add(answer,'bot');
+    return;
+  }
   const userBubble=add(q,'user'),receipt=document.createElement('small');receipt.className='ai-receipt';receipt.textContent='Sent ✓';userBubble?.appendChild(receipt);
   chat.push({role:'user',content:q});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();input.value='';input.disabled=true;
   const submit=form?.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
   const loading=add('Thinking…','bot');
   try{
-    const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}googleUser=sessionData.session.user;updateAccountUI();const requestController=new AbortController();
+    const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}const {data:verifiedData,error:verifiedError}=await supabaseClient.auth.getUser(sessionData.session.access_token);if(verifiedError||!verifiedData?.user){googleUser=null;updateAccountUI();throw new Error('Your sign-in could not be verified. Please sign in again.')}googleUser=verifiedData.user;updateAccountUI();const requestController=new AbortController();
     const requestTimeout=window.setTimeout(()=>requestController.abort(),25000);
     let response,data;
     try {
