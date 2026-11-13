@@ -94,10 +94,10 @@ async function checkPresence(){
   catch{serviceOnline=false;setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt))}
 }
 renderSavedChat();
-if(launcher){launcher.setAttribute('aria-controls','aiPanel');launcher.setAttribute('aria-expanded','false');launcher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
-if(allPagesAI){allPagesAI.addEventListener('click',event=>{event.preventDefault();aiOpen()})}
-if(desktopLauncher){desktopLauncher.setAttribute('aria-controls','aiPanel');desktopLauncher.setAttribute('aria-expanded','false');desktopLauncher.addEventListener('click',()=>{if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
-if(mobileLauncher){mobileLauncher.setAttribute('aria-controls','aiPanel');mobileLauncher.setAttribute('aria-expanded','false');mobileLauncher.addEventListener('click',event=>{event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()})}
+document.addEventListener('click',event=>{const trigger=event.target.closest('#aiMenuOpen,#aiDesktopOpen,#aiMobileOpen,#allPagesAI,[data-open-ventorea-ai]');if(!trigger)return;event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()},true);
+if(launcher)launcher.setAttribute('aria-controls','aiPanel');
+if(desktopLauncher)desktopLauncher.setAttribute('aria-controls','aiPanel');
+if(mobileLauncher)mobileLauncher.setAttribute('aria-controls','aiPanel');
 closeButton?.addEventListener('click',aiClose);
 aiSignInButton?.addEventListener('click',startGoogleLogin);
 
