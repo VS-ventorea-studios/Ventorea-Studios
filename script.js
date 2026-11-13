@@ -305,7 +305,7 @@ googleSignOutButton?.addEventListener('click',async()=>{
 });
 function add(text,type){
   if(!messages)return null;
-  const p=document.createElement('div');p.className=type;
+  const p=document.createElement('div');p.className=type;p.dir='auto';
   if(type==='bot'&&text==='Thinking…'){
     p.classList.add('ai-thinking-glow');p.setAttribute('aria-live','polite');
     p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span>Thinking</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span>';
