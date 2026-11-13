@@ -28,7 +28,7 @@ const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),desktopLauncher=$('aiDesktopOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const allPagesAI=$('allPagesAI');
 const aiAuthRequired=$('aiAuthRequired'),aiSignInButton=$('aiSignInButton');
-const accountOpen=$('accountOpen');
+const accountOpen=$('accountOpen'),profileIconOpen=$('profileIconOpen');
 const cookieNotice=$('cookieNotice');
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
 const REMEMBER_CHAT_KEY='ventorea-remember-ai-chat-v1';
@@ -45,7 +45,8 @@ function applyMotionSetting(){document.body.classList.toggle('reduce-motion',rea
 function renderSavedChat(){
   if(!messages)return;
   messages.replaceChildren();
-  add("Hey there. I’m Ventorea AI. Ask me about the studio, RSL, our systems or development progress.",'bot');
+  if(isDemoSignedIn())add("Hey there. I’m Ventorea AI. Ask me about the studio, RSL, our systems or development progress.",'bot');
+  else add("Log in required. Sign in or create an account to chat with Ventorea AI. Simple service notifications still work here without calling the AI API or using API credits.",'bot');
   chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
 }
 
@@ -55,6 +56,7 @@ function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
+  if(profileIconOpen){profileIconOpen.href=signed?'/account/':'/login/';profileIconOpen.setAttribute('aria-label',signed?'Open your profile':'Sign in or create an account');profileIconOpen.title=signed?'Your profile':'Sign in or create an account'}
   if(input){input.disabled=!signed;input.placeholder=signed?'Message Ventorea AI…':'Sign-in required'}
   if(aiAuthRequired)aiAuthRequired.hidden=signed;
   if(form)form.hidden=!signed;
