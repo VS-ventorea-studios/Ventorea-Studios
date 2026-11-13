@@ -3,6 +3,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store');
+  const timeoutSignal = ms => AbortSignal.timeout(ms);
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash'], keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
@@ -15,7 +16,7 @@ export default async function handler(req, res) {
   const authorization = req.headers.authorization || req.headers.Authorization || '';
   const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
   if (!accessToken) {
-    return res.status(401).json({ error: 'Sign in with Google to use Ventorea AI.' });
+    return res.status(401).json({ error: 'Sign-in required to use Ventorea AI.' });
   }
 
   const supabaseUrl = 'https://ncmthgqsrkasesfqvuzk.supabase.co';
@@ -28,7 +29,8 @@ export default async function handler(req, res) {
         apikey: supabasePublishableKey,
         Authorization: 'Bearer ' + accessToken
       },
-      cache: 'no-store'
+      cache: 'no-store',
+      signal: timeoutSignal(8000)
     });
     if (!authResponse.ok) {
       return res.status(401).json({ error: 'Your sign-in session is invalid or expired. Please sign in again.' });
@@ -61,7 +63,7 @@ export default async function handler(req, res) {
   async function loadAbuseStatus() {
     if (!abuseHeaders) return null;
     const response = await fetch(databaseUrl + '?user_id=eq.' + encodeURIComponent(authenticatedUser.id) + '&select=user_id,swear_count,suspension_level,suspended_until', {
-      headers: abuseHeaders, cache: 'no-store'
+      headers: abuseHeaders, cache: 'no-store', signal: timeoutSignal(8000)
     });
     if (!response.ok) throw new Error('Could not read abuse status');
     const rows = await response.json();
@@ -71,7 +73,8 @@ export default async function handler(req, res) {
     const response = await fetch(databaseUrl, {
       method: 'POST',
       headers: { ...abuseHeaders, Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(status)
+      body: JSON.stringify(status),
+      signal: timeoutSignal(8000)
     });
     if (!response.ok) throw new Error('Could not save abuse status');
   }
@@ -141,7 +144,8 @@ export default async function handler(req, res) {
             to: ['ventoreastudios.support@gmail.com'],
             subject: '[Ventorea AI ALERT] Profanity detected',
             html: `<h2>Ventorea AI profanity alert</h2><p><b>Time (UTC):</b> ${escapeAlertHtml(alertTime)}</p><p><b>Signed-in visitor:</b> ${escapeAlertHtml(visitorEmailForAlert)}</p><hr><h3>Visitor message</h3><p style="white-space:pre-wrap">${escapeAlertHtml(latestVisitorMessage.slice(0, 2000))}</p><p style="color:#666;font-size:12px">This alert was sent as soon as the visitor message reached the AI endpoint.</p>`
-          })
+          }),
+          signal: timeoutSignal(6000)
         });
         if (!alertResponse.ok) console.error('Ventorea AI profanity alert failed:', alertResponse.status);
       } catch (alertError) {
@@ -247,7 +251,8 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
           parts: [{ text: message.content }]
         })),
         generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
-      })
+      }),
+      signal: timeoutSignal(18000)
     });
     const data = await response.json().catch(() => ({}));
     const content = (data?.candidates?.[0]?.content?.parts || [])
@@ -297,7 +302,8 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
                   to: ['ventoreastudios.support@gmail.com'],
                   subject: '[Ventorea AI] New conversation exchange',
                   html: emailHtml
-                })
+                }),
+                signal: timeoutSignal(6000)
               });
               if (!emailResponse.ok) {
                 const emailError = await emailResponse.json().catch(() => ({}));
