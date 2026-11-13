@@ -50,6 +50,9 @@
     catch { /* Private browsing can block storage. */ }
   }
   async function signIn(provider) {
+    if (provider !== 'google') return;
+    window.location.href = '/login/';
+    return;
     if (!client || busy) return;
     busy = true;
     const buttons = [signInButton, $('accountAppleSignIn'), $('accountFacebookSignIn')].filter(Boolean);
@@ -123,8 +126,8 @@
     }
   }
   signInButton.addEventListener('click', () => signIn('google'));
-  $('accountAppleSignIn').addEventListener('click', () => signIn('apple'));
-  $('accountFacebookSignIn').addEventListener('click', () => signIn('facebook'));
+  $('accountAppleSignIn')?.addEventListener('click', () => signIn('apple'));
+  $('accountFacebookSignIn')?.addEventListener('click', () => signIn('facebook'));
   signOutButton.addEventListener('click', signOut);
   profileForm.addEventListener('submit', saveProfile);
   $('rememberChat').addEventListener('change', event => writeBool('ventorea-remember-ai-chat-v1', event.target.checked));
@@ -142,7 +145,7 @@
   client.auth.getSession().then(({ data, error }) => {
     if (error) throw error;
     render(data?.session?.user || null);
-    if (!data?.session?.user) status(signedOutStatus, 'Sign in with Google, Apple, or Facebook to manage your account.');
+    if (!data?.session?.user) status(signedOutStatus, 'Continue with Google to sign in, then return here to manage your profile.');
   }).catch(error => {
     render(null);
     status(signedOutStatus, error?.message || 'Could not check your session. Refresh the page and try again.', 'error');
