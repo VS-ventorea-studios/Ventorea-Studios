@@ -19,8 +19,8 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Sign-in required to use Ventorea AI.' });
   }
 
-  const supabaseUrl = 'https://ncmthgqsrkasesfqvuzk.supabase.co';
-  const supabasePublishableKey = 'sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
+  const supabaseUrl = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
+  const supabasePublishableKey = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
   let authenticatedUser;
   try {
     const authResponse = await fetch(supabaseUrl + '/auth/v1/user', {
