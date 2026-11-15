@@ -288,27 +288,31 @@ $('accountSignOutButton')?.addEventListener('click',async()=>{
 });
 $('googleLoginClose')?.addEventListener('click',()=>hideModal(googleLoginModal));
 googleLoginModal?.addEventListener('click',e=>{if(e.target===googleLoginModal)hideModal(googleLoginModal)});
-async function startGoogleLogin(){
+async function startGoogleLogin(event){
+ if(event){event.preventDefault();event.stopPropagation()}
  if(googleOAuthPending)return;
- openGoogleLogin();
- if(!supabaseClient){refreshGoogleAccount();return}
  googleOAuthPending=true;
- if(googleLoginButton)googleLoginButton.disabled=true;
+ if(googleLoginButton){googleLoginButton.disabled=true;googleLoginButton.setAttribute('aria-busy','true')}
+ if(aiSignInButton)aiSignInButton.disabled=true;
  if(googleLoginStatus){googleLoginStatus.textContent='Connecting to Google securely…';googleLoginStatus.className='form-status'}
-  if(aiSignInButton)aiSignInButton.disabled=true;
- try {
+ if(!supabaseClient){
+  googleOAuthPending=false;
+  if(googleLoginStatus){googleLoginStatus.textContent='Sign-in could not start because the authentication service did not load. Refresh the page and try again.';googleLoginStatus.className='form-status error'}
+  if(googleLoginButton){googleLoginButton.disabled=false;googleLoginButton.removeAttribute('aria-busy')}
+  if(aiSignInButton)aiSignInButton.disabled=false;
+  return;
+ }
+ try{
   const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
-   options:{redirectTo:(window.location.pathname.replace(/\/+$/,'')==='/login'?'https://www.ventoreastudios.online/login/':'https://www.ventoreastudios.online/'),queryParams:{prompt:'select_account'}}
+   options:{redirectTo:(window.location.pathname.replace(/\\/+$/,'')==='/login'?'https://www.ventoreastudios.online/login/':'https://www.ventoreastudios.online/'),queryParams:{prompt:'select_account'}}
   });
   if(error)throw error;
-  // Supabase redirects the current tab to Google. Do not show a false
-  // timeout error while mobile browsers are still completing the redirect.
-  // If OAuth returns with an error, showOAuthReturnError() handles it.
- } catch(error) {
+ }catch(error){
   googleOAuthPending=false;
   if(googleLoginStatus){googleLoginStatus.textContent=error?.message||'Google sign-in could not be started. Please try again.';googleLoginStatus.className='form-status error'}
-  if(googleLoginButton)googleLoginButton.disabled=false;
+  if(googleLoginButton){googleLoginButton.disabled=false;googleLoginButton.removeAttribute('aria-busy')}
+  if(aiSignInButton)aiSignInButton.disabled=false;
  }
 }
 googleLoginButton?.addEventListener('click',startGoogleLogin);
