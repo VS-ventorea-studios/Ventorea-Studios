@@ -114,8 +114,8 @@ if(mobileLauncher)mobileLauncher.setAttribute('aria-controls','aiPanel');
 closeButton?.addEventListener('click',aiClose);
 aiSignInButton?.addEventListener('click',startGoogleLogin);
 
-const SUPABASE_URL='https://ncmthgqsrkasesfqvuzk.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
+const SUPABASE_URL='https://ujxcvfgkpqzkpfthahla.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
 let supabaseClient=null,googleUser=null;
 const googleLoginModal=$('googleLoginModal'),googleLoginStatus=$('googleLoginStatus'),googleLoginButton=$('googleLoginButton'),googleSignOutButton=$('googleSignOutButton');
 const oauthReturnError=(()=>{const params=new URLSearchParams(window.location.search);const error=params.get('error_description')||params.get('error_code')||params.get('error');if(!error)return '';params.delete('error_description');params.delete('error_code');params.delete('error');const query=params.toString();window.history.replaceState(null,document.title,window.location.pathname+(query?'?'+query:'')+window.location.hash);return error})();
