@@ -1,8 +1,8 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const SUPABASE_URL = 'https://ncmthgqsrkasesfqvuzk.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_bP4bxaJgbN2eimj-uW4n1g_mUhpUwsf';
+  const SUPABASE_URL = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
   const signedOut = $('signedOutView');
   const accountContent = $('accountContent');
   const signedOutStatus = $('signedOutStatus');
