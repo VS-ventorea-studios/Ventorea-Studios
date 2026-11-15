@@ -299,7 +299,7 @@ async function startGoogleLogin(){
  try {
   const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
-   options:{redirectTo:(window.location.pathname.replace(/\/+$/,'')==='/login'?'https://ventoreastudios.online/login/':'https://ventoreastudios.online/'),queryParams:{prompt:'select_account'}}
+   options:{redirectTo:(window.location.pathname.replace(/\/+$/,'')==='/login'?'https://www.ventoreastudios.online/login/':'https://www.ventoreastudios.online/'),queryParams:{prompt:'select_account'}}
   });
   if(error)throw error;
   // Supabase redirects the current tab to Google. Do not show a false
