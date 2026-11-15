@@ -38,6 +38,95 @@
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../script.js?v=90"></script>
+  <script>
+    (() => {
+      const button = document.getElementById('googleLoginButton');
+      const signOutButton = document.getElementById('googleSignOutButton');
+      const status = document.getElementById('googleLoginStatus');
+      const SUPABASE_URL = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
+      let client;
+
+      const setStatus = (message, type = '') => {
+        status.textContent = message;
+        status.className = 'form-status' + (type ? ' ' + type : '');
+      };
+
+      if (!button || !status) return;
+
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        setStatus('Authentication library failed to load. Check your connection, refresh, and try again.', 'error');
+        button.disabled = true;
+        return;
+      }
+
+      try {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: {
+            flowType: 'pkce',
+            detectSessionInUrl: true,
+            persistSession: true,
+            autoRefreshToken: true
+          }
+        });
+      } catch (error) {
+        setStatus('Authentication setup failed: ' + (error.message || 'Unknown error'), 'error');
+        button.disabled = true;
+        return;
+      }
+
+      const showSession = (user) => {
+        if (user) {
+          setStatus('Signed in as ' + (user.email || 'Google user') + '.');
+          button.hidden = true;
+          signOutButton.hidden = false;
+        } else {
+          setStatus('Choose Google to securely sign in to Ventorea Studios.');
+          button.hidden = false;
+          signOutButton.hidden = true;
+        }
+      };
+
+      client.auth.getSession().then(({ data, error }) => {
+        if (error) throw error;
+        showSession(data.session?.user || null);
+      }).catch(error => {
+        setStatus('Could not check your session: ' + (error.message || 'Please refresh.'), 'error');
+      });
+
+      client.auth.onAuthStateChange((_event, session) => {
+        showSession(session?.user || null);
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      const authError = params.get('error_description') || params.get('error');
+      if (authError) setStatus('Google sign-in failed: ' + authError, 'error');
+
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        setStatus('Connecting to Google securely…');
+        try {
+          const { error } = await client.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: 'https://www.ventoreastudios.online/login/',
+              queryParams: { prompt: 'select_account' }
+            }
+          });
+          if (error) throw error;
+        } catch (error) {
+          setStatus('Google sign-in could not start: ' + (error.message || 'Please try again.'), 'error');
+          button.disabled = false;
+        }
+      });
+
+      signOutButton.addEventListener('click', async () => {
+        signOutButton.disabled = true;
+        const { error } = await client.auth.signOut();
+        if (error) setStatus('Sign out failed: ' + error.message, 'error');
+        signOutButton.disabled = false;
+      });
+    })();
+  </script>
 </body>
 </html>
