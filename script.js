@@ -153,8 +153,8 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
   }
  });
  const callbackParams=new URLSearchParams(window.location.search);
- const callbackCode=callbackParams.get('code');
- const callbackFlowId=callbackParams.get('sb_flow_id');
+ const callbackCode=callbackParams.get('code')||window.__ventoreaAuthCode||'';
+ const callbackFlowId=callbackParams.get('sb_flow_id')||window.__ventoreaAuthFlowId||'';
  const clearAuthCallbackUrl=()=>{
   if(!callbackCode)return;
   callbackParams.delete('code');
