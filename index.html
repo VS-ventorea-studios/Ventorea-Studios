@@ -75,11 +75,11 @@
 </section>
 <button id="aiMobileOpen" class="ai-launcher" type="button" aria-label="Open Ventorea AI" aria-controls="aiPanel" aria-expanded="false">✦</button>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./script.js?v=90"></script>
+<script src="./script.js?v=91"></script>
 <script>
 // FAQ accordion exclusivity
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));
-</script><script src="./all-pages.js?v=6"></script><script>
+</script><script src="./all-pages.js?v=7"></script><script>
 /* Independent AI launcher fallback. Keeps the chat panel operable if the main app script stops early. */
 (()=> {
   const openChat=()=>{
