@@ -98,10 +98,12 @@ async function checkPresence(){
   try{
     const response=await fetch(AI_ENDPOINT,{method:'GET',cache:'no-store',signal:controller.signal});
     const data=await response.json().catch(()=>({}));
-    serviceOnline=response.ok&&data.ok===true&&data.keyConfigured===true;
+    serviceOnline=response.ok&&data.ok===true&&data.aiReady===true;
     const needsSetup=response.ok&&data.ok===true&&data.keyConfigured===false;
-    setPresence(serviceOnline,serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):needsSetup?'Setup needed':'Offline · active '+duration(Date.now()-sessionStartedAt));
-    if(needsSetup&&presenceText)presenceText.title='The server needs its AI API key configured.';
+    const issue=data.issue||'';
+    const statusLabel=serviceOnline?'Online · active '+duration(Date.now()-sessionStartedAt):needsSetup?'Setup needed':issue==='api_key_rejected'?'AI key rejected':issue==='no_supported_text_model'?'No supported Gemini model':'AI unavailable · active '+duration(Date.now()-sessionStartedAt);
+    setPresence(serviceOnline,statusLabel);
+    if(presenceText&&!serviceOnline)presenceText.title=issue||'Gemini health check did not pass.';
   }catch{
     serviceOnline=false;
     setPresence(false,'Offline · active '+duration(Date.now()-sessionStartedAt));
