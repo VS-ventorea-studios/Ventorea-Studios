@@ -160,6 +160,8 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
   const remaining=callbackParams.toString();
   window.history.replaceState(window.history.state,document.title,window.location.pathname+(remaining?'?'+remaining:'')+window.location.hash);
  };
+ // Hide the one-time code immediately, while retaining callbackCode in memory for PKCE.
+ clearAuthCallbackUrl();
  (async()=>{
   try{
    let session=null;
