@@ -305,7 +305,7 @@ async function startGoogleLogin(event){
  try{
   const {error}=await supabaseClient.auth.signInWithOAuth({
    provider:'google',
-   options:{redirectTo:(window.location.pathname.replace(/\\/+$/,'')==='/login'?'https://www.ventoreastudios.online/login/':'https://www.ventoreastudios.online/'),queryParams:{prompt:'select_account'}}
+   options:{redirectTo:'https://www.ventoreastudios.online/',queryParams:{prompt:'select_account'}}
   });
   if(error)throw error;
  }catch(error){
