@@ -348,9 +348,9 @@ function add(text,type){
     p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span>Thinking</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span>';
   }else if(type==='bot'){
     // Render a small, safe Markdown subset. Never inject model text as HTML.
-    const lines=String(text??'').split(/\\r?\\n/);
+    const lines=String(text??'').split(/\r?\n/);
     const addInline=(parent,line)=>{
-      const re=/(https?:\\/\\/[^\\s<>"']+|\\*\\*[^*]+\\*\\*)/g;let last=0,m;
+      const re=/(https?:\/\/[^\s<>"']+|\*\*[^*]+\*\*)/g;let last=0,m;
       while((m=re.exec(line))){
         if(m.index>last)parent.appendChild(document.createTextNode(line.slice(last,m.index)));
         const token=m[0];
