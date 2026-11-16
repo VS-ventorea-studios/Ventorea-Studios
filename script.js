@@ -139,9 +139,9 @@ function refreshGoogleAccount(){
  else{googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';googleLoginStatus.className='form-status';if(googleLoginButton)googleLoginButton.hidden=false;if(googleSignOutButton)googleSignOutButton.hidden=true}
 }
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
- // Exchange the PKCE code explicitly, then remove it from the address bar.
- // Vercel canonicalizes the apex host to www so the verifier stays on one origin.
- supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:false,persistSession:true,autoRefreshToken:true}});
+ // Let Supabase handle the OAuth PKCE callback and clean the one-time code after exchanging it.
+ // Keep the callback on the same canonical www origin used to start sign-in.
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
  supabaseClient.auth.onAuthStateChange((event,session)=>{
   googleUser=session?.user||null;
   refreshGoogleAccount();
@@ -152,48 +152,21 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
     googleLoginStatus.className='form-status success';
   }
  });
- const callbackParams=new URLSearchParams(window.location.search);
- const callbackCode=callbackParams.get('code')||window.__ventoreaAuthCode||'';
- const callbackFlowId=callbackParams.get('sb_flow_id')||window.__ventoreaAuthFlowId||'';
- const clearAuthCallbackUrl=()=>{
-  if(!callbackCode)return;
-  callbackParams.delete('code');
-  callbackParams.delete('sb_flow_id');
-  const remaining=callbackParams.toString();
-  window.history.replaceState(window.history.state,document.title,window.location.pathname+(remaining?'?'+remaining:'')+window.location.hash);
- };
- // Hide the one-time code immediately, while retaining callbackCode in memory for PKCE.
- clearAuthCallbackUrl();
- (async()=>{
-  try{
-   let session=null;
-   if(callbackCode){
-    const {data,error}=await supabaseClient.auth.exchangeCodeForSession(callbackCode,callbackFlowId?{flowId:callbackFlowId}:undefined);
-    if(error)throw error;
-    session=data?.session||null;
-    clearAuthCallbackUrl();
-   }else{
-    const {data,error}=await supabaseClient.auth.getSession();
-    if(error)throw error;
-    session=data?.session||null;
-   }
-   googleUser=session?.user||null;
-   refreshGoogleAccount();
-   updateAccountUI();
-   if(oauthReturnError)showOAuthReturnError();
-  }catch(error){
-   clearAuthCallbackUrl();
-   console.error('Ventorea authentication initialization failed:',error?.message||'unknown error');
-   googleUser=null;
-   refreshGoogleAccount();
-   updateAccountUI();
-   if(googleLoginStatus){
-    googleLoginStatus.textContent='Google sign-in could not be completed: '+(error?.message||'Please sign in again.');
-    googleLoginStatus.className='form-status error';
-   }
-   if(oauthReturnError)showOAuthReturnError();
+ supabaseClient.auth.getSession().then(({data,error})=>{
+  if(error)throw error;
+  googleUser=data?.session?.user||null;
+  refreshGoogleAccount();
+  updateAccountUI();
+ }).catch(error=>{
+  console.error('Ventorea authentication initialization failed:',error?.message||'unknown error');
+  googleUser=null;
+  refreshGoogleAccount();
+  updateAccountUI();
+  if(googleLoginStatus){
+   googleLoginStatus.textContent='Google sign-in could not be completed: '+(error?.message||'Please sign in again.');
+   googleLoginStatus.className='form-status error';
   }
- })();
+ });
 }
 if(oauthReturnError&&!supabaseClient)showOAuthReturnError();
 if(new URLSearchParams(window.location.search).get('login')==='required'){
