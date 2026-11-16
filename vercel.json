@@ -1,6 +1,17 @@
 {
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "ventoreastudios.online"
+        }
+      ],
+      "destination": "https://www.ventoreastudios.online/:path*",
+      "permanent": true
+    },
+    {
       "source": "/studio-hub.html",
       "destination": "/studio-hub",
       "permanent": true
