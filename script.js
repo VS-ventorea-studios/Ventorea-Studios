@@ -373,20 +373,31 @@ async function verifySignedInUser(){
   let timeout;
   try{
     const verification=(async()=>{
-      const {data,error}=await supabaseClient.auth.getSession();
+      let {data,error}=await supabaseClient.auth.getSession();
       if(error)throw error;
-      const token=data?.session?.access_token;
+      let session=data?.session||null;
+      // Recover a persisted Google session before treating the visitor as signed out.
+      if(!session?.access_token){
+        const refreshed=await supabaseClient.auth.refreshSession();
+        if(refreshed.error)throw refreshed.error;
+        session=refreshed.data?.session||null;
+      }
+      const token=session?.access_token;
       if(!token)return {user:null,unavailable:false};
       const {data:userData,error:userError}=await supabaseClient.auth.getUser(token);
       if(userError||!userData?.user)throw userError||new Error('Account verification failed');
+      googleUser=userData.user;
+      updateAccountUI();
       return {user:userData.user,unavailable:false};
     })();
     return await Promise.race([
       verification,
-      new Promise((_,reject)=>{timeout=window.setTimeout(()=>reject(new Error('Account verification timed out')),8000)})
+      new Promise((_,reject)=>{timeout=window.setTimeout(()=>reject(new Error('Account verification timed out')),12000)})
     ]);
-  }catch{return {user:null,unavailable:true}}
-  finally{window.clearTimeout(timeout)}
+  }catch(error){
+    console.warn('Ventorea AI sign-in verification failed:',error?.message||'unknown error');
+    return {user:null,unavailable:true};
+  }finally{window.clearTimeout(timeout)}
 }
 async function sendToAI(){
   const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH);if(!q||input.disabled)return;
