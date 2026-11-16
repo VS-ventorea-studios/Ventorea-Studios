@@ -108,6 +108,8 @@ async function checkPresence(){
   }finally{window.clearTimeout(timeout)}
 }
 renderSavedChat();
+checkPresence();
+window.setInterval(checkPresence,60000);
 document.addEventListener('click',event=>{const trigger=event.target.closest('#aiMenuOpen,#aiDesktopOpen,#aiMobileOpen,#allPagesAI,[data-open-ventorea-ai]');if(!trigger)return;event.preventDefault();if(panel?.classList.contains('open'))aiClose();else aiOpen()},true);
 if(launcher)launcher.setAttribute('aria-controls','aiPanel');
 if(desktopLauncher)desktopLauncher.setAttribute('aria-controls','aiPanel');
@@ -135,11 +137,11 @@ function refreshGoogleAccount(){
  else{googleLoginStatus.textContent='Choose Google to securely sign in to Ventorea Studios.';googleLoginStatus.className='form-status';if(googleLoginButton)googleLoginButton.hidden=false;if(googleSignOutButton)googleSignOutButton.hidden=true}
 }
 if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'){
- supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
- supabaseClient.auth.getSession().then(({data,error})=>{if(error)console.error('Supabase session restore failed:',error);googleUser=data?.session?.user||null;if(data?.session&&new URLSearchParams(window.location.search).has('code'))window.history.replaceState(null,document.title,window.location.pathname+window.location.hash);refreshGoogleAccount();updateAccountUI();if(oauthReturnError)showOAuthReturnError()}).catch(error=>{console.error('Supabase session restore failed:',error);if(oauthReturnError)showOAuthReturnError()});
+ // Exchange the PKCE code explicitly, then remove it from the address bar.
+ // Vercel canonicalizes the apex host to www so the verifier stays on one origin.
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',detectSessionInUrl:false,persistSession:true,autoRefreshToken:true}});
  supabaseClient.auth.onAuthStateChange((event,session)=>{
   googleUser=session?.user||null;
-  if(session&&new URLSearchParams(window.location.search).has('code'))window.history.replaceState(null,document.title,window.location.pathname+window.location.hash);
   refreshGoogleAccount();
   updateAccountUI();
   if(oauthReturnError)showOAuthReturnError();
@@ -147,9 +149,47 @@ if(window.supabase&&SUPABASE_PUBLISHABLE_KEY!=='PASTE_YOUR_SUPABASE_PUBLISHABLE_
     googleLoginStatus.textContent='Signed in as '+(googleUser.email||'Google user')+'. Your profile is available from My Account.';
     googleLoginStatus.className='form-status success';
   }
-  // Do not automatically open Account Settings after OAuth. It caused a page jump
-  // and made sign-in look frozen while profile/friend data loaded on mobile.
-});
+ });
+ const callbackParams=new URLSearchParams(window.location.search);
+ const callbackCode=callbackParams.get('code');
+ const callbackFlowId=callbackParams.get('sb_flow_id');
+ const clearAuthCallbackUrl=()=>{
+  if(!callbackCode)return;
+  callbackParams.delete('code');
+  callbackParams.delete('sb_flow_id');
+  const remaining=callbackParams.toString();
+  window.history.replaceState(window.history.state,document.title,window.location.pathname+(remaining?'?'+remaining:'')+window.location.hash);
+ };
+ (async()=>{
+  try{
+   let session=null;
+   if(callbackCode){
+    const {data,error}=await supabaseClient.auth.exchangeCodeForSession(callbackCode,callbackFlowId?{flowId:callbackFlowId}:undefined);
+    if(error)throw error;
+    session=data?.session||null;
+    clearAuthCallbackUrl();
+   }else{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error)throw error;
+    session=data?.session||null;
+   }
+   googleUser=session?.user||null;
+   refreshGoogleAccount();
+   updateAccountUI();
+   if(oauthReturnError)showOAuthReturnError();
+  }catch(error){
+   clearAuthCallbackUrl();
+   console.error('Ventorea authentication initialization failed:',error?.message||'unknown error');
+   googleUser=null;
+   refreshGoogleAccount();
+   updateAccountUI();
+   if(googleLoginStatus){
+    googleLoginStatus.textContent='Google sign-in could not be completed: '+(error?.message||'Please sign in again.');
+    googleLoginStatus.className='form-status error';
+   }
+   if(oauthReturnError)showOAuthReturnError();
+  }
+ })();
 }
 if(oauthReturnError&&!supabaseClient)showOAuthReturnError();
 if(new URLSearchParams(window.location.search).get('login')==='required'){
