@@ -6,7 +6,31 @@ export default async function handler(req, res) {
   const timeoutSignal = ms => AbortSignal.timeout(ms);
 
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method === 'GET') return res.status(200).json({ ok: true, provider: 'gemini', models: ['gemini-3.5-flash-lite'], keyConfigured: Boolean(process.env.GEMINI_API_KEY) });
+  if (req.method === 'GET') {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: false, aiReady: false, issue: 'missing_api_key' });
+    try {
+      const modelResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+        headers: { 'x-goog-api-key': apiKey },
+        cache: 'no-store',
+        signal: timeoutSignal(8000)
+      });
+      const modelData = await modelResponse.json().catch(() => ({}));
+      if (!modelResponse.ok) {
+        console.error('Ventorea AI health check rejected by Gemini:', modelResponse.status, modelData?.error?.status || 'upstream_error');
+        return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: true, aiReady: false, issue: modelResponse.status === 401 || modelResponse.status === 403 ? 'api_key_rejected' : 'gemini_unavailable' });
+      }
+      const supported = (modelData.models || [])
+        .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
+        .map(model => String(model.name || '').replace(/^models\//, ''));
+      const preferredModels = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+      const selectedModel = preferredModels.find(model => supported.includes(model)) || '';
+      return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: true, aiReady: Boolean(selectedModel), model: selectedModel || null, issue: selectedModel ? null : 'no_supported_text_model' });
+    } catch (error) {
+      console.error('Ventorea AI health check failed:', error?.name || 'network_error');
+      return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: true, aiReady: false, issue: 'health_check_failed' });
+    }
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
@@ -264,7 +288,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
   }
 
   try {
-    const models = ['gemini-3.5-flash-lite'];
+    const models = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
     let lastError = null;
 
     for (const model of models) {
