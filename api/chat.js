@@ -276,7 +276,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         })),
         generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
       }),
-      signal: timeoutSignal(18000)
+      signal: timeoutSignal(35000)
     });
     const data = await response.json().catch(() => ({}));
     const content = (data?.candidates?.[0]?.content?.parts || [])
@@ -290,8 +290,10 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
   try {
     const models = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
     let lastError = null;
+    let activeModel = '';
 
     for (const model of models) {
+      activeModel = model;
       const { response, data, content } = await askModel(model);
       if (response.ok) {
         if (content) {
@@ -344,6 +346,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         lastError = 'Gemini completed the request but returned no text.';
         continue;
       }
+      console.error('Ventorea AI Gemini request rejected:', model, response.status, data?.error?.status || 'upstream_error');
       lastError = data?.error?.message || data?.errors?.[0]?.message || `Gemini returned HTTP ${response.status}.`;
       const retryable = response.status === 429 || response.status >= 500 || /high demand|overloaded|temporar|unavailable|capacity/i.test(lastError);
       if (!retryable) break;
@@ -351,6 +354,12 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
     return res.status(502).json({ error: lastError || 'Gemini is temporarily unavailable. Please try again.' });
   } catch (error) {
-    return res.status(500).json({ error: `Backend request failed: ${error?.message || 'unknown server error'}` });
+    const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+    console.error('Ventorea AI backend request failed:', activeModel || 'preflight', error?.name || 'unknown_error');
+    return res.status(timedOut ? 504 : 500).json({
+      error: timedOut
+        ? 'Gemini took too long to respond. Please try again.'
+        : `Backend request failed: ${error?.message || 'unknown server error'}`
+    });
   }
 }
