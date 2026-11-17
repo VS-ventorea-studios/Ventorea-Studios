@@ -440,7 +440,7 @@ async function sendToAI(){
   const loading=add('Thinking…','bot');
   try{
     const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}const {data:verifiedData,error:verifiedError}=await supabaseClient.auth.getUser(sessionData.session.access_token);if(verifiedError||!verifiedData?.user){googleUser=null;updateAccountUI();throw new Error('Your sign-in could not be verified. Please sign in again.')}googleUser=verifiedData.user;updateAccountUI();const requestController=new AbortController();
-    const requestTimeout=window.setTimeout(()=>requestController.abort(),45000);
+    const requestTimeout=window.setTimeout(()=>requestController.abort(),70000);
     let response,data;
     try {
       response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionData.session.access_token},body:JSON.stringify({messages:chat,user:{id:sessionData.session.user.id,email:sessionData.session.user.email}}),signal:requestController.signal});
