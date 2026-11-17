@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 90
+    }
+  },
   "redirects": [
     {
       "source": "/:path*",
