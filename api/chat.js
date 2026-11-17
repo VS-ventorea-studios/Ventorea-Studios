@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       const supported = (modelData.models || [])
         .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
         .map(model => String(model.name || '').replace(/^models\//, ''));
-      const preferredModels = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+      const preferredModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
       const selectedModel = preferredModels.find(model => supported.includes(model)) || '';
       return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: true, aiReady: Boolean(selectedModel), model: selectedModel || null, issue: selectedModel ? null : 'no_supported_text_model' });
     } catch (error) {
@@ -270,13 +270,13 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
       },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents: safeMessages.map(message => ({
+        contents: safeMessages.slice(-8).map(message => ({
           role: message.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: message.content }]
         })),
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+        generationConfig: { maxOutputTokens: 600, thinkingConfig: { thinkingLevel: 'MINIMAL' } }
       }),
-      signal: timeoutSignal(35000)
+      signal: timeoutSignal(18000)
     });
     const data = await response.json().catch(() => ({}));
     const content = (data?.candidates?.[0]?.content?.parts || [])
@@ -289,7 +289,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
   let activeModel = '';
   try {
-    const models = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+    const models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
     let lastError = null;
 
     for (const model of models) {
