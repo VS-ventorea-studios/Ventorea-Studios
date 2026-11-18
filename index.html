@@ -73,19 +73,18 @@
     <button id="aiClose" type="button" aria-label="Close Ventorea AI">×</button>
   </div>
   <div id="aiMessages" class="ai-messages" aria-live="polite"></div>
-  <div id="aiAuthRequired" class="ai-auth-required" style="padding:14px;border-top:1px solid var(--line)">
-    <p class="modal-intro">Log in required to chat with Ventorea AI.</p>
-    <p class="ai-local-notice" role="status">Simple service notifications are available here. These local notices do not call the AI API or use API credits.</p>
-    <button id="aiSignInButton" class="button button-bright" type="button">LOG IN OR SIGN UP <span>↗</span></button>
-  </div>
-  <form id="aiForm" hidden>
+  <div class="ai-public-note">PUBLIC CHAT · NO SIGN-IN REQUIRED</div>
+  <div id="aiAttachmentList" class="ai-attachment-list" aria-live="polite" hidden></div>
+  <form id="aiForm">
+    <button id="aiAttachButton" type="button" aria-label="Attach files" title="Attach files">＋</button>
+    <input id="aiFileInput" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.txt,.csv,.md,.json,application/pdf,image/*,text/plain,text/csv,text/markdown,application/json" multiple hidden>
     <input id="aiInput" type="text" maxlength="2000" autocomplete="off" placeholder="Message Ventorea AI…" aria-label="Message Ventorea AI">
     <button id="aiSendButton" type="submit" aria-label="Send message">↑</button>
   </form>
 </section>
 <button id="aiMobileOpen" class="ai-launcher" type="button" aria-label="Open Ventorea AI" aria-controls="aiPanel" aria-expanded="false">✦</button>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./script.js?v=94"></script>
+<script src="./script.js?v=95"></script>
 <script>
 // FAQ accordion exclusivity
 document.querySelectorAll('.faq details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.faq details').forEach(other=>{if(other!==d)other.removeAttribute('open')})}));
