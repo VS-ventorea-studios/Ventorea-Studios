@@ -1,143 +1,204 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#050914">
-  <meta name="color-scheme" content="dark">
-  <meta name="description" content="Sign in to Ventorea Studios securely with your Google account.">
-  <title>Sign In — Ventorea Studios</title>
-  <link rel="icon" href="../Ventorea%20Studios.jpg">
-  <link rel="stylesheet" href="../style.css?v=80">
-
-  <link rel="canonical" href="https://www.ventoreastudios.online/login/">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Sign In — Ventorea Studios">
-  <meta property="og:description" content="Sign in to Ventorea Studios securely with your Google account.">
-  <meta property="og:url" content="https://www.ventoreastudios.online/login/">
-  <meta property="og:image" content="https://www.ventoreastudios.online/Ventorea%20Studios.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Sign In — Ventorea Studios">
-  <meta name="twitter:description" content="Sign in to Ventorea Studios securely with your Google account.">
-  <meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050914">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Sign in or create your Ventorea Studios account.">
+<title>Sign In or Create Account — Ventorea Studios</title>
+<link rel="icon" href="../Ventorea%20Studios.jpg">
+<link rel="stylesheet" href="../style.css?v=85">
+<link rel="canonical" href="https://ventoreastudios.online/login/">
+<meta name="robots" content="noindex,nofollow">
+<style>
+.auth-page{min-height:100vh;display:grid;place-items:center;padding:112px 18px 48px}
+.auth-card{width:min(100%,480px);padding:clamp(24px,5vw,42px);border:1px solid rgba(139,197,255,.24);background:linear-gradient(150deg,rgba(12,27,47,.97),rgba(5,12,24,.98));box-shadow:0 28px 90px #0008}
+.auth-card h1{font:500 clamp(38px,7vw,54px)/1.05 var(--display);letter-spacing:-.06em;margin:13px 0}
+.auth-card h1 em{font-family:Georgia,serif;color:#a9d6ff;font-weight:400}
+.auth-intro{color:#9fb4ce;font-size:13px;line-height:1.7;margin:0 0 24px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;background:#050d19;border:1px solid #263b56;margin:22px 0}
+.auth-tab{min-height:42px;border:1px solid transparent;background:transparent;color:#91a9c5;font:10px var(--mono);letter-spacing:.8px;cursor:pointer}
+.auth-tab[aria-selected="true"]{background:#142b47;border-color:#41658d;color:#eaf5ff}
+.auth-form label{display:block;color:#c8d9ed;font-size:12px;margin:0 0 15px}
+.auth-form input{display:block;width:100%;margin-top:7px;padding:14px;border:1px solid #294563;background:#050d19;color:#eff7ff;font:14px var(--body);outline:none;border-radius:3px}
+.auth-form input:focus{border-color:#80c9ff;box-shadow:0 0 0 3px rgba(128,201,255,.09)}
+.auth-form .button,.google-button{width:100%;min-height:48px;margin-top:5px}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#7188a5;font:9px var(--mono);letter-spacing:1px}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:#263b56}
+.google-button{display:flex;align-items:center;justify-content:center;gap:11px}
+.google-g{font:bold 19px Arial;color:#4285f4}
+.auth-status{min-height:22px;margin:14px 0 0;color:#a9bfd9;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.auth-status.error{color:#ff9aab}.auth-status.success{color:#8ce0bd}
+.auth-footnote{margin:15px 0 0;color:#7188a5;font-size:10px;line-height:1.6;text-align:center}
+.auth-back-link{display:block;margin-top:23px;text-align:center;color:#9dcfff;font:9px var(--mono);letter-spacing:1px}
+.auth-form[hidden],.auth-tab[hidden]{display:none!important}
+@media(max-width:520px){.auth-page{padding-top:94px}.auth-card{padding:24px 19px}}
+</style>
 </head>
 <body>
-  <div id="live-background" aria-hidden="true">
-    <div class="ambient-glow glow-one"></div>
-    <div class="ambient-glow glow-two"></div>
-    <div class="ambient-grid"></div>
-  </div>
-  <div class="noise" aria-hidden="true"></div>
-  <header class="site-header">
-    <a class="brand" href="/" aria-label="Ventorea Studios home">
-      <img class="brand-logo" src="../Ventorea%20Studios.jpg" alt="Ventorea Studios">
-    </a>
-    <a class="header-cta" href="/">BACK TO SITE <span>↗</span></a>
-  </header>
-  <main class="auth-page">
-    <section class="auth-card" aria-labelledby="login-title">
-      <p class="eyebrow">VENTOREA / ACCOUNT</p>
-      <h1 id="login-title">Welcome <em>back.</em></h1>
-      <p class="modal-intro">Sign in or create your Ventorea Studios account with Google. New visitors get an account automatically.</p>
-      <button class="button button-bright google-login-button" id="googleLoginButton" type="button">
-        <span class="google-g">G</span> CONTINUE WITH GOOGLE ↗
-      </button>
-      <button class="button button-outline google-signout-button" id="googleSignOutButton" type="button" hidden>SIGN OUT</button>
-      <p id="googleLoginStatus" class="form-status" role="status" aria-live="polite">Your account is managed securely through Google and Supabase.</p>
-      <p class="google-login-footnote">Google securely handles your sign-in. Never enter your Google password directly on this website.</p>
-      <a class="auth-back-link" href="/">← BACK TO VENTOREA STUDIOS</a>
-    </section>
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    (() => {
-      const button = document.getElementById('googleLoginButton');
-      const signOutButton = document.getElementById('googleSignOutButton');
-      const status = document.getElementById('googleLoginStatus');
-      const SUPABASE_URL = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
-      const SUPABASE_KEY = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
-      let client;
+<div id="live-background" aria-hidden="true"><div class="ambient-glow glow-one"></div><div class="ambient-glow glow-two"></div><div class="ambient-grid"></div></div>
+<div class="noise" aria-hidden="true"></div>
+<header class="site-header">
+<a class="brand" href="/" aria-label="Ventorea Studios home"><img class="brand-logo" src="../Ventorea%20Studios.jpg" alt="Ventorea Studios"></a>
+<a class="header-cta" href="/">BACK TO SITE <span>↗</span></a>
+</header>
+<main class="auth-page">
+<section class="auth-card" aria-labelledby="login-title">
+<p class="eyebrow">VENTOREA / ACCOUNT ACCESS</p>
+<h1 id="login-title">Your world.<br><em>Your account.</em></h1>
+<p class="auth-intro">Sign in to continue, or create a new Ventorea Studios account.</p>
+<div class="auth-tabs" role="tablist" aria-label="Account access">
+<button class="auth-tab" id="signInTab" type="button" role="tab" aria-selected="true">SIGN IN</button>
+<button class="auth-tab" id="signUpTab" type="button" role="tab" aria-selected="false">CREATE ACCOUNT</button>
+</div>
+<form class="auth-form" id="signInForm">
+<label>Email address<input id="signInEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+<label>Password<input id="signInPassword" type="password" autocomplete="current-password" placeholder="Your password" required></label>
+<button class="button button-bright" id="signInSubmit" type="submit">SIGN IN ↗</button>
+</form>
+<form class="auth-form" id="signUpForm" hidden>
+<label>Your name<input id="signUpName" type="text" maxlength="80" autocomplete="name" placeholder="Your name" required></label>
+<label>Email address<input id="signUpEmail" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+<label>Password<input id="signUpPassword" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required></label>
+<label>Confirm password<input id="signUpConfirm" type="password" autocomplete="new-password" minlength="8" placeholder="Enter your password again" required></label>
+<button class="button button-bright" id="signUpSubmit" type="submit">CREATE ACCOUNT ↗</button>
+</form>
+<div class="auth-divider">OR CONTINUE WITH</div>
+<button class="button button-outline google-button" id="googleLoginButton" type="button"><span class="google-g" aria-hidden="true">G</span> CONTINUE WITH GOOGLE</button>
+<p class="auth-status" id="authStatus" role="status" aria-live="polite">Use your email and password, or continue with Google.</p>
+<p class="auth-footnote">Your password is handled securely by Supabase Authentication. Never share your password with anyone.</p>
+<a class="auth-back-link" href="/">← BACK TO VENTOREA STUDIOS</a>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const SUPABASE_URL = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
+  const status = $('authStatus');
+  const signInForm = $('signInForm');
+  const signUpForm = $('signUpForm');
+  const signInTab = $('signInTab');
+  const signUpTab = $('signUpTab');
+  let busy = false;
 
-      const setStatus = (message, type = '') => {
-        status.textContent = message;
-        status.className = 'form-status' + (type ? ' ' + type : '');
-      };
+  function setStatus(message, type = '') {
+    status.textContent = message;
+    status.className = 'auth-status' + (type ? ' ' + type : '');
+  }
+  function setMode(mode) {
+    const signingIn = mode === 'signin';
+    signInForm.hidden = !signingIn;
+    signUpForm.hidden = signingIn;
+    signInTab.setAttribute('aria-selected', String(signingIn));
+    signUpTab.setAttribute('aria-selected', String(!signingIn));
+    setStatus(signingIn ? 'Enter your email and password to sign in.' : 'Create an account with your name, email and password.');
+  }
+  function setBusy(value) {
+    busy = value;
+    document.querySelectorAll('#signInSubmit,#signUpSubmit,#googleLoginButton').forEach(button => button.disabled = value);
+  }
 
-      if (!button || !status) return;
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+    setStatus('Authentication could not load. Check your connection and refresh.', 'error');
+    setBusy(true);
+    return;
+  }
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+  });
 
-      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-        setStatus('Authentication library failed to load. Check your connection, refresh, and try again.', 'error');
-        button.disabled = true;
-        return;
-      }
+  signInTab.addEventListener('click', () => setMode('signin'));
+  signUpTab.addEventListener('click', () => setMode('signup'));
 
-      try {
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-          auth: {
-            flowType: 'pkce',
-            detectSessionInUrl: true,
-            persistSession: true,
-            autoRefreshToken: true
-          }
-        });
-      } catch (error) {
-        setStatus('Authentication setup failed: ' + (error.message || 'Unknown error'), 'error');
-        button.disabled = true;
-        return;
-      }
+  client.auth.getSession().then(({data,error}) => {
+    if (error) throw error;
+    if (data.session?.user) {
+      setStatus('You are already signed in. Opening your account…', 'success');
+      window.location.replace('/account/');
+    }
+  }).catch(error => setStatus(error.message || 'Could not check your session.', 'error'));
 
-      const showSession = (user) => {
-        if (user) {
-          setStatus('Signed in as ' + (user.email || 'Google user') + '.');
-          button.hidden = true;
-          signOutButton.hidden = false;
-        } else {
-          setStatus('Choose Google to securely sign in to Ventorea Studios.');
-          button.hidden = false;
-          signOutButton.hidden = true;
+  signInForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (busy) return;
+    const email = $('signInEmail').value.trim();
+    const password = $('signInPassword').value;
+    setBusy(true);
+    setStatus('Signing in securely…');
+    try {
+      const {data,error} = await client.auth.signInWithPassword({email,password});
+      if (error) throw error;
+      if (!data.session) throw new Error('Sign-in did not create a session. Please try again.');
+      setStatus('Signed in. Opening your account…', 'success');
+      window.location.assign('/account/');
+    } catch (error) {
+      setStatus(error.message || 'Could not sign in. Check your details and try again.', 'error');
+      setBusy(false);
+    }
+  });
+
+  signUpForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (busy) return;
+    const name = $('signUpName').value.trim();
+    const email = $('signUpEmail').value.trim();
+    const password = $('signUpPassword').value;
+    const confirmation = $('signUpConfirm').value;
+    if (password.length < 8) return setStatus('Choose a password with at least 8 characters.', 'error');
+    if (password !== confirmation) return setStatus('Your passwords do not match.', 'error');
+    setBusy(true);
+    setStatus('Creating your account securely…');
+    try {
+      const {data,error} = await client.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {display_name:name,full_name:name},
+          emailRedirectTo: window.location.origin + '/account/'
         }
-      };
-
-      client.auth.getSession().then(({ data, error }) => {
-        if (error) throw error;
-        showSession(data.session?.user || null);
-      }).catch(error => {
-        setStatus('Could not check your session: ' + (error.message || 'Please refresh.'), 'error');
       });
+      if (error) throw error;
+      if (data.session) {
+        setStatus('Your account is ready. Opening your profile…', 'success');
+        window.location.assign('/account/');
+      } else {
+        setStatus('Account created. Check your email for the confirmation link, then sign in here.', 'success');
+        setMode('signin');
+        $('signInEmail').value = email;
+      }
+    } catch (error) {
+      setStatus(error.message || 'Could not create your account. Please try again.', 'error');
+      setBusy(false);
+    }
+  });
 
-      client.auth.onAuthStateChange((_event, session) => {
-        showSession(session?.user || null);
-      });
-
-      const params = new URLSearchParams(window.location.search);
-      const authError = params.get('error_description') || params.get('error');
-      if (authError) setStatus('Google sign-in failed: ' + authError, 'error');
-
-      button.addEventListener('click', async () => {
-        button.disabled = true;
-        setStatus('Connecting to Google securely…');
-        try {
-          const { error } = await client.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-              redirectTo: 'https://www.ventoreastudios.online/',
-              queryParams: { prompt: 'select_account' }
-            }
-          });
-          if (error) throw error;
-        } catch (error) {
-          setStatus('Google sign-in could not start: ' + (error.message || 'Please try again.'), 'error');
-          button.disabled = false;
+  $('googleLoginButton').addEventListener('click', async () => {
+    if (busy) return;
+    setBusy(true);
+    setStatus('Connecting to Google securely…');
+    try {
+      const {error} = await client.auth.signInWithOAuth({
+        provider:'google',
+        options:{
+          redirectTo: window.location.origin + '/account/',
+          queryParams:{prompt:'select_account'}
         }
       });
+      if (error) throw error;
+    } catch (error) {
+      setStatus(error.message || 'Google sign-in could not start. Please try again.', 'error');
+      setBusy(false);
+    }
+  });
 
-      signOutButton.addEventListener('click', async () => {
-        signOutButton.disabled = true;
-        const { error } = await client.auth.signOut();
-        if (error) setStatus('Sign out failed: ' + error.message, 'error');
-        signOutButton.disabled = false;
-      });
-    })();
-  </script>
+  const params = new URLSearchParams(window.location.search);
+  const authError = params.get('error_description') || params.get('error');
+  if (authError) setStatus('Sign-in failed: ' + authError, 'error');
+})();
+</script>
 </body>
 </html>
