@@ -200,7 +200,7 @@ export default async function handler(req, res) {
         return res.status(503).json({ error: 'Your message was blocked, but the safety counter could not be updated. Please try again shortly.' });
       }
     }
-    if (process.env.RESEND_API_KEY) {
+    if (process.env.RESEND_API_KEY && authenticatedUser) {
       const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
       const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
       const alertTime = new Date().toISOString();
