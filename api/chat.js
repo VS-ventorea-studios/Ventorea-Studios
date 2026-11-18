@@ -359,7 +359,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
     }
     const supportedModels = (modelListData.models || [])
       .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
-      .map(model => String(model.name || '').replace(/^models\\//, ''));
+      .map(model => String(model.name || '').replace(/^models\//, ''));
     const models = [
       ...supportedModels.filter(model => /flash-lite/i.test(model)),
       ...supportedModels.filter(model => /flash/i.test(model) && !/flash-lite/i.test(model)),
