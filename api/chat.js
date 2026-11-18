@@ -41,8 +41,9 @@ export default async function handler(req, res) {
       const supported = (modelData.models || [])
         .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
         .map(model => String(model.name || '').replace(/^models\//, ''));
-      const preferredModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
-      const selectedModel = preferredModels.find(model => supported.includes(model)) || '';
+      const selectedModel = supported.find(model => /flash-lite/i.test(model))
+        || supported.find(model => /flash/i.test(model))
+        || '';
       return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: true, aiReady: Boolean(selectedModel), model: selectedModel || null, issue: selectedModel ? null : 'no_supported_text_model' });
     } catch (error) {
       console.error('Ventorea AI health check failed:', error?.name || 'network_error');
@@ -306,6 +307,21 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
     }))
   ];
 
+  // Gemini requires the conversation to begin with a user turn and alternate roles.
+  // Older browser chat histories can begin with an assistant message or contain repeated roles.
+  const normalizedMessages = [];
+  for (const message of safeMessages.slice(-8)) {
+    const role = message.role === 'assistant' ? 'model' : 'user';
+    if (!normalizedMessages.length && role !== 'user') continue;
+    const previous = normalizedMessages[normalizedMessages.length - 1];
+    if (previous && previous.role === role) previous.parts[0].text += '\\n' + message.content;
+    else normalizedMessages.push({ role, parts: [{ text: message.content }] });
+  }
+  if (!normalizedMessages.length || normalizedMessages[normalizedMessages.length - 1].role !== 'user') {
+    return res.status(400).json({ error: 'Please send a new message to start the conversation.' });
+  }
+  normalizedMessages[normalizedMessages.length - 1].parts.push(...attachmentParts);
+
   async function askModel(model) {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
@@ -315,14 +331,8 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
       },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents: safeMessages.slice(-8).map((message, index, recent) => ({
-          role: message.role === 'assistant' ? 'model' : 'user',
-          parts: [
-            { text: message.content },
-            ...(index === recent.length - 1 ? attachmentParts : [])
-          ]
-        })),
-        generationConfig: { maxOutputTokens: 600, thinkingConfig: { thinkingLevel: 'MINIMAL' } }
+        contents: normalizedMessages,
+        generationConfig: { maxOutputTokens: 600 }
       }),
       signal: timeoutSignal(18000)
     });
@@ -337,7 +347,25 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
   let activeModel = '';
   try {
-    const models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
+    const modelListResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+      headers: { 'x-goog-api-key': apiKey },
+      cache: 'no-store',
+      signal: timeoutSignal(8000)
+    });
+    const modelListData = await modelListResponse.json().catch(() => ({}));
+    if (!modelListResponse.ok) {
+      const reason = modelListData?.error?.message || 'Gemini model discovery failed.';
+      return res.status(502).json({ error: reason });
+    }
+    const supportedModels = (modelListData.models || [])
+      .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
+      .map(model => String(model.name || '').replace(/^models\\//, ''));
+    const models = [
+      ...supportedModels.filter(model => /flash-lite/i.test(model)),
+      ...supportedModels.filter(model => /flash/i.test(model) && !/flash-lite/i.test(model)),
+      ...supportedModels.filter(model => !/flash/i.test(model))
+    ].filter((model, index, all) => model && all.indexOf(model) === index).slice(0, 3);
+    if (!models.length) return res.status(502).json({ error: 'No supported Gemini text-generation model is available for this API key.' });
     let lastError = null;
 
     for (const model of models) {
