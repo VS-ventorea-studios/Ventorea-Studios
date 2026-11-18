@@ -463,7 +463,7 @@ async function sendToAI(){
   const pendingFiles=selectedFiles.slice();
   const visibleText=q||'Please review the attached file(s).';
   const fileNames=pendingFiles.map(item=>item.file.name);
-  const displayText=fileNames.length?visibleText+'\\n📎 '+fileNames.join(', '):visibleText;
+  const displayText=fileNames.length?visibleText+'\n📎 '+fileNames.join(', '):visibleText;
   const userBubble=add(displayText,'user'),receipt=document.createElement('small');
   receipt.className='ai-receipt';receipt.textContent='Sending…';userBubble?.appendChild(receipt);
   chat.push({role:'user',content:displayText});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();
