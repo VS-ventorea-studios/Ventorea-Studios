@@ -1510,3 +1510,5 @@ body{min-width:320px}
   .ai-panel form #aiAttachButton{width:38px;flex-basis:38px}
   .ai-panel form #aiSendButton{width:40px;flex-basis:40px}
 }
+
+.ai-privacy-note{margin:0;padding:0 14px 8px;color:#a8b8cb;font-size:10px;line-height:1.5;text-align:center}
