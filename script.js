@@ -28,6 +28,10 @@ const $=id=>document.getElementById(id);
 const launcher=$('aiMenuOpen'),desktopLauncher=$('aiDesktopOpen'),mobileLauncher=$('aiMobileOpen'),panel=$('aiPanel'),closeButton=$('aiClose'),messages=$('aiMessages'),form=$('aiForm'),input=$('aiInput'),unreadBadge=$('aiUnread'),presenceText=$('aiPresenceText'),presenceDot=$('aiPresenceDot'),menuPresence=$('aiMenuStatus');
 const allPagesAI=$('allPagesAI');
 const aiAuthRequired=$('aiAuthRequired'),aiSignInButton=$('aiSignInButton');
+const fileInput=$('aiFileInput'),attachButton=$('aiAttachButton'),attachmentList=$('aiAttachmentList');
+const selectedFiles=[];
+const MAX_UPLOAD_FILES=3,MAX_UPLOAD_FILE_SIZE=2*1024*1024,MAX_UPLOAD_TOTAL=2.5*1024*1024;
+const ALLOWED_UPLOAD_TYPES=new Set(['application/pdf','image/jpeg','image/png','image/webp','image/gif','text/plain','text/csv','text/markdown','application/json']);
 const accountOpen=$('accountOpen'),profileIconOpen=$('profileIconOpen');
 const cookieNotice=$('cookieNotice');
 const CHAT_STORAGE_KEY='ventorea-ai-chat-history-v1';
@@ -45,9 +49,8 @@ function applyMotionSetting(){document.body.classList.toggle('reduce-motion',rea
 function renderSavedChat(){
   if(!messages)return;
   messages.replaceChildren();
-  if(isDemoSignedIn())add("Hey there. I’m Ventorea AI. Ask me about Ventorea Studios, RSL, our systems or development progress.",'bot');
-  else add("Welcome to Ventorea. Ask me for quick public information such as RSL prices, planned editions or release status. These instant answers do not use AI API credits. Sign in to unlock full Ventorea AI chat.",'bot');
-  if(isDemoSignedIn())chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
+  add("Welcome to Ventorea AI. Anyone can chat here without signing in. You can also attach up to 3 supported files for analysis.",'bot');
+  chat.forEach(m=>add(m.content,m.role==='user'?'user':'bot'));
 }
 
 let unreadCount=0,sessionStartedAt=Date.now(),serviceOnline=false,googleOAuthPending=false;
@@ -58,8 +61,8 @@ function updateAccountUI(){
   const signed=!!googleUser;
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
   if(profileIconOpen){profileIconOpen.href=signed?'/account/':'/login/';profileIconOpen.setAttribute('aria-label',signed?'Open your profile':'Sign in or create an account');profileIconOpen.title=signed?'Your profile':'Sign in or create an account'}
-  if(input){input.disabled=false;input.placeholder=signed?'Message Ventorea AI…':'Ask about prices, RSL or the studio…'}
-  if(aiAuthRequired)aiAuthRequired.hidden=signed;
+  if(input){input.disabled=false;input.placeholder='Message Ventorea AI…'}
+  if(aiAuthRequired)aiAuthRequired.hidden=true;
   if(form)form.hidden=false;
   if(aiSignInButton)aiSignInButton.disabled=!!googleOAuthPending;
   if(signed)populateAccountSettings();
@@ -78,7 +81,7 @@ function aiOpen(){
   desktopLauncher?.setAttribute('aria-expanded','true');
   mobileLauncher?.setAttribute('aria-expanded','true');
   setUnread(0);
-  if(isDemoSignedIn())setTimeout(()=>input?.focus({preventScroll:true}),180);
+  setTimeout(()=>input?.focus({preventScroll:true}),180);
   if(supabaseClient){
     supabaseClient.auth.getSession().then(({data,error})=>{
       if(error){console.warn('Could not verify Ventorea AI sign-in:',error);return}
@@ -418,38 +421,78 @@ async function verifySignedInUser(){
     return {user:null,unavailable:true};
   }finally{window.clearTimeout(timeout)}
 }
+function renderSelectedAttachments(){
+  if(!attachmentList)return;
+  attachmentList.replaceChildren();
+  attachmentList.hidden=selectedFiles.length===0;
+  selectedFiles.forEach((item,index)=>{
+    const chip=document.createElement('span');chip.className='ai-attachment-chip';
+    const name=document.createElement('span');name.textContent=item.file.name;
+    const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.setAttribute('aria-label','Remove '+item.file.name);
+    remove.addEventListener('click',()=>{selectedFiles.splice(index,1);renderSelectedAttachments()});
+    chip.append(name,remove);attachmentList.appendChild(chip);
+  });
+}
+function addSelectedFiles(fileList){
+  const extensionTypes={pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',txt:'text/plain',csv:'text/csv',md:'text/markdown',json:'application/json'};
+  for(const file of Array.from(fileList||[])){
+    const ext=file.name.split('.').pop().toLowerCase();
+    const mimeType=ALLOWED_UPLOAD_TYPES.has(file.type)?file.type:(extensionTypes[ext]||'');
+    if(!mimeType||!ALLOWED_UPLOAD_TYPES.has(mimeType)){add('Unsupported file: '+file.name+'. Choose a PDF, image, TXT, CSV, Markdown or JSON file.','bot');continue}
+    if(file.size>MAX_UPLOAD_FILE_SIZE){add(file.name+' is larger than 2 MB. Choose a smaller file.','bot');continue}
+    const currentTotal=selectedFiles.reduce((sum,item)=>sum+item.file.size,0);
+    if(selectedFiles.length>=MAX_UPLOAD_FILES){add('You can attach up to 3 files per message.','bot');break}
+    if(currentTotal+file.size>MAX_UPLOAD_TOTAL){add('Your attachments must total 2.5 MB or less.','bot');continue}
+    selectedFiles.push({file,mimeType});
+  }
+  renderSelectedAttachments();
+}
+function readFileAsBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{const value=String(reader.result||'');const comma=value.indexOf(',');if(comma<0)reject(new Error('Could not read '+file.name));else resolve(value.slice(comma+1))};
+    reader.onerror=()=>reject(new Error('Could not read '+file.name));
+    reader.readAsDataURL(file);
+  });
+}
+attachButton?.addEventListener('click',()=>fileInput?.click());
+fileInput?.addEventListener('change',()=>{addSelectedFiles(fileInput.files);fileInput.value=''});
 async function sendToAI(){
-  const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH);if(!q||input.disabled)return;
-  const verified=await verifySignedInUser();
-  if(verified.unavailable){
-    add("I couldn’t verify your sign-in right now. Check your connection and try again. No AI request was sent.",'bot');
-    return;
-  }
-  googleUser=verified.user;
-  updateAccountUI();
-  if(!verified.user){
-    const answer=getLocalPublicAnswer(q);
-    add(q,'user');
-    add(answer,'bot');
-    if(input)input.value='';
-    return;
-  }
-  const userBubble=add(q,'user'),receipt=document.createElement('small');receipt.className='ai-receipt';receipt.textContent='Sent ✓';userBubble?.appendChild(receipt);
-  chat.push({role:'user',content:q});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();input.value='';input.disabled=true;
-  const submit=form?.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
+  const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH)||'';
+  if((!q&&!selectedFiles.length)||input.disabled)return;
+  const pendingFiles=selectedFiles.slice();
+  const visibleText=q||'Please review the attached file(s).';
+  const fileNames=pendingFiles.map(item=>item.file.name);
+  const displayText=fileNames.length?visibleText+'\\n📎 '+fileNames.join(', '):visibleText;
+  const userBubble=add(displayText,'user'),receipt=document.createElement('small');
+  receipt.className='ai-receipt';receipt.textContent='Sending…';userBubble?.appendChild(receipt);
+  chat.push({role:'user',content:displayText});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();
+  input.value='';input.disabled=true;attachButton.disabled=true;
+  const submit=form?.querySelector('#aiSendButton');if(submit)submit.disabled=true;
   const loading=add('Thinking…','bot');
   try{
-    const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();if(sessionError||!sessionData?.session){googleUser=null;updateAccountUI();throw new Error('Your sign-in session expired. Please sign in with Google again.')}const {data:verifiedData,error:verifiedError}=await supabaseClient.auth.getUser(sessionData.session.access_token);if(verifiedError||!verifiedData?.user){googleUser=null;updateAccountUI();throw new Error('Your sign-in could not be verified. Please sign in again.')}googleUser=verifiedData.user;updateAccountUI();const requestController=new AbortController();
+    const attachments=await Promise.all(pendingFiles.map(async item=>({name:item.file.name,mimeType:item.mimeType,data:await readFileAsBase64(item.file)})));
+    const requestController=new AbortController();
     const requestTimeout=window.setTimeout(()=>requestController.abort(),70000);
-    let response,data;
-    try {
-      response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sessionData.session.access_token},body:JSON.stringify({messages:chat,user:{id:sessionData.session.user.id,email:sessionData.session.user.email}}),signal:requestController.signal});
-      data=await response.json().catch(()=>({}));
-    } finally { window.clearTimeout(requestTimeout); }loading?.remove();if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
-    const answer=typeof data.content==='string'?data.content.trim():'';add(answer||'Ventorea AI returned an empty response.','bot');
-    if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
-  }catch(error){loading?.remove();if(receipt)receipt.textContent='Not sent';add(error?.name==='AbortError'?'Ventorea AI is taking too long to respond. Please try again.':(error?.message||'Ventorea AI could not be reached. Please try again.'),'bot');checkPresence()}
-  finally{if(input){input.disabled=!isDemoSignedIn();if(panel?.classList.contains('open'))input.focus()}if(submit)submit.disabled=false}
+    const headers={'Content-Type':'application/json'};
+    try{
+      if(supabaseClient){
+        try{const {data}=await supabaseClient.auth.getSession();const token=data?.session?.access_token;if(token)headers.Authorization='Bearer '+token}catch{}
+      }
+      const response=await fetch(AI_ENDPOINT,{method:'POST',headers,body:JSON.stringify({messages:chat,attachments}),signal:requestController.signal});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
+      const answer=typeof data.content==='string'?data.content.trim():'';
+      loading?.remove();add(answer||'Ventorea AI returned an empty response.','bot');
+      if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
+      selectedFiles.splice(0,selectedFiles.length);renderSelectedAttachments();
+    }finally{window.clearTimeout(requestTimeout)}
+  }catch(error){
+    loading?.remove();if(receipt)receipt.textContent='Not sent';
+    add(error?.name==='AbortError'?'Ventorea AI is taking too long to respond. Please try again.':(error?.message||'Ventorea AI could not be reached. Please try again.'),'bot');checkPresence();
+  }finally{
+    input.disabled=false;attachButton.disabled=false;if(panel?.classList.contains('open'))input.focus();if(submit)submit.disabled=false;
+  }
 }
 form?.addEventListener('submit',e=>{e.preventDefault();sendToAI()});
 function setCookieChoice(choice){try{localStorage.setItem('ventorea-cookie-choice',choice)}catch{};cookieNotice?.classList.remove('is-visible')}
