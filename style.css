@@ -1493,7 +1493,6 @@ body{min-width:320px}
 
 
 /* Public Ventorea AI composer and file attachments. */
-.ai-public-note{padding:9px 14px 0;color:#8fbbe8;font:9px var(--mono);letter-spacing:1.1px;text-align:center}
 .ai-attachment-list{display:flex;flex-wrap:wrap;gap:7px;padding:8px 12px 0}
 .ai-attachment-list[hidden]{display:none!important}
 .ai-attachment-chip{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:6px 9px;border:1px solid rgba(113,166,255,.35);border-radius:5px;background:rgba(23,43,69,.78);color:#dcecff;font-size:10px}
@@ -1511,4 +1510,3 @@ body{min-width:320px}
   .ai-panel form #aiSendButton{width:40px;flex-basis:40px}
 }
 
-.ai-privacy-note{margin:0;padding:0 14px 8px;color:#a8b8cb;font-size:10px;line-height:1.5;text-align:center}
