@@ -15,6 +15,13 @@
   let client = null;
   let currentUser = null;
   let busy = false;
+  const avatarInput = $('avatarFile');
+  const removeAvatarButton = $('removeAvatar');
+  const avatarPreview = $('avatarUploadPreview');
+  const profileAvatar = $('profileAvatar');
+  const AVATAR_BUCKET = 'ventorea-avatars';
+  const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+  const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
   function status(el, message, kind = '') {
     if (!el) return;
@@ -33,7 +40,10 @@
     const name = displayName(currentUser);
     $('profileHeading').textContent = name;
     $('profileEmailHeading').textContent = currentUser.email || '';
-    $('profileAvatar').textContent = (name.trim()[0] || 'V').toUpperCase();
+    const avatarUrl = currentUser.user_metadata?.avatar_url || '';
+    renderAvatar(profileAvatar, avatarUrl, name);
+    renderAvatar(avatarPreview, avatarUrl, name);
+    if (removeAvatarButton) removeAvatarButton.hidden = !avatarUrl;
     $('displayName').value = name;
     $('emailAddress').value = currentUser.email || '';
     $('phoneNumber').value = currentUser.user_metadata?.phone_number || '';
@@ -41,6 +51,95 @@
     $('rememberChat').checked = readBool('ventorea-remember-ai-chat-v1', true);
     $('reduceMotion').checked = readBool('ventorea-reduce-motion-v1', false);
   }
+
+  function renderAvatar(target, url, name) {
+    if (!target) return;
+    target.replaceChildren();
+    if (url) {
+      const image = document.createElement('img');
+      image.src = url;
+      image.alt = 'Profile picture';
+      image.referrerPolicy = 'no-referrer';
+      target.appendChild(image);
+    } else {
+      target.textContent = (name?.trim()?.[0] || 'V').toUpperCase();
+    }
+  }
+  function setAvatarBusy(value) {
+    if (avatarInput) avatarInput.disabled = value;
+    if (removeAvatarButton) removeAvatarButton.disabled = value;
+  }
+  async function saveAvatarUrl(url) {
+    const { data, error } = await client.auth.updateUser({
+      data: { ...(currentUser.user_metadata || {}), avatar_url: url || null }
+    });
+    if (error) throw error;
+    currentUser = data.user || currentUser;
+    const { error: profileError } = await client.from('profiles')
+      .update({ avatar_url: url || null, updated_at: new Date().toISOString() })
+      .eq('user_id', currentUser.id);
+    if (profileError) throw profileError;
+    render(currentUser);
+  }
+  async function uploadAvatar(file) {
+    if (!client || !currentUser || busy) return;
+    if (!file || !AVATAR_TYPES.has(file.type)) {
+      status(profileStatus, 'Choose a JPG, PNG or WEBP image.', 'error');
+      return;
+    }
+    if (file.size > MAX_AVATAR_SIZE) {
+      status(profileStatus, 'Your profile picture must be 2 MB or smaller.', 'error');
+      return;
+    }
+    busy = true;
+    setAvatarBusy(true);
+    status(profileStatus, 'Uploading your profile picture…');
+    try {
+      const extension = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/png' ? 'png' : 'webp';
+      const path = currentUser.id + '/avatar.' + extension;
+      const { error: uploadError } = await client.storage.from(AVATAR_BUCKET).upload(path, file, {
+        cacheControl: '3600',
+        contentType: file.type,
+        upsert: true
+      });
+      if (uploadError) throw uploadError;
+      const { data } = client.storage.from(AVATAR_BUCKET).getPublicUrl(path);
+      const url = data?.publicUrl ? data.publicUrl + '?v=' + Date.now() : '';
+      if (!url) throw new Error('The uploaded image URL could not be created.');
+      await saveAvatarUrl(url);
+      status(profileStatus, 'Profile picture updated successfully.', 'success');
+    } catch (error) {
+      status(profileStatus, error?.message || 'Could not upload your profile picture.', 'error');
+    } finally {
+      busy = false;
+      setAvatarBusy(false);
+      if (avatarInput) avatarInput.value = '';
+    }
+  }
+  async function removeAvatar() {
+    if (!client || !currentUser || busy) return;
+    busy = true;
+    setAvatarBusy(true);
+    status(profileStatus, 'Removing your profile picture…');
+    try {
+      const oldUrl = currentUser.user_metadata?.avatar_url || '';
+      await saveAvatarUrl('');
+      if (oldUrl.includes('/storage/v1/object/public/' + AVATAR_BUCKET + '/')) {
+        const path = oldUrl.split('/storage/v1/object/public/' + AVATAR_BUCKET + '/')[1].split('?')[0];
+        if (path.startsWith(currentUser.id + '/')) {
+          const { error } = await client.storage.from(AVATAR_BUCKET).remove([decodeURIComponent(path)]);
+          if (error) console.warn('Old profile picture cleanup failed:', error.message);
+        }
+      }
+      status(profileStatus, 'Profile picture removed.', 'success');
+    } catch (error) {
+      status(profileStatus, error?.message || 'Could not remove your profile picture.', 'error');
+    } finally {
+      busy = false;
+      setAvatarBusy(false);
+    }
+  }
+
   function readBool(key, fallback) {
     try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true'; }
     catch { return fallback; }
@@ -130,6 +229,8 @@
   $('accountFacebookSignIn')?.addEventListener('click', () => signIn('facebook'));
   signOutButton.addEventListener('click', signOut);
   profileForm.addEventListener('submit', saveProfile);
+  avatarInput?.addEventListener('change', event => uploadAvatar(event.target.files?.[0]));
+  removeAvatarButton?.addEventListener('click', removeAvatar);
   $('rememberChat').addEventListener('change', event => writeBool('ventorea-remember-ai-chat-v1', event.target.checked));
   $('reduceMotion').addEventListener('change', event => writeBool('ventorea-reduce-motion-v1', event.target.checked));
 
