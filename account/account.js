@@ -75,11 +75,15 @@
     });
     if (error) throw error;
     currentUser = data.user || currentUser;
+    // Auth metadata is the source of truth for the account avatar.
+    // Render immediately so the new picture appears without requiring a new sign-in.
+    render(currentUser);
+    // Keep the public profile row in sync, but do not report a successful
+    // auth metadata update as a failed upload if this secondary write is blocked.
     const { error: profileError } = await client.from('profiles')
       .update({ avatar_url: url || null, updated_at: new Date().toISOString() })
       .eq('user_id', currentUser.id);
-    if (profileError) throw profileError;
-    render(currentUser);
+    if (profileError) console.warn('Profile avatar sync failed:', profileError.message);
   }
   async function uploadAvatar(file) {
     if (!client || !currentUser || busy) return;
