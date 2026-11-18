@@ -4,6 +4,24 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Cache-Control', 'no-store');
   const timeoutSignal = ms => AbortSignal.timeout(ms);
+  const requestWindows = globalThis.__ventoreaAiRequestWindows || (globalThis.__ventoreaAiRequestWindows = new Map());
+  function allowRequest(ip) {
+    const now = Date.now();
+    const recent = (requestWindows.get(ip) || []).filter(time => now - time < 60 * 60 * 1000);
+    const perMinute = recent.filter(time => now - time < 60 * 1000).length;
+    if (perMinute >= 12 || recent.length >= 120) {
+      requestWindows.set(ip, recent);
+      return false;
+    }
+    recent.push(now);
+    requestWindows.set(ip, recent);
+    if (requestWindows.size > 5000) {
+      for (const [key, times] of requestWindows) {
+        if (!times.length || now - times[times.length - 1] > 60 * 60 * 1000) requestWindows.delete(key);
+      }
+    }
+    return true;
+  }
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method === 'GET') {
@@ -23,8 +41,9 @@ export default async function handler(req, res) {
       const supported = (modelData.models || [])
         .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
         .map(model => String(model.name || '').replace(/^models\//, ''));
-      const preferredModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
-      const selectedModel = preferredModels.find(model => supported.includes(model)) || '';
+      const selectedModel = supported.find(model => /flash-lite/i.test(model))
+        || supported.find(model => /flash/i.test(model))
+        || '';
       return res.status(200).json({ ok: true, provider: 'gemini', keyConfigured: true, aiReady: Boolean(selectedModel), model: selectedModel || null, issue: selectedModel ? null : 'no_supported_text_model' });
     } catch (error) {
       console.error('Ventorea AI health check failed:', error?.name || 'network_error');
@@ -32,39 +51,36 @@ export default async function handler(req, res) {
     }
   }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const contentLength = Number(req.headers['content-length'] || 0);
+  if (contentLength > 4000000) return res.status(413).json({ error: 'Your message and attachments are too large. Please use smaller files.' });
+  const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  const clientIp = forwardedFor || String(req.headers['x-real-ip'] || 'unknown').slice(0, 100);
+  if (!allowRequest(clientIp)) return res.status(429).json({ error: 'Ventorea AI has received too many requests from this connection. Please wait a minute and try again.' });
 
   const body = req.body || {};
 
-  // Verify the signed-in Supabase user from the bearer token sent by the frontend.
-  // Never trust user IDs or email addresses supplied in the request body.
+  // Google sign-in is optional. If a visitor sends a token, verify it before using account features.
   const authorization = req.headers.authorization || req.headers.Authorization || '';
   const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
-  if (!accessToken) {
-    return res.status(401).json({ error: 'Sign-in required to use Ventorea AI.' });
-  }
-
   const supabaseUrl = 'https://ujxcvfgkpqzkpfthahla.supabase.co';
   const supabasePublishableKey = 'sb_publishable_BeuJ8qa-4oBzWcijNNPGKA_j-wSf3Uq';
-  let authenticatedUser;
-  try {
-    const authResponse = await fetch(supabaseUrl + '/auth/v1/user', {
-      method: 'GET',
-      headers: {
-        apikey: supabasePublishableKey,
-        Authorization: 'Bearer ' + accessToken
-      },
-      cache: 'no-store',
-      signal: timeoutSignal(8000)
-    });
-    if (!authResponse.ok) {
-      return res.status(401).json({ error: 'Your sign-in session is invalid or expired. Please sign in again.' });
+  let authenticatedUser = null;
+  if (accessToken) {
+    try {
+      const authResponse = await fetch(supabaseUrl + '/auth/v1/user', {
+        method: 'GET',
+        headers: { apikey: supabasePublishableKey, Authorization: 'Bearer ' + accessToken },
+        cache: 'no-store',
+        signal: timeoutSignal(8000)
+      });
+      if (authResponse.ok) {
+        const verifiedUser = await authResponse.json();
+        if (verifiedUser && typeof verifiedUser.id === 'string') authenticatedUser = verifiedUser;
+      }
+    } catch {
+      // An expired or unavailable optional session falls back to public guest access.
+      authenticatedUser = null;
     }
-    authenticatedUser = await authResponse.json();
-    if (!authenticatedUser || typeof authenticatedUser.id !== 'string') {
-      return res.status(401).json({ error: 'Could not verify your Ventorea account. Please sign in again.' });
-    }
-  } catch {
-    return res.status(503).json({ error: 'Account verification is temporarily unavailable. Please try again.' });
   }
 
   const messages = Array.isArray(body.messages) ? body.messages : [];
@@ -78,12 +94,42 @@ export default async function handler(req, res) {
   }
 
   const latestVisitorMessage = safeMessages[safeMessages.length - 1].content;
+  const allowedFileTypes = new Set(['application/pdf','image/jpeg','image/png','image/webp','image/gif','text/plain','text/csv','text/markdown','application/json']);
+  const incomingAttachments = Array.isArray(body.attachments) ? body.attachments : [];
+  if (incomingAttachments.length > 3) return res.status(400).json({ error: 'Please attach no more than 3 files per message.' });
+  let totalAttachmentBytes = 0;
+  const safeAttachments = [];
+  for (const attachment of incomingAttachments) {
+    if (!attachment || typeof attachment.data !== 'string' || typeof attachment.mimeType !== 'string' || !allowedFileTypes.has(attachment.mimeType)) {
+      return res.status(400).json({ error: 'This file type is not supported. Upload a PDF, image, TXT, CSV, Markdown or JSON file.' });
+    }
+    const base64 = attachment.data.replace(/^data:[^,]+,/, '');
+    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64) || base64.length % 4 !== 0) {
+      return res.status(400).json({ error: 'One of your attachments could not be read. Please select it again.' });
+    }
+    const size = Math.floor(base64.length * 3 / 4) - (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
+    if (size > 2 * 1024 * 1024) return res.status(400).json({ error: 'Each attachment must be 2 MB or smaller.' });
+    totalAttachmentBytes += size;
+    if (totalAttachmentBytes > 2.5 * 1024 * 1024) return res.status(400).json({ error: 'Your attachments must total 2.5 MB or less.' });
+    const name = String(attachment.name || 'uploaded-file').replace(/[\\/\r\n<>]/g, '_').slice(0, 100);
+    safeAttachments.push({ name, mimeType: attachment.mimeType, data: base64, size });
+  }
+  const attachmentParts = safeAttachments.flatMap(file => {
+    if (file.mimeType.startsWith('text/') || file.mimeType === 'application/json') {
+      const decoded = Buffer.from(file.data, 'base64').toString('utf8').slice(0, 50000);
+      return [{ text: '\n\n[Attached text file: ' + file.name + ']\n' + decoded }];
+    }
+    return [
+      { text: '[Attached file: ' + file.name + ']' },
+      { inlineData: { mimeType: file.mimeType, data: file.data } }
+    ];
+  });
   const profanityPattern = /(?:\bfck\b|\bfuck(?:ing|ed|er|ers)?\b|\bf\*+k\b|\bshit(?:ty|ting)?\b|\bbullshit\b|\bass(?:hole|es)?\b|\bbitch(?:es|y)?\b|\bbastard(?:s)?\b|\bdamn(?:ed|it)?\b|\bmotherfucker\b|\bson of a bitch\b|\bwtf\b|\bstfu\b|\bcrap\b|\bdick(?:head|s)?\b|\bpiss(?:ed|ing)?\b|\bcunt\b|\bprick\b|\bdouchebag\b|\bكس(?:م|مك|مه)?\b|\bخول\b|\bشرموط(?:ة)?\b|\bعرص\b|\bيلعن\b|\bزب\b|\bطيز\b|\bمنيك\b|\bمتناك\b)/iu;
 
   // Persistent abuse tracking is stored server-side in Supabase. Never trust client-side counters.
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const databaseUrl = supabaseUrl + '/rest/v1/ai_abuse_status';
-  const abuseHeaders = serviceKey ? { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey, 'Content-Type': 'application/json' } : null;
+  const abuseHeaders = serviceKey && authenticatedUser ? { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey, 'Content-Type': 'application/json' } : null;
   async function loadAbuseStatus() {
     if (!abuseHeaders) return null;
     const response = await fetch(databaseUrl + '?user_id=eq.' + encodeURIComponent(authenticatedUser.id) + '&select=user_id,swear_count,suspension_level,suspended_until', {
@@ -155,7 +201,7 @@ export default async function handler(req, res) {
         return res.status(503).json({ error: 'Your message was blocked, but the safety counter could not be updated. Please try again shortly.' });
       }
     }
-    if (process.env.RESEND_API_KEY) {
+    if (process.env.RESEND_API_KEY && authenticatedUser) {
       const escapeAlertHtml = value => String(value ?? '').replace(/[&<>']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;' }[char]));
       const visitorEmailForAlert = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
       const alertTime = new Date().toISOString();
@@ -261,6 +307,21 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
     }))
   ];
 
+  // Gemini requires the conversation to begin with a user turn and alternate roles.
+  // Older browser chat histories can begin with an assistant message or contain repeated roles.
+  const normalizedMessages = [];
+  for (const message of safeMessages.slice(-8)) {
+    const role = message.role === 'assistant' ? 'model' : 'user';
+    if (!normalizedMessages.length && role !== 'user') continue;
+    const previous = normalizedMessages[normalizedMessages.length - 1];
+    if (previous && previous.role === role) previous.parts[0].text += '\\n' + message.content;
+    else normalizedMessages.push({ role, parts: [{ text: message.content }] });
+  }
+  if (!normalizedMessages.length || normalizedMessages[normalizedMessages.length - 1].role !== 'user') {
+    return res.status(400).json({ error: 'Please send a new message to start the conversation.' });
+  }
+  normalizedMessages[normalizedMessages.length - 1].parts.push(...attachmentParts);
+
   async function askModel(model) {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
@@ -270,11 +331,8 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
       },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents: safeMessages.slice(-8).map(message => ({
-          role: message.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: message.content }]
-        })),
-        generationConfig: { maxOutputTokens: 600, thinkingConfig: { thinkingLevel: 'MINIMAL' } }
+        contents: normalizedMessages,
+        generationConfig: { maxOutputTokens: 600 }
       }),
       signal: timeoutSignal(18000)
     });
@@ -289,7 +347,25 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
   let activeModel = '';
   try {
-    const models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
+    const modelListResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+      headers: { 'x-goog-api-key': apiKey },
+      cache: 'no-store',
+      signal: timeoutSignal(8000)
+    });
+    const modelListData = await modelListResponse.json().catch(() => ({}));
+    if (!modelListResponse.ok) {
+      const reason = modelListData?.error?.message || 'Gemini model discovery failed.';
+      return res.status(502).json({ error: reason });
+    }
+    const supportedModels = (modelListData.models || [])
+      .filter(model => (model.supportedGenerationMethods || []).includes('generateContent'))
+      .map(model => String(model.name || '').replace(/^models\\//, ''));
+    const models = [
+      ...supportedModels.filter(model => /flash-lite/i.test(model)),
+      ...supportedModels.filter(model => /flash/i.test(model) && !/flash-lite/i.test(model)),
+      ...supportedModels.filter(model => !/flash/i.test(model))
+    ].filter((model, index, all) => model && all.indexOf(model) === index).slice(0, 3);
+    if (!models.length) return res.status(502).json({ error: 'No supported Gemini text-generation model is available for this API key.' });
     let lastError = null;
 
     for (const model of models) {
@@ -300,12 +376,12 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
           // Send each completed exchange to the studio inbox when Resend is configured.
           // This is best-effort: email delivery must never prevent the visitor receiving the AI reply.
           const resendApiKey = process.env.RESEND_API_KEY;
-          if (resendApiKey) {
+          if (resendApiKey && authenticatedUser) {
             const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
               '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
             }[char]));
             const visitorMessage = safeMessages[safeMessages.length - 1].content;
-            const visitorEmail = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
+            const visitorEmail = typeof authenticatedUser?.email === 'string' ? authenticatedUser.email : 'Guest visitor';
             const sentAt = new Date().toISOString();
             const emailHtml = `
               <h2>New Ventorea AI conversation</h2>
@@ -341,7 +417,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
           } else {
             console.warn('Ventorea AI email logging is disabled: RESEND_API_KEY is not configured.');
           }
-          return res.status(200).json({ content, model: data?.model || model });
+          return res.status(200).json({ content, model: data?.model || model, attachmentsProcessed: safeAttachments.length });
         }
         lastError = 'Gemini completed the request but returned no text.';
         continue;

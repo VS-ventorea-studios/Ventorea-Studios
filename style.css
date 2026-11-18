@@ -1490,3 +1490,25 @@ body{min-width:320px}
 #aiPanel .ai-title-stack{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
 #aiPanel .ai-head-caption{font:8px/1.3 var(--mono);letter-spacing:1px;color:#7f9ab9}
 #aiPanel .ai-title-stack small{display:flex;align-items:center;gap:6px}
+
+
+/* Public Ventorea AI composer and file attachments. */
+.ai-public-note{padding:9px 14px 0;color:#8fbbe8;font:9px var(--mono);letter-spacing:1.1px;text-align:center}
+.ai-attachment-list{display:flex;flex-wrap:wrap;gap:7px;padding:8px 12px 0}
+.ai-attachment-list[hidden]{display:none!important}
+.ai-attachment-chip{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:6px 9px;border:1px solid rgba(113,166,255,.35);border-radius:5px;background:rgba(23,43,69,.78);color:#dcecff;font-size:10px}
+.ai-attachment-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:190px}
+.ai-attachment-chip button{border:0;background:transparent;color:#a9cfff;font-size:17px;line-height:1;cursor:pointer}
+.ai-panel form #aiAttachButton{width:40px;flex:0 0 40px;border:1px solid rgba(113,166,255,.45);background:#14243b;color:#a9d2ff;font-size:22px}
+.ai-panel form #aiAttachButton:hover{background:#203c60}
+.ai-panel form #aiFileInput{display:none}
+.ai-panel form #aiInput{flex:1;width:100%;min-width:0}
+.ai-panel form #aiSendButton{width:42px;flex:0 0 42px}
+@media(max-width:680px){
+  .ai-attachment-chip span{max-width:145px}
+  .ai-panel form{gap:6px;padding:10px}
+  .ai-panel form #aiAttachButton{width:38px;flex-basis:38px}
+  .ai-panel form #aiSendButton{width:40px;flex-basis:40px}
+}
+
+.ai-privacy-note{margin:0;padding:0 14px 8px;color:#a8b8cb;font-size:10px;line-height:1.5;text-align:center}
