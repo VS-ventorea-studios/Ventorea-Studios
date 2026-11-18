@@ -20,7 +20,7 @@
   const avatarPreview = $('avatarUploadPreview');
   const profileAvatar = $('profileAvatar');
   const AVATAR_BUCKET = 'ventorea-avatars';
-  const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+  const MAX_AVATAR_SIZE = 3 * 1024 * 1024;
   const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
   function status(el, message, kind = '') {
@@ -88,7 +88,7 @@
       return;
     }
     if (file.size > MAX_AVATAR_SIZE) {
-      status(profileStatus, 'Your profile picture must be 2 MB or smaller.', 'error');
+      status(profileStatus, 'Your profile picture must be 3 MB or smaller.', 'error');
       return;
     }
     busy = true;
