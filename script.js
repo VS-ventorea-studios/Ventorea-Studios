@@ -60,7 +60,18 @@ function isDemoSignedIn(){return !!googleUser}
 function updateAccountUI(){
   const signed=!!googleUser;
   if(accountOpen){accountOpen.innerHTML=signed?'MY ACCOUNT <span>↗</span>':'SIGN IN <span>↗</span>';accountOpen.href=signed?'/account/':'/login/';accountOpen.setAttribute('aria-label',signed?'Open account settings':'Sign in with Google')}
-  if(profileIconOpen){profileIconOpen.href=signed?'/account/':'/login/';profileIconOpen.setAttribute('aria-label',signed?'Open your profile':'Sign in or create an account');profileIconOpen.title=signed?'Your profile':'Sign in or create an account'}
+  if(profileIconOpen){
+    profileIconOpen.href=signed?'/account/':'/login/';
+    profileIconOpen.setAttribute('aria-label',signed?'Open your profile':'Sign in or create an account');
+    profileIconOpen.title=signed?'Your profile':'Sign in or create an account';
+    const avatarUrl=googleUser?.user_metadata?.avatar_url||'';
+    if(avatarUrl){
+      const image=document.createElement('img');image.src=avatarUrl;image.alt='Your profile';image.className='profile-icon-image';image.referrerPolicy='no-referrer';
+      profileIconOpen.replaceChildren(image);
+    }else if(!profileIconOpen.querySelector('svg')){
+      profileIconOpen.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.7-3.5 3.3-5.2 7.5-5.2s6.8 1.7 7.5 5.2"></path></svg>';
+    }
+  }
   if(input){input.disabled=false;input.placeholder='Message Ventorea AI…'}
   if(aiAuthRequired)aiAuthRequired.hidden=true;
   if(form)form.hidden=false;
@@ -91,7 +102,7 @@ function aiOpen(){
     }).catch(error=>console.warn('Could not verify Ventorea AI sign-in:',error));
   }
 }
-function aiClose(){document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');desktopLauncher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else if(desktopLauncher)desktopLauncher.focus();else launcher?.focus()}
+function aiClose(){if(voiceRecognition)voiceRecognition.stop();if('speechSynthesis'in window)window.speechSynthesis.cancel();document.body.classList.remove('ai-chat-open');panel?.classList.remove('open');panel?.setAttribute('aria-hidden','true');launcher?.setAttribute('aria-expanded','false');desktopLauncher?.setAttribute('aria-expanded','false');mobileLauncher?.setAttribute('aria-expanded','false');if(window.matchMedia('(max-width: 680px)').matches)mobileLauncher?.focus();else if(desktopLauncher)desktopLauncher.focus();else launcher?.focus()}
 function setUnread(count){unreadCount=Math.max(0,count);if(unreadBadge){unreadBadge.hidden=unreadCount===0;unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount)}if(launcher)launcher.setAttribute('aria-label',unreadCount?('Open Ventorea AI, '+unreadCount+' unread messages'):'Open Ventorea AI')}
 function setPresence(online,label){if(presenceText)presenceText.textContent=label;if(presenceDot){presenceDot.classList.toggle('is-online',online);presenceDot.classList.toggle('is-offline',!online)}if(menuPresence){menuPresence.textContent=online?'ONLINE':'OFFLINE';menuPresence.classList.toggle('is-online',online);menuPresence.classList.toggle('is-offline',!online)}}
 function duration(ms){const sec=Math.max(0,Math.floor(ms/1000)),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return h?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
@@ -241,7 +252,7 @@ async function ensurePublicProfile(){
  const {data:existing,error:readError}=await supabaseClient.from('profiles').select('friend_code').eq('user_id',user.id).maybeSingle();
  if(readError)throw readError;
  code=existing?.friend_code||makeFriendCode();
- const {error}=await supabaseClient.from('profiles').upsert({user_id:user.id,display_name:displayNameFor(user),bio:user.user_metadata?.bio||'',friend_code:code,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ const {error}=await supabaseClient.from('profiles').upsert({user_id:user.id,display_name:displayNameFor(user),bio:user.user_metadata?.bio||'',avatar_url:user.user_metadata?.avatar_url||null,friend_code:code,updated_at:new Date().toISOString()},{onConflict:'user_id'});
  if(error)throw error;
  if(accountFriendCode)accountFriendCode.value=code;
 }
@@ -457,6 +468,68 @@ function readFileAsBase64(file){
 }
 attachButton?.addEventListener('click',()=>fileInput?.click());
 fileInput?.addEventListener('change',()=>{addSelectedFiles(fileInput.files);fileInput.value=''});
+
+const voiceInputButton=$('aiVoiceInput');
+const voiceOutputButton=$('aiVoiceOutput');
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let voiceRecognition=null,voiceRepliesEnabled=false;
+function setVoiceOutput(enabled){
+  voiceRepliesEnabled=!!enabled;
+  if(voiceOutputButton){
+    voiceOutputButton.setAttribute('aria-pressed',String(voiceRepliesEnabled));
+    voiceOutputButton.title=voiceRepliesEnabled?'Turn spoken replies off':'Read AI replies aloud';
+    voiceOutputButton.setAttribute('aria-label',voiceOutputButton.title);
+    voiceOutputButton.classList.toggle('is-active',voiceRepliesEnabled);
+  }
+  if(!voiceRepliesEnabled&&'speechSynthesis'in window)window.speechSynthesis.cancel();
+}
+function speakAIReply(text){
+  if(!voiceRepliesEnabled||!('speechSynthesis'in window)||!text)return;
+  window.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.lang=document.documentElement.lang||navigator.language||'en';
+  utterance.rate=1;
+  window.speechSynthesis.speak(utterance);
+}
+if(voiceOutputButton){
+  voiceOutputButton.addEventListener('click',()=>{
+    if(!('speechSynthesis'in window)){add('Spoken replies are not supported by this browser.','bot');return}
+    setVoiceOutput(!voiceRepliesEnabled);
+  });
+}
+if(voiceInputButton){
+  if(!SpeechRecognition){
+    voiceInputButton.disabled=true;
+    voiceInputButton.title='Voice input is not supported by this browser';
+    voiceInputButton.setAttribute('aria-label',voiceInputButton.title);
+  }else{
+    voiceInputButton.addEventListener('click',()=>{
+      if(voiceRecognition){voiceRecognition.stop();return}
+      voiceRecognition=new SpeechRecognition();
+      voiceRecognition.lang=document.documentElement.lang||navigator.language||'en';
+      voiceRecognition.continuous=false;
+      voiceRecognition.interimResults=false;
+      voiceInputButton.classList.add('is-active');
+      voiceInputButton.setAttribute('aria-pressed','true');
+      voiceInputButton.title='Listening… click to stop';
+      voiceRecognition.onresult=event=>{
+        const transcript=Array.from(event.results||[]).map(result=>result[0]?.transcript||'').join(' ').trim();
+        if(transcript&&input){input.value=transcript;input.focus()}
+      };
+      voiceRecognition.onerror=event=>{
+        if(event.error!=='no-speech'&&event.error!=='aborted')add('Microphone issue: '+event.error+'. Check your browser microphone permission.','bot');
+      };
+      voiceRecognition.onend=()=>{
+        voiceRecognition=null;
+        voiceInputButton.classList.remove('is-active');
+        voiceInputButton.setAttribute('aria-pressed','false');
+        voiceInputButton.title='Dictate a message';
+      };
+      try{voiceRecognition.start()}catch(error){voiceRecognition=null;voiceInputButton.classList.remove('is-active');voiceInputButton.setAttribute('aria-pressed','false');add('Could not start voice input. Please try again.','bot')}
+    });
+  }
+}
+
 async function sendToAI(){
   const q=input?.value.trim().slice(0,MAX_MESSAGE_LENGTH)||'';
   if((!q&&!selectedFiles.length)||input.disabled)return;
@@ -483,7 +556,7 @@ async function sendToAI(){
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
       const answer=typeof data.content==='string'?data.content.trim():'';
-      loading?.remove();add(answer||'Ventorea AI returned an empty response.','bot');
+      loading?.remove();add(answer||'Ventorea AI returned an empty response.','bot');if(answer)speakAIReply(answer);
       if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
       selectedFiles.splice(0,selectedFiles.length);renderSelectedAttachments();
     }finally{window.clearTimeout(requestTimeout)}
