@@ -72,13 +72,13 @@ export default async function handler(req, res) {
         cache: 'no-store',
         signal: timeoutSignal(8000)
       });
-      if (!authResponse.ok) return res.status(401).json({ error: 'Your sign-in session is invalid or expired. Please sign in again.' });
-      authenticatedUser = await authResponse.json();
-      if (!authenticatedUser || typeof authenticatedUser.id !== 'string') {
-        return res.status(401).json({ error: 'Could not verify your Ventorea account. Please sign in again.' });
+      if (authResponse.ok) {
+        const verifiedUser = await authResponse.json();
+        if (verifiedUser && typeof verifiedUser.id === 'string') authenticatedUser = verifiedUser;
       }
     } catch {
-      return res.status(503).json({ error: 'Account verification is temporarily unavailable. Please try again.' });
+      // An expired or unavailable optional session falls back to public guest access.
+      authenticatedUser = null;
     }
   }
 
