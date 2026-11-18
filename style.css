@@ -1510,3 +1510,16 @@ body{min-width:320px}
   .ai-panel form #aiSendButton{width:40px;flex-basis:40px}
 }
 
+
+
+/* Voice conversation controls */
+#aiPanel form #aiVoiceInput,
+#aiPanel form #aiVoiceOutput{width:40px;flex:0 0 40px;padding:0;border:1px solid rgba(125,178,236,.34)!important;background:#12243b!important;color:#c9e4ff!important;font-size:17px!important}
+#aiPanel form #aiVoiceInput.is-active,
+#aiPanel form #aiVoiceOutput.is-active{background:linear-gradient(145deg,#75c5ff,#397fce)!important;color:#061326!important;border-color:#a9d9ff!important;box-shadow:0 0 0 3px rgba(94,171,246,.16),0 0 18px rgba(76,151,226,.28)}
+#aiPanel form #aiVoiceInput:disabled,
+#aiPanel form #aiVoiceOutput:disabled{opacity:.45;cursor:not-allowed}
+.profile-icon-image{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover}
+@media(max-width:680px){
+  #aiPanel form #aiVoiceInput,#aiPanel form #aiVoiceOutput{width:36px;flex-basis:36px;font-size:15px!important}
+}
