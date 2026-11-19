@@ -158,23 +158,23 @@
       window.location.href = '/login/';
       return;
     }
-    if (provider !== 'facebook') return;
+    if (!['facebook', 'apple'].includes(provider)) return;
     busy = true;
-    const buttons = [signInButton, $('accountFacebookSignIn')].filter(Boolean);
+    const buttons = [signInButton, $('accountFacebookSignIn'), $('accountAppleSignIn')].filter(Boolean);
     buttons.forEach(button => { button.disabled = true; });
-    const providerName = 'Facebook';
+    const providerName = provider === 'apple' ? 'Apple' : 'Facebook';
     status(signedOutStatus, 'Connecting to ' + providerName + '…');
     try {
       const { error } = await client.auth.signInWithOAuth({
-        provider: 'facebook',
+        provider,
         options: { redirectTo: window.location.origin + '/account/' }
       });
       if (error) throw error;
-      status(signedOutStatus, 'Opening Facebook sign-in…');
+      status(signedOutStatus, 'Opening ' + providerName + ' sign-in…');
     } catch (error) {
-      const message = error?.message || 'Could not start Facebook sign-in.';
+      const message = error?.message || 'Could not start ' + providerName + ' sign-in.';
       status(signedOutStatus, /provider is not enabled|unsupported provider|provider.*disabled/i.test(message)
-        ? 'Facebook sign-in is not enabled yet. The studio needs to finish provider setup first.'
+        ? providerName + ' sign-in is not enabled yet. The studio needs to finish provider setup first.'
         : message, 'error');
       busy = false;
       buttons.forEach(button => { button.disabled = false; });
@@ -230,6 +230,7 @@
   signInButton.addEventListener('click', () => signIn('google'));
   $('accountAppleSignIn')?.addEventListener('click', () => signIn('apple'));
   $('accountFacebookSignIn')?.addEventListener('click', () => signIn('facebook'));
+  $('accountAppleSignIn')?.addEventListener('click', () => signIn('apple'));
   signOutButton.addEventListener('click', signOut);
   profileForm.addEventListener('submit', saveProfile);
   avatarInput?.addEventListener('change', event => uploadAvatar(event.target.files?.[0]));
@@ -249,7 +250,7 @@
   client.auth.getSession().then(({ data, error }) => {
     if (error) throw error;
     render(data?.session?.user || null);
-    if (!data?.session?.user) status(signedOutStatus, 'Continue with Google or Facebook to sign in, then manage your profile.');
+    if (!data?.session?.user) status(signedOutStatus, 'Continue with Google, Facebook or Apple to sign in, then manage your profile.');
   }).catch(error => {
     render(null);
     status(signedOutStatus, error?.message || 'Could not check your session. Refresh the page and try again.', 'error');
