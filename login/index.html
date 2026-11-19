@@ -48,7 +48,9 @@
 .auth-back-link{display:block;margin-top:23px;text-align:center;color:#9dcfff;font:9px var(--mono);letter-spacing:1px;transition:color .2s}
 .auth-back-link:hover{color:#fff}
 .auth-form[hidden],.auth-tab[hidden]{display:none!important}
-.auth-form button:disabled,.google-button:disabled{opacity:.55;cursor:wait;transform:none}
+.auth-form button:disabled,.google-button:disabled{opacity:.78;cursor:wait;transform:none}
+.auth-spinner{display:inline-block;width:15px;height:15px;flex:0 0 15px;border:2px solid rgba(225,241,255,.28);border-top-color:#a9d8ff;border-radius:50%;animation:authSpin .7s linear infinite;vertical-align:middle}
+@keyframes authSpin{to{transform:rotate(360deg)}}
 @keyframes authCardIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.auth-page{padding:94px 14px 30px;min-height:100svh}.auth-card{padding:25px 19px;border-radius:14px}.auth-card h1{font-size:clamp(38px,11vw,49px)}.auth-intro{font-size:12px}.auth-tabs{margin:19px 0}.auth-form input{min-height:47px}}
 @media(prefers-reduced-motion:reduce){.auth-card{animation:none}.auth-tab,.auth-form input,.auth-form .button,.google-button,.auth-back-link{transition:none}}
@@ -115,9 +117,20 @@
     signUpTab.setAttribute('aria-selected', String(!signingIn));
     setStatus(signingIn ? 'Enter your email and password to sign in.' : 'Create an account with your name, email and password.');
   }
-  function setBusy(value) {
+  function setBusy(value, activeButton = null, loadingText = 'Please wait…') {
     busy = value;
-    document.querySelectorAll('#signInSubmit,#signUpSubmit,#googleLoginButton').forEach(button => button.disabled = value);
+    const buttons = [$('signInSubmit'), $('signUpSubmit'), $('googleLoginButton')];
+    buttons.forEach(button => {
+      if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
+      button.disabled = value;
+      if (button === activeButton && value) {
+        button.innerHTML = '<span class="auth-spinner" aria-hidden="true"></span><span>' + loadingText + '</span>';
+        button.setAttribute('aria-busy', 'true');
+      } else if (!value) {
+        button.innerHTML = button.dataset.originalHtml;
+        button.removeAttribute('aria-busy');
+      }
+    });
   }
 
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -145,7 +158,7 @@
     if (busy) return;
     const email = $('signInEmail').value.trim();
     const password = $('signInPassword').value;
-    setBusy(true);
+    setBusy(true, $('signInSubmit'), 'Signing in…');
     setStatus('Signing in securely…');
     try {
       const {data,error} = await client.auth.signInWithPassword({email,password});
@@ -168,7 +181,7 @@
     const confirmation = $('signUpConfirm').value;
     if (password.length < 8) return setStatus('Choose a password with at least 8 characters.', 'error');
     if (password !== confirmation) return setStatus('Your passwords do not match.', 'error');
-    setBusy(true);
+    setBusy(true, $('signUpSubmit'), 'Creating account…');
     setStatus('Creating your account securely…');
     try {
       const {data,error} = await client.auth.signUp({
@@ -196,7 +209,7 @@
 
   $('googleLoginButton').addEventListener('click', async () => {
     if (busy) return;
-    setBusy(true);
+    setBusy(true, $('googleLoginButton'), 'Connecting…');
     setStatus('Connecting to Google securely…');
     try {
       const {error} = await client.auth.signInWithOAuth({
