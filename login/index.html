@@ -48,12 +48,14 @@
 .auth-back-link{display:block;margin-top:23px;text-align:center;color:#9dcfff;font:9px var(--mono);letter-spacing:1px;transition:color .2s}
 .auth-back-link:hover{color:#fff}
 .auth-form[hidden],.auth-tab[hidden]{display:none!important}
+.auth-form.is-entering{animation:authCircularReveal .52s cubic-bezier(.2,.75,.25,1) both;transform-origin:center}
+@keyframes authCircularReveal{from{opacity:0;clip-path:circle(0% at 50% 45%);transform:scale(.97)}to{opacity:1;clip-path:circle(150% at 50% 45%);transform:scale(1)}}
 .auth-form button:disabled,.google-button:disabled{opacity:.78;cursor:wait;transform:none}
 .auth-spinner{display:inline-block;width:15px;height:15px;flex:0 0 15px;border:2px solid rgba(225,241,255,.28);border-top-color:#a9d8ff;border-radius:50%;animation:authSpin .7s linear infinite;vertical-align:middle}
 @keyframes authSpin{to{transform:rotate(360deg)}}
 @keyframes authCardIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.auth-page{padding:94px 14px 30px;min-height:100svh}.auth-card{padding:25px 19px;border-radius:14px}.auth-card h1{font-size:clamp(38px,11vw,49px)}.auth-intro{font-size:12px}.auth-tabs{margin:19px 0}.auth-form input{min-height:47px}}
-@media(prefers-reduced-motion:reduce){.auth-card{animation:none}.auth-tab,.auth-form input,.auth-form .button,.google-button,.auth-back-link{transition:none}}
+@media(prefers-reduced-motion:reduce){.auth-card,.auth-form.is-entering{animation:none}.auth-tab,.auth-form input,.auth-form .button,.google-button,.auth-back-link{transition:none}}
 </style>
 </head>
 <body>
@@ -111,8 +113,12 @@
   }
   function setMode(mode) {
     const signingIn = mode === 'signin';
+    const activeForm = signingIn ? signInForm : signUpForm;
     signInForm.hidden = !signingIn;
     signUpForm.hidden = signingIn;
+    [signInForm, signUpForm].forEach(form => form.classList.remove('is-entering'));
+    void activeForm.offsetWidth;
+    activeForm.classList.add('is-entering');
     signInTab.setAttribute('aria-selected', String(signingIn));
     signUpTab.setAttribute('aria-selected', String(!signingIn));
     setStatus(signingIn ? 'Enter your email and password to sign in.' : 'Create an account with your name, email and password.');
