@@ -153,29 +153,28 @@
     catch { /* Private browsing can block storage. */ }
   }
   async function signIn(provider) {
-    if (provider !== 'google') return;
-    window.location.href = '/login/';
-    return;
     if (!client || busy) return;
+    if (provider === 'google') {
+      window.location.href = '/login/';
+      return;
+    }
+    if (provider !== 'facebook') return;
     busy = true;
-    const buttons = [signInButton, $('accountAppleSignIn'), $('accountFacebookSignIn')].filter(Boolean);
+    const buttons = [signInButton, $('accountFacebookSignIn')].filter(Boolean);
     buttons.forEach(button => { button.disabled = true; });
-    const providerName = provider === 'google' ? 'Google' : provider === 'apple' ? 'Apple' : 'Facebook';
+    const providerName = 'Facebook';
     status(signedOutStatus, 'Connecting to ' + providerName + '…');
     try {
       const { error } = await client.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: window.location.origin + '/account/',
-          ...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {})
-        }
+        provider: 'facebook',
+        options: { redirectTo: window.location.origin + '/account/' }
       });
       if (error) throw error;
-      status(signedOutStatus, 'Opening ' + providerName + ' sign-in…');
+      status(signedOutStatus, 'Opening Facebook sign-in…');
     } catch (error) {
-      const message = error?.message || 'Could not start ' + providerName + ' sign-in.';
+      const message = error?.message || 'Could not start Facebook sign-in.';
       status(signedOutStatus, /provider is not enabled|unsupported provider|provider.*disabled/i.test(message)
-        ? providerName + ' sign-in is not enabled in the authentication settings yet. The studio needs to configure this provider first.'
+        ? 'Facebook sign-in is not enabled yet. The studio needs to finish provider setup first.'
         : message, 'error');
       busy = false;
       buttons.forEach(button => { button.disabled = false; });
@@ -250,7 +249,7 @@
   client.auth.getSession().then(({ data, error }) => {
     if (error) throw error;
     render(data?.session?.user || null);
-    if (!data?.session?.user) status(signedOutStatus, 'Continue with Google to sign in, then return here to manage your profile.');
+    if (!data?.session?.user) status(signedOutStatus, 'Continue with Google or Facebook to sign in, then manage your profile.');
   }).catch(error => {
     render(null);
     status(signedOutStatus, error?.message || 'Could not check your session. Refresh the page and try again.', 'error');
