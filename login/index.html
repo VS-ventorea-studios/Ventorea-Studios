@@ -39,9 +39,9 @@
 .auth-divider{display:flex;align-items:center;gap:12px;margin:22px 0 15px;color:#7188a5;font:9px var(--mono);letter-spacing:1.1px}
 .auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#263b56)}
 .auth-divider:after{background:linear-gradient(90deg,#263b56,transparent)}
-.google-button{display:flex;align-items:center;justify-content:center;gap:11px;background:rgba(255,255,255,.025);border-color:rgba(139,197,255,.25);color:#eaf4ff}
-.google-button:hover{background:rgba(91,151,216,.1);border-color:#78baff;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.google-g{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;font:bold 16px Arial;color:#4285f4}
+.google-button,.facebook-button{display:flex;align-items:center;justify-content:center;gap:11px;background:rgba(255,255,255,.025);border-color:rgba(139,197,255,.25);color:#eaf4ff}
+.google-button:hover,.facebook-button:hover{background:rgba(91,151,216,.1);border-color:#78baff;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.google-g{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;font:bold 16px Arial;color:#4285f4}.facebook-f{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#1877f2;color:#fff;font:bold 19px Arial}
 .auth-status{min-height:22px;margin:14px 0 0;padding:0 2px;color:#a9bfd9;font-size:11px;line-height:1.65;overflow-wrap:anywhere}
 .auth-status.error{color:#ff9aab}.auth-status.success{color:#8ce0bd}
 .auth-footnote{margin:15px 0 0;padding:12px 13px;border:1px solid rgba(109,154,205,.12);border-radius:8px;background:rgba(3,10,20,.35);color:#8198b4;font-size:10px;line-height:1.7;text-align:center}
@@ -50,12 +50,12 @@
 .auth-form[hidden],.auth-tab[hidden]{display:none!important}
 .auth-form.is-entering{animation:authCircularReveal .52s cubic-bezier(.2,.75,.25,1) both;transform-origin:center}
 @keyframes authCircularReveal{from{opacity:0;clip-path:circle(0% at 50% 45%);transform:scale(.97)}to{opacity:1;clip-path:circle(150% at 50% 45%);transform:scale(1)}}
-.auth-form button:disabled,.google-button:disabled{opacity:.78;cursor:wait;transform:none}
+.auth-form button:disabled,.google-button:disabled,.facebook-button:disabled{opacity:.78;cursor:wait;transform:none}
 .auth-spinner{display:inline-block;width:15px;height:15px;flex:0 0 15px;border:2px solid rgba(225,241,255,.28);border-top-color:#a9d8ff;border-radius:50%;animation:authSpin .7s linear infinite;vertical-align:middle}
 @keyframes authSpin{to{transform:rotate(360deg)}}
 @keyframes authCardIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.auth-page{padding:94px 14px 30px;min-height:100svh}.auth-card{padding:25px 19px;border-radius:14px}.auth-card h1{font-size:clamp(38px,11vw,49px)}.auth-intro{font-size:12px}.auth-tabs{margin:19px 0}.auth-form input{min-height:47px}}
-@media(prefers-reduced-motion:reduce){.auth-card,.auth-form.is-entering{animation:none}.auth-tab,.auth-form input,.auth-form .button,.google-button,.auth-back-link{transition:none}}
+@media(prefers-reduced-motion:reduce){.auth-card,.auth-form.is-entering{animation:none}.auth-tab,.auth-form input,.auth-form .button,.google-button,.facebook-button,.auth-back-link{transition:none}}
 </style>
 </head>
 <body>
@@ -88,7 +88,8 @@
 </form>
 <div class="auth-divider">OR CONTINUE WITH</div>
 <button class="button button-outline google-button" id="googleLoginButton" type="button"><span class="google-g" aria-hidden="true">G</span> CONTINUE WITH GOOGLE</button>
-<p class="auth-status" id="authStatus" role="status" aria-live="polite">Use your email and password, or continue with Google.</p>
+<button class="button button-outline google-button facebook-button" id="facebookLoginButton" type="button"><span class="facebook-f" aria-hidden="true">f</span> CONTINUE WITH FACEBOOK</button>
+<p class="auth-status" id="authStatus" role="status" aria-live="polite">Use your email and password, or continue with Google or Facebook.</p>
 <p class="auth-footnote">Your password is handled securely by Supabase Authentication. Never share your password with anyone.</p>
 <a class="auth-back-link" href="/">← BACK TO VENTOREA STUDIOS</a>
 </section>
@@ -213,24 +214,31 @@
     }
   });
 
-  $('googleLoginButton').addEventListener('click', async () => {
+  async function startSocialLogin(provider) {
     if (busy) return;
-    setBusy(true, $('googleLoginButton'), 'Connecting…');
-    setStatus('Connecting to Google securely…');
+    const button = provider === 'google' ? $('googleLoginButton') : $('facebookLoginButton');
+    const providerName = provider === 'google' ? 'Google' : 'Facebook';
+    setBusy(true, button, 'Connecting…');
+    setStatus('Connecting to ' + providerName + ' securely…');
     try {
       const {error} = await client.auth.signInWithOAuth({
-        provider:'google',
+        provider,
         options:{
           redirectTo: window.location.origin + '/account/',
-          queryParams:{prompt:'select_account'}
+          ...(provider === 'google' ? {queryParams:{prompt:'select_account'}} : {})
         }
       });
       if (error) throw error;
     } catch (error) {
-      setStatus(error.message || 'Google sign-in could not start. Please try again.', 'error');
+      const message = error?.message || providerName + ' sign-in could not start. Please try again.';
+      setStatus(/provider is not enabled|unsupported provider|provider.*disabled/i.test(message)
+        ? providerName + ' sign-in is not enabled yet. The studio must finish provider setup first.'
+        : message, 'error');
       setBusy(false);
     }
-  });
+  }
+  $('googleLoginButton').addEventListener('click', () => startSocialLogin('google'));
+  $('facebookLoginButton').addEventListener('click', () => startSocialLogin('facebook'));
 
   const params = new URLSearchParams(window.location.search);
   const authError = params.get('error_description') || params.get('error');
