@@ -41,7 +41,7 @@
 .auth-divider:after{background:linear-gradient(90deg,#263b56,transparent)}
 .google-button,.facebook-button{display:flex;align-items:center;justify-content:center;gap:11px;background:rgba(255,255,255,.025);border-color:rgba(139,197,255,.25);color:#eaf4ff}
 .google-button:hover,.facebook-button:hover{background:rgba(91,151,216,.1);border-color:#78baff;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.google-g{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;font:bold 16px Arial;color:#4285f4}.facebook-f{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#1877f2;color:#fff;font:bold 19px Arial}
+.brand-provider-logo{display:block;width:22px;height:22px;flex:0 0 22px}.facebook-button .brand-provider-logo{width:22px;height:22px}
 .auth-status{min-height:22px;margin:14px 0 0;padding:0 2px;color:#a9bfd9;font-size:11px;line-height:1.65;overflow-wrap:anywhere}
 .auth-status.error{color:#ff9aab}.auth-status.success{color:#8ce0bd}
 .auth-footnote{margin:15px 0 0;padding:12px 13px;border:1px solid rgba(109,154,205,.12);border-radius:8px;background:rgba(3,10,20,.35);color:#8198b4;font-size:10px;line-height:1.7;text-align:center}
@@ -87,8 +87,8 @@
 <button class="button button-bright" id="signUpSubmit" type="submit">CREATE ACCOUNT ↗</button>
 </form>
 <div class="auth-divider">OR CONTINUE WITH</div>
-<button class="button button-outline google-button" id="googleLoginButton" type="button"><span class="google-g" aria-hidden="true">G</span> CONTINUE WITH GOOGLE</button>
-<button class="button button-outline google-button facebook-button" id="facebookLoginButton" type="button"><span class="facebook-f" aria-hidden="true">f</span> CONTINUE WITH FACEBOOK</button>
+<button class="button button-outline google-button" id="googleLoginButton" type="button"><svg class="brand-provider-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.89c-.58 2.96-2.25 5.47-4.73 7.16l7.63 5.92c4.45-4.1 7.19-10.14 7.19-17.55z"/><path fill="#FBBC05" d="M10.54 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.47 0 11.91-2.13 15.88-5.9l-7.63-5.92c-2.12 1.44-4.84 2.29-8.25 2.29-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> CONTINUE WITH GOOGLE</button>
+<button class="button button-outline google-button facebook-button" id="facebookLoginButton" type="button"><svg class="brand-provider-logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M13.45 20v-7.3h2.45l.37-2.85h-2.82V8.03c0-.83.23-1.39 1.41-1.39h1.51V4.09c-.26-.04-1.15-.11-2.19-.11-2.17 0-3.65 1.33-3.65 3.77v2.1H8.08v2.85h2.45V20h2.92z"/></svg> CONTINUE WITH FACEBOOK</button>
 <p class="auth-status" id="authStatus" role="status" aria-live="polite">Use your email and password, or continue with Google or Facebook.</p>
 <p class="auth-footnote">Your password is handled securely by Supabase Authentication. Never share your password with anyone.</p>
 <a class="auth-back-link" href="/">← BACK TO VENTOREA STUDIOS</a>
