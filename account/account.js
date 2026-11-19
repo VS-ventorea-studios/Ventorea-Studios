@@ -158,11 +158,11 @@
       window.location.href = '/login/';
       return;
     }
-    if (!['facebook', 'apple'].includes(provider)) return;
+    if (provider !== 'facebook') return;
     busy = true;
-    const buttons = [signInButton, $('accountFacebookSignIn'), $('accountAppleSignIn')].filter(Boolean);
+    const buttons = [signInButton, $('accountFacebookSignIn')].filter(Boolean);
     buttons.forEach(button => { button.disabled = true; });
-    const providerName = provider === 'apple' ? 'Apple' : 'Facebook';
+    const providerName = 'Facebook';
     status(signedOutStatus, 'Connecting to ' + providerName + '…');
     try {
       const { error } = await client.auth.signInWithOAuth({
@@ -228,7 +228,6 @@
     }
   }
   signInButton.addEventListener('click', () => signIn('google'));
-  $('accountAppleSignIn')?.addEventListener('click', () => signIn('apple'));
   $('accountFacebookSignIn')?.addEventListener('click', () => signIn('facebook'));
   $('accountAppleSignIn')?.addEventListener('click', () => signIn('apple'));
   signOutButton.addEventListener('click', signOut);
