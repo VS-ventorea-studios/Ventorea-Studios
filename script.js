@@ -575,6 +575,11 @@ async function sendToAI(){
         if(event.type==='chunk'&&typeof event.text==='string'){
           if(loading){const label=loading.querySelector('.ai-thinking-label');if(label)label.textContent='Generating response'}
           answer+=event.text;pendingWords+=event.text;revealFiveWords();
+        }else if(event.type==='replace'&&typeof event.text==='string'){
+          answer=event.text;pendingWords='';
+          if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
+          streamBubble.textContent=answer;
+          messages.scrollTop=messages.scrollHeight;
         }else if(event.type==='done'){completed=true}
         else if(event.type==='error')throw new Error(event.error||'The AI response stream failed.');
       };
