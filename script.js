@@ -359,7 +359,7 @@ function add(text,type){
   const p=document.createElement('div');p.className=type;p.dir='auto';
   if(type==='bot'&&text==='Thinking…'){
     p.classList.add('ai-thinking-glow');p.setAttribute('aria-live','polite');
-    p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span>Thinking</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span>';
+    p.innerHTML='<span class="ai-thinking-dot" aria-hidden="true"></span><span class="ai-thinking-label">Connecting to Gemini</span><span class="ai-thinking-ellipsis" aria-hidden="true">...</span><span class="ai-thinking-track" aria-hidden="true"><span></span></span>';
   }else if(type==='bot'){
     // Render a small, safe Markdown subset. Never inject model text as HTML.
     const lines=String(text??'').split(/\r?\n/);
@@ -390,7 +390,7 @@ function add(text,type){
   messages.appendChild(p);messages.scrollTop=messages.scrollHeight;return p;
 }
 (()=>{if(document.getElementById('aiReadableReplyStyles'))return;const style=document.createElement('style');style.id='aiReadableReplyStyles';style.textContent=`.ai-messages .bot{font-size:16px!important;line-height:1.75!important;overflow-wrap:anywhere}.ai-messages .bot .ai-answer-heading{font-size:1.18em;font-weight:700;margin:.55em 0 .25em;color:#f2f7ff}.ai-messages .bot .ai-answer-list-item{padding-left:.25em;margin:.18em 0}.ai-messages .bot strong{font-weight:750;color:#fff}.ai-messages .bot .ai-answer-link{color:#83c6ff;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}.ai-messages .bot .ai-answer-link:hover{color:#c0e3ff}.ai-messages .user{font-size:15px!important;line-height:1.65!important}@media(max-width:680px){.ai-messages .bot{font-size:17px!important;line-height:1.75!important}.ai-messages .user{font-size:16px!important}}`;document.head.appendChild(style);})();
-(()=>{if(document.getElementById('aiThinkingGlowStyles'))return;const style=document.createElement('style');style.id='aiThinkingGlowStyles';style.textContent=`.ai-messages .ai-thinking-glow{display:flex;align-items:center;gap:9px;width:max-content;max-width:90%;border:1px solid rgba(77,163,255,.42);box-shadow:0 0 8px rgba(77,163,255,.14),inset 0 0 10px rgba(77,163,255,.06);animation:aiThinkingGlow 2.1s ease-in-out infinite;color:#e0edff}.ai-thinking-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#7fc1ff;box-shadow:0 0 5px 2px rgba(77,163,255,.42);animation:aiThinkingPulse 1.6s ease-in-out infinite}.ai-thinking-ellipsis{display:inline-block;min-width:18px;letter-spacing:2px;animation:aiThinkingDots 1.2s steps(4,end) infinite;overflow:hidden}@keyframes aiThinkingGlow{0%,100%{border-color:rgba(77,163,255,.28);box-shadow:0 0 5px rgba(77,163,255,.1),inset 0 0 8px rgba(77,163,255,.04)}50%{border-color:rgba(125,195,255,.95);box-shadow:0 0 8px 3px rgba(77,163,255,.32),0 0 22px rgba(77,163,255,.18),inset 0 0 13px rgba(77,163,255,.12)}}@keyframes aiThinkingPulse{0%,100%{opacity:.55;transform:scale(.85);box-shadow:0 0 4px 1px rgba(77,163,255,.28)}50%{opacity:1;transform:scale(1.15);box-shadow:0 0 8px 4px rgba(77,163,255,.8)}}@keyframes aiThinkingDots{0%{width:0}100%{width:18px}}@media(prefers-reduced-motion:reduce){.ai-thinking-glow,.ai-thinking-dot,.ai-thinking-ellipsis{animation:none!important}}`;document.head.appendChild(style);})();
+(()=>{if(document.getElementById('aiThinkingGlowStyles'))return;const style=document.createElement('style');style.id='aiThinkingGlowStyles';style.textContent=`.ai-messages .ai-thinking-glow{display:flex;align-items:center;gap:9px;width:max-content;max-width:90%;border:1px solid rgba(77,163,255,.42);box-shadow:0 0 8px rgba(77,163,255,.14),inset 0 0 10px rgba(77,163,255,.06);animation:aiThinkingGlow 2.1s ease-in-out infinite;color:#e0edff}.ai-thinking-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#7fc1ff;box-shadow:0 0 5px 2px rgba(77,163,255,.42);animation:aiThinkingPulse 1.6s ease-in-out infinite}.ai-thinking-ellipsis{display:inline-block;min-width:18px;letter-spacing:2px;animation:aiThinkingDots 1.2s steps(4,end) infinite;overflow:hidden}@keyframes aiThinkingGlow{0%,100%{border-color:rgba(77,163,255,.28);box-shadow:0 0 5px rgba(77,163,255,.1),inset 0 0 8px rgba(77,163,255,.04)}50%{border-color:rgba(125,195,255,.95);box-shadow:0 0 8px 3px rgba(77,163,255,.32),0 0 22px rgba(77,163,255,.18),inset 0 0 13px rgba(77,163,255,.12)}}@keyframes aiThinkingPulse{0%,100%{opacity:.55;transform:scale(.85);box-shadow:0 0 4px 1px rgba(77,163,255,.28)}50%{opacity:1;transform:scale(1.15);box-shadow:0 0 8px 4px rgba(77,163,255,.8)}}@keyframes aiThinkingDots{0%{width:0}100%{width:18px}}.ai-thinking-glow{position:relative;flex-wrap:wrap;padding:10px 13px 16px!important;min-height:38px}.ai-thinking-track{position:absolute;left:13px;right:13px;bottom:7px;height:2px;border-radius:5px;background:rgba(125,195,255,.16);overflow:hidden}.ai-thinking-track span{display:block;width:34%;height:100%;border-radius:5px;background:#83c6ff;box-shadow:0 0 8px rgba(77,163,255,.75);animation:aiThinkingProgress 1.4s ease-in-out infinite}@keyframes aiThinkingProgress{0%{transform:translateX(-120%)}100%{transform:translateX(330%)}}@media(prefers-reduced-motion:reduce){.ai-thinking-glow,.ai-thinking-dot,.ai-thinking-ellipsis,.ai-thinking-track span{animation:none!important}}`;document.head.appendChild(style);})();
 function getLocalPublicAnswer(message){
   const q=String(message||'').toLowerCase();
   const priceMatch=/(price|pricing|cost|how much|edition|demo|standard|ultimate|سعر|الاسعار|الأسعار|بكام|كام|نسخة|الإصدار|الاصدار)/i.test(q);
@@ -553,10 +553,54 @@ async function sendToAI(){
         try{const {data}=await supabaseClient.auth.getSession();const token=data?.session?.access_token;if(token)headers.Authorization='Bearer '+token}catch{}
       }
       const response=await fetch(AI_ENDPOINT,{method:'POST',headers,body:JSON.stringify({messages:chat,attachments}),signal:requestController.signal});
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Ventorea AI returned HTTP '+response.status+'.');
-      const answer=typeof data.content==='string'?data.content.trim():'';
-      loading?.remove();add(answer||'Ventorea AI returned an empty response.','bot');if(answer)speakAIReply(answer);
+      if(!response.ok){
+        const errorData=await response.json().catch(()=>({}));
+        throw new Error(typeof errorData.error==='string'?errorData.error:'Ventorea AI returned HTTP '+response.status+'.');
+      }
+      if(!response.body)throw new Error('Your browser does not support live AI responses. Please try another browser.');
+      const reader=response.body.getReader(),decoder=new TextDecoder();
+      let streamBuffer='',pendingWords='',answer='',streamBubble=null,completed=false;
+      const revealFiveWords=()=>{
+        let match;
+        while((match=pendingWords.match(/^((?:\\S+\\s+){5})/))){
+          const group=match[1];pendingWords=pendingWords.slice(group.length);
+          if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
+          streamBubble.textContent+=group;
+          messages.scrollTop=messages.scrollHeight;
+        }
+      };
+      const handleStreamEvent=async raw=>{
+        if(!raw||raw==='[DONE]')return;
+        let event;try{event=JSON.parse(raw)}catch{return}
+        if(event.type==='chunk'&&typeof event.text==='string'){
+          if(loading){const label=loading.querySelector('.ai-thinking-label');if(label)label.textContent='Generating response'}
+          answer+=event.text;pendingWords+=event.text;revealFiveWords();
+        }else if(event.type==='done'){completed=true}
+        else if(event.type==='error')throw new Error(event.error||'The AI response stream failed.');
+      };
+      while(true){
+        const {value,done}=await reader.read();if(done)break;
+        streamBuffer+=decoder.decode(value,{stream:true});
+        const events=streamBuffer.split(/\\r?\\n\\r?\\n/);streamBuffer=events.pop()||'';
+        for(const eventText of events){
+          const dataLine=eventText.split(/\\r?\\n/).find(line=>line.startsWith('data:'));
+          if(dataLine)await handleStreamEvent(dataLine.slice(5).trim());
+        }
+      }
+      streamBuffer+=decoder.decode();
+      if(streamBuffer.trim()){
+        const dataLine=streamBuffer.split(/\\r?\\n/).find(line=>line.startsWith('data:'));
+        if(dataLine)await handleStreamEvent(dataLine.slice(5).trim());
+      }
+      if(pendingWords){
+        if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
+        streamBubble.textContent+=pendingWords;pendingWords='';
+      }
+      answer=answer.trim();
+      if(!completed||!answer)throw new Error('Ventorea AI ended the stream before completing its response. Please try again.');
+      loading?.remove();
+      if(streamBubble){streamBubble.remove();streamBubble=null}
+      add(answer,'bot');speakAIReply(answer);
       if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
       selectedFiles.splice(0,selectedFiles.length);renderSelectedAttachments();
     }finally{window.clearTimeout(requestTimeout)}
