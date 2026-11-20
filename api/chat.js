@@ -303,7 +303,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
   normalizedMessages[normalizedMessages.length - 1].parts.push(...attachmentParts);
 
   async function askModel(model) {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -314,15 +314,10 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         contents: normalizedMessages,
         generationConfig: { maxOutputTokens: 600 }
       }),
-      signal: timeoutSignal(18000)
+      signal: timeoutSignal(30000)
     });
-    const data = await response.json().catch(() => ({}));
-    const content = (data?.candidates?.[0]?.content?.parts || [])
-      .filter(part => typeof part?.text === 'string')
-      .map(part => part.text)
-      .join('\n')
-      .trim();
-    return { response, data, content };
+    const data = response.ok ? {} : await response.json().catch(() => ({}));
+    return { response, data };
   }
 
   let activeModel = '';
@@ -350,53 +345,96 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
     for (const model of models) {
       activeModel = model;
-      const { response, data, content } = await askModel(model);
+      const { response, data } = await askModel(model);
       if (response.ok) {
-        if (content) {
-          // Privacy by default: never email ordinary AI conversations or AI replies.
-          // A separate alert is sent only when a conservative rule detects explicit first-person intent to harm.
-          const directHarmPatterns = [
-            /\\b(?:i(?:'m| am)?\\s+(?:going to|gonna|will|intend to|plan to)\\s+(?:hurt|harm|kill|attack)\\s+(?:myself|someone|him|her|them|you|people))\\b/i,
-            /\\b(?:i\\s+want\\s+to\\s+(?:hurt|harm|kill)\\s+(?:myself|someone|him|her|them|you))\\b/i,
-            /\\b(?:i(?:'m| am)?\\s+(?:going to|gonna|will|intend to|plan to)\\s+(?:end my life|commit suicide))\\b/i,
-            /\\b(?:i\\s+want\\s+to\\s+(?:end my life|die by suicide))\\b/i,
-            /(?:أنا|انا|سوف|راح|ه)\\s*(?:أؤذي|اؤذي|أقتل|اقتل|أهاجم|اهجم)\\s*(?:نفسي|شخص|حد|إياه|إياها|هم|ك|كِ)/u,
-            /(?:عايز|أريد|اريد|نفسي)\\s*(?:أؤذي|اؤذي|أقتل|اقتل)\\s*(?:نفسي|حد|شخص)/u
-          ];
-          const safetyAlertMatch = directHarmPatterns.some(pattern => pattern.test(visitorMessage));
-          if (safetyAlertMatch && process.env.RESEND_API_KEY && authenticatedUser) {
-            const escapeAlertHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
-              '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[char]));
-            const visitorEmail = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
-            const sentAt = new Date().toISOString();
-            try {
-              const alertResponse = await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  from: process.env.SUPPORT_FROM_EMAIL || 'Ventorea AI <onboarding@resend.dev>',
-                  to: ['ventoreastudios.support@gmail.com'],
-                  subject: '[Ventorea AI SAFETY ALERT] Possible direct harm intent',
-                  html: `<h2>Possible safety concern detected</h2>
-                    <p><b>Time (UTC):</b> ${escapeAlertHtml(sentAt)}</p>
-                    <p><b>Signed-in account:</b> ${escapeAlertHtml(visitorEmail)}</p>
-                    <p><b>Alert type:</b> Possible explicit first-person intent to harm self or another person.</p>
-                    <hr><h3>Flagged message only</h3>
-                    <p style="white-space:pre-wrap">${escapeAlertHtml(visitorMessage.slice(0, 1200))}</p>
-                    <p style="color:#666;font-size:12px">Automated detection can be wrong or miss messages. This alert does not include the surrounding conversation or the AI reply. Handle this information confidentially and do not treat this inbox as an emergency response service.</p>`
-                }),
-                signal: timeoutSignal(6000)
-              });
-              if (!alertResponse.ok) console.error('Ventorea AI safety alert failed:', alertResponse.status);
-            } catch (alertError) {
-              console.error('Ventorea AI safety alert failed:', alertError?.message || 'network error');
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
+        const sendEvent = payload => res.write('data: ' + JSON.stringify(payload) + '\\n\\n');
+        let content = '';
+        let buffer = '';
+        const reader = response.body?.getReader();
+        if (!reader) {
+          sendEvent({ type: 'error', error: 'Gemini streaming is unavailable for this response.' });
+          return res.end();
+        }
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += new TextDecoder().decode(value, { stream: true });
+            const lines = buffer.split(/\\r?\\n/);
+            buffer = lines.pop() || '';
+            for (const line of lines) {
+              if (!line.startsWith('data:')) continue;
+              const raw = line.slice(5).trim();
+              if (!raw || raw === '[DONE]') continue;
+              let event;
+              try { event = JSON.parse(raw); } catch { continue; }
+              const textParts = (event?.candidates?.[0]?.content?.parts || [])
+                .filter(part => typeof part?.text === 'string')
+                .map(part => part.text);
+              const chunk = textParts.join('');
+              if (chunk) {
+                content += chunk;
+                sendEvent({ type: 'chunk', text: chunk });
+              }
             }
           }
-          return res.status(200).json({ content, model: data?.model || model, attachmentsProcessed: safeAttachments.length });
+        } catch (streamError) {
+          console.error('Ventorea AI stream failed:', streamError?.name || 'stream_error');
+          sendEvent({ type: 'error', error: 'The response stream was interrupted. Please try again.' });
+          return res.end();
         }
-        lastError = 'Gemini completed the request but returned no text.';
-        continue;
+        content = content.trim();
+        if (!content) {
+          sendEvent({ type: 'error', error: 'Gemini completed the request but returned no text.' });
+          return res.end();
+        }
+        // Privacy by default: never email ordinary AI conversations or AI replies.
+        // A separate alert is sent only when a conservative rule detects explicit first-person intent to harm.
+        const directHarmPatterns = [
+          /\\b(?:i(?:'m| am)?\\s+(?:going to|gonna|will|intend to|plan to)\\s+(?:hurt|harm|kill|attack)\\s+(?:myself|someone|him|her|them|you|people))\\b/i,
+          /\\b(?:i\\s+want\\s+to\\s+(?:hurt|harm|kill)\\s+(?:myself|someone|him|her|them|you))\\b/i,
+          /\\b(?:i(?:'m| am)?\\s+(?:going to|gonna|will|intend to|plan to)\\s+(?:end my life|commit suicide))\\b/i,
+          /\\b(?:i\\s+want\\s+to\\s+(?:end my life|die by suicide))\\b/i,
+          /(?:أنا|انا|سوف|راح|ه)\\s*(?:أؤذي|اؤذي|أقتل|اقتل|أهاجم|اهجم)\\s*(?:نفسي|شخص|حد|إياه|إياها|هم|ك|كِ)/u,
+          /(?:عايز|أريد|اريد|نفسي)\\s*(?:أؤذي|اؤذي|أقتل|اقتل)\\s*(?:نفسي|حد|شخص)/u
+        ];
+        const safetyAlertMatch = directHarmPatterns.some(pattern => pattern.test(visitorMessage));
+        if (safetyAlertMatch && process.env.RESEND_API_KEY && authenticatedUser) {
+          const escapeAlertHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+          }[char]));
+          const visitorEmail = typeof authenticatedUser.email === 'string' ? authenticatedUser.email : 'Not available';
+          const sentAt = new Date().toISOString();
+          try {
+            const alertResponse = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: process.env.SUPPORT_FROM_EMAIL || 'Ventorea AI <onboarding@resend.dev>',
+                to: ['ventoreastudios.support@gmail.com'],
+                subject: '[Ventorea AI SAFETY ALERT] Possible direct harm intent',
+                html: `<h2>Possible safety concern detected</h2>
+                  <p><b>Time (UTC):</b> ${escapeAlertHtml(sentAt)}</p>
+                  <p><b>Signed-in account:</b> ${escapeAlertHtml(visitorEmail)}</p>
+                  <p><b>Alert type:</b> Possible explicit first-person intent to harm self or another person.</p>
+                  <hr><h3>Flagged message only</h3>
+                  <p style="white-space:pre-wrap">${escapeAlertHtml(visitorMessage.slice(0, 1200))}</p>
+                  <p style="color:#666;font-size:12px">Automated detection can be wrong or miss messages. This alert does not include the surrounding conversation or the AI reply. Handle this information confidentially and do not treat this inbox as an emergency response service.</p>`
+              }),
+              signal: timeoutSignal(6000)
+            });
+            if (!alertResponse.ok) console.error('Ventorea AI safety alert failed:', alertResponse.status);
+          } catch (alertError) {
+            console.error('Ventorea AI safety alert failed:', alertError?.message || 'network error');
+          }
+        }
+        sendEvent({ type: 'done', model, attachmentsProcessed: safeAttachments.length });
+        return res.end();
       }
       console.error('Ventorea AI Gemini request rejected:', model, response.status, data?.error?.status || 'upstream_error');
       lastError = data?.error?.message || data?.errors?.[0]?.message || `Gemini returned HTTP ${response.status}.`;
