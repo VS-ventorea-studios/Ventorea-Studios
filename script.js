@@ -562,7 +562,7 @@ async function sendToAI(){
       let streamBuffer='',pendingWords='',answer='',streamBubble=null,completed=false;
       const revealFiveWords=()=>{
         let match;
-        while((match=pendingWords.match(/^((?:\\S+\\s+){5})/))){
+        while((match=pendingWords.match(/^((?:\S+\s+){5})/))){
           const group=match[1];pendingWords=pendingWords.slice(group.length);
           if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
           streamBubble.textContent+=group;
@@ -581,15 +581,15 @@ async function sendToAI(){
       while(true){
         const {value,done}=await reader.read();if(done)break;
         streamBuffer+=decoder.decode(value,{stream:true});
-        const events=streamBuffer.split(/\\r?\\n\\r?\\n/);streamBuffer=events.pop()||'';
+        const events=streamBuffer.split(/\r?\n\r?\n/);streamBuffer=events.pop()||'';
         for(const eventText of events){
-          const dataLine=eventText.split(/\\r?\\n/).find(line=>line.startsWith('data:'));
+          const dataLine=eventText.split(/\r?\n/).find(line=>line.startsWith('data:'));
           if(dataLine)await handleStreamEvent(dataLine.slice(5).trim());
         }
       }
       streamBuffer+=decoder.decode();
       if(streamBuffer.trim()){
-        const dataLine=streamBuffer.split(/\\r?\\n/).find(line=>line.startsWith('data:'));
+        const dataLine=streamBuffer.split(/\r?\n/).find(line=>line.startsWith('data:'));
         if(dataLine)await handleStreamEvent(dataLine.slice(5).trim());
       }
       if(pendingWords){
