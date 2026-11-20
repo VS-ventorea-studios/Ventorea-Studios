@@ -318,7 +318,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
       }),
       signal: timeoutSignal(60000)
     });
-    const data = response.ok ? {} : await response.json().catch(() => ({}));
+    const data = await response.json().catch(() => ({}));
     return { response, data };
   }
 
