@@ -352,7 +352,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         res.setHeader('Cache-Control', 'no-cache, no-transform');
         res.setHeader('Connection', 'keep-alive');
         res.setHeader('X-Accel-Buffering', 'no');
-        const sendEvent = payload => res.write('data: ' + JSON.stringify(payload) + '\\n\\n');
+        const sendEvent = payload => res.write('data: ' + JSON.stringify(payload) + '\n\n');
         let content = '';
         let buffer = '';
         const reader = response.body?.getReader();
@@ -365,7 +365,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
             const { value, done } = await reader.read();
             if (done) break;
             buffer += new TextDecoder().decode(value, { stream: true });
-            const lines = buffer.split(/\\r?\\n/);
+            const lines = buffer.split(/\r?\n/);
             buffer = lines.pop() || '';
             for (const line of lines) {
               if (!line.startsWith('data:')) continue;
@@ -396,12 +396,12 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         // Privacy by default: never email ordinary AI conversations or AI replies.
         // A separate alert is sent only when a conservative rule detects explicit first-person intent to harm.
         const directHarmPatterns = [
-          /\\b(?:i(?:'m| am)?\\s+(?:going to|gonna|will|intend to|plan to)\\s+(?:hurt|harm|kill|attack)\\s+(?:myself|someone|him|her|them|you|people))\\b/i,
-          /\\b(?:i\\s+want\\s+to\\s+(?:hurt|harm|kill)\\s+(?:myself|someone|him|her|them|you))\\b/i,
-          /\\b(?:i(?:'m| am)?\\s+(?:going to|gonna|will|intend to|plan to)\\s+(?:end my life|commit suicide))\\b/i,
-          /\\b(?:i\\s+want\\s+to\\s+(?:end my life|die by suicide))\\b/i,
-          /(?:أنا|انا|سوف|راح|ه)\\s*(?:أؤذي|اؤذي|أقتل|اقتل|أهاجم|اهجم)\\s*(?:نفسي|شخص|حد|إياه|إياها|هم|ك|كِ)/u,
-          /(?:عايز|أريد|اريد|نفسي)\\s*(?:أؤذي|اؤذي|أقتل|اقتل)\\s*(?:نفسي|حد|شخص)/u
+          /\b(?:i(?:'m| am)?\s+(?:going to|gonna|will|intend to|plan to)\s+(?:hurt|harm|kill|attack)\s+(?:myself|someone|him|her|them|you|people))\b/i,
+          /\b(?:i\s+want\s+to\s+(?:hurt|harm|kill)\s+(?:myself|someone|him|her|them|you))\b/i,
+          /\b(?:i(?:'m| am)?\s+(?:going to|gonna|will|intend to|plan to)\s+(?:end my life|commit suicide))\b/i,
+          /\b(?:i\s+want\s+to\s+(?:end my life|die by suicide))\b/i,
+          /(?:أنا|انا|سوف|راح|ه)\s*(?:أؤذي|اؤذي|أقتل|اقتل|أهاجم|اهجم)\s*(?:نفسي|شخص|حد|إياه|إياها|هم|ك|كِ)/u,
+          /(?:عايز|أريد|اريد|نفسي)\s*(?:أؤذي|اؤذي|أقتل|اقتل)\s*(?:نفسي|حد|شخص)/u
         ];
         const safetyAlertMatch = directHarmPatterns.some(pattern => pattern.test(visitorMessage));
         if (safetyAlertMatch && process.env.RESEND_API_KEY && authenticatedUser) {
