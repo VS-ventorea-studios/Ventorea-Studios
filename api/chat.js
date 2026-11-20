@@ -305,7 +305,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
   normalizedMessages[normalizedMessages.length - 1].parts.push(...attachmentParts);
 
   async function askModel(model) {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -349,83 +349,14 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
       activeModel = model;
       const { response, data } = await askModel(model);
       if (response.ok) {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-transform');
-        res.setHeader('Connection', 'keep-alive');
-        res.setHeader('X-Accel-Buffering', 'no');
-        const sendEvent = payload => res.write('data: ' + JSON.stringify(payload) + '\n\n');
-        let content = '';
-        let buffer = '';
-        const decoder = new TextDecoder();
-        const reader = response.body?.getReader();
-        if (!reader) {
-          sendEvent({ type: 'error', error: 'Gemini streaming is unavailable for this response.' });
-          return res.end();
-        }
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split(/\r?\n/);
-            buffer = lines.pop() || '';
-            for (const line of lines) {
-              if (!line.startsWith('data:')) continue;
-              const raw = line.slice(5).trim();
-              if (!raw || raw === '[DONE]') continue;
-              let event;
-              try { event = JSON.parse(raw); } catch { continue; }
-              const textParts = (event?.candidates?.[0]?.content?.parts || [])
-                .filter(part => typeof part?.text === 'string')
-                .map(part => part.text);
-              const chunk = textParts.join('');
-              if (chunk) {
-                content += chunk;
-                sendEvent({ type: 'chunk', text: chunk });
-              }
-            }
-          }
-          buffer += decoder.decode();
-          if (buffer.startsWith('data:')) {
-            const raw = buffer.slice(5).trim();
-            if (raw && raw !== '[DONE]') {
-              try {
-                const event = JSON.parse(raw);
-                const chunk = (event?.candidates?.[0]?.content?.parts || []).filter(part => typeof part?.text === 'string').map(part => part.text).join('');
-                if (chunk) { content += chunk; sendEvent({ type: 'chunk', text: chunk }); }
-              } catch {}
-            }
-          }
-        } catch (streamError) {
-          console.error('Ventorea AI stream failed:', streamError?.name || 'stream_error');
-          try {
-            const fallbackResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-              body: JSON.stringify({
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-                contents: normalizedMessages,
-                generationConfig: { maxOutputTokens: 600 }
-              }),
-              signal: timeoutSignal(25000)
-            });
-            const fallbackData = await fallbackResponse.json().catch(() => ({}));
-            const fallbackContent = (fallbackData?.candidates?.[0]?.content?.parts || [])
-              .filter(part => typeof part?.text === 'string').map(part => part.text).join('\\n').trim();
-            if (!fallbackResponse.ok || !fallbackContent) throw new Error(fallbackData?.error?.message || 'Fallback generation failed');
-            content = fallbackContent;
-            sendEvent({ type: 'replace', text: content });
-          } catch (fallbackError) {
-            console.error('Ventorea AI fallback failed:', fallbackError?.name || 'fallback_error');
-            sendEvent({ type: 'error', error: 'The live connection was interrupted and the backup response failed. Please try again.' });
-            return res.end();
-          }
-        }
-        content = content.trim();
+        const content = (data?.candidates?.[0]?.content?.parts || [])
+          .filter(part => typeof part?.text === 'string')
+          .map(part => part.text)
+          .join('\\n')
+          .trim();
         if (!content) {
-          sendEvent({ type: 'error', error: 'Gemini completed the request but returned no text.' });
-          return res.end();
+          lastError = 'Gemini completed the request but returned no text.';
+          break;
         }
         // Privacy by default: never email ordinary AI conversations or AI replies.
         // A separate alert is sent only when a conservative rule detects explicit first-person intent to harm.
@@ -467,8 +398,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
             console.error('Ventorea AI safety alert failed:', alertError?.message || 'network error');
           }
         }
-        sendEvent({ type: 'done', model, attachmentsProcessed: safeAttachments.length });
-        return res.end();
+        return res.status(200).json({ content, model, attachmentsProcessed: safeAttachments.length });
       }
       console.error('Ventorea AI Gemini request rejected:', model, response.status, data?.error?.status || 'upstream_error');
       lastError = data?.error?.message || data?.errors?.[0]?.message || `Gemini returned HTTP ${response.status}.`;
