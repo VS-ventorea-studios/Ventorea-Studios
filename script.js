@@ -557,56 +557,22 @@ async function sendToAI(){
         const errorData=await response.json().catch(()=>({}));
         throw new Error(typeof errorData.error==='string'?errorData.error:'Ventorea AI returned HTTP '+response.status+'.');
       }
-      if(!response.body)throw new Error('Your browser does not support live AI responses. Please try another browser.');
-      const reader=response.body.getReader(),decoder=new TextDecoder();
-      let streamBuffer='',pendingWords='',answer='',streamBubble=null,completed=false;
-      const revealFiveWords=()=>{
-        let match;
-        while((match=pendingWords.match(/^((?:\S+\s+){5})/))){
-          const group=match[1];pendingWords=pendingWords.slice(group.length);
-          if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
-          streamBubble.textContent+=group;
-          messages.scrollTop=messages.scrollHeight;
-        }
-      };
-      const handleStreamEvent=async raw=>{
-        if(!raw||raw==='[DONE]')return;
-        let event;try{event=JSON.parse(raw)}catch{return}
-        if(event.type==='chunk'&&typeof event.text==='string'){
-          if(loading){const label=loading.querySelector('.ai-thinking-label');if(label)label.textContent='Generating response'}
-          answer+=event.text;pendingWords+=event.text;revealFiveWords();
-        }else if(event.type==='replace'&&typeof event.text==='string'){
-          answer=event.text;pendingWords='';
-          if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
-          streamBubble.textContent=answer;
-          messages.scrollTop=messages.scrollHeight;
-        }else if(event.type==='done'){completed=true}
-        else if(event.type==='error')throw new Error(event.error||'The AI response stream failed.');
-      };
-      while(true){
-        const {value,done}=await reader.read();if(done)break;
-        streamBuffer+=decoder.decode(value,{stream:true});
-        const events=streamBuffer.split(/\r?\n\r?\n/);streamBuffer=events.pop()||'';
-        for(const eventText of events){
-          const dataLine=eventText.split(/\r?\n/).find(line=>line.startsWith('data:'));
-          if(dataLine)await handleStreamEvent(dataLine.slice(5).trim());
-        }
-      }
-      streamBuffer+=decoder.decode();
-      if(streamBuffer.trim()){
-        const dataLine=streamBuffer.split(/\r?\n/).find(line=>line.startsWith('data:'));
-        if(dataLine)await handleStreamEvent(dataLine.slice(5).trim());
-      }
-      if(pendingWords){
-        if(!streamBubble){loading?.remove();streamBubble=add('','bot');streamBubble.classList.add('ai-streaming-reply')}
-        streamBubble.textContent+=pendingWords;pendingWords='';
-      }
-      answer=answer.trim();
-      if(!completed||!answer)throw new Error('Ventorea AI ended the stream before completing its response. Please try again.');
+      const data=await response.json().catch(()=>({}));
+      const answer=typeof data.content==='string'?data.content.trim():'';
+      if(!answer)throw new Error('Ventorea AI returned an empty response.');
+      const words=answer.split(/\\s+/);
+      let visible='';
+      const bubble=add('','bot');bubble.classList.add('ai-streaming-reply');
       loading?.remove();
-      if(streamBubble){streamBubble.remove();streamBubble=null}
+      for(let i=0;i<words.length;i+=5){
+        visible+=(visible?' ':'')+words.slice(i,i+5).join(' ');
+        bubble.textContent=visible;
+        messages.scrollTop=messages.scrollHeight;
+        await new Promise(resolve=>window.setTimeout(resolve,35));
+      }
+      bubble.remove();
       add(answer,'bot');speakAIReply(answer);
-      if(answer){chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1)}
+      chat.push({role:'assistant',content:answer.slice(0,MAX_MESSAGE_LENGTH)});while(chat.length>MAX_HISTORY)chat.shift();saveChatHistory();if(receipt)receipt.textContent='Read ✓✓';if(!panel?.classList.contains('open'))setUnread(unreadCount+1);
       selectedFiles.splice(0,selectedFiles.length);renderSelectedAttachments();
     }finally{window.clearTimeout(requestTimeout)}
   }catch(error){
