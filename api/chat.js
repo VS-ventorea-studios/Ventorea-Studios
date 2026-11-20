@@ -399,8 +399,28 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
           }
         } catch (streamError) {
           console.error('Ventorea AI stream failed:', streamError?.name || 'stream_error');
-          sendEvent({ type: 'error', error: 'The response stream was interrupted. Please try again.' });
-          return res.end();
+          try {
+            const fallbackResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                contents: normalizedMessages,
+                generationConfig: { maxOutputTokens: 600 }
+              }),
+              signal: timeoutSignal(25000)
+            });
+            const fallbackData = await fallbackResponse.json().catch(() => ({}));
+            const fallbackContent = (fallbackData?.candidates?.[0]?.content?.parts || [])
+              .filter(part => typeof part?.text === 'string').map(part => part.text).join('\\n').trim();
+            if (!fallbackResponse.ok || !fallbackContent) throw new Error(fallbackData?.error?.message || 'Fallback generation failed');
+            content = fallbackContent;
+            sendEvent({ type: 'replace', text: content });
+          } catch (fallbackError) {
+            console.error('Ventorea AI fallback failed:', fallbackError?.name || 'fallback_error');
+            sendEvent({ type: 'error', error: 'The live connection was interrupted and the backup response failed. Please try again.' });
+            return res.end();
+          }
         }
         content = content.trim();
         if (!content) {
