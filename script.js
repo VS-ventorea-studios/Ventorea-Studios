@@ -605,7 +605,7 @@ async function sendToAI(){
       selectedFiles.splice(0,selectedFiles.length);renderSelectedAttachments();
     }finally{window.clearTimeout(requestTimeout)}
   }catch(error){
-    loading?.remove();if(receipt)receipt.textContent='Not sent';
+    loading?.remove();if(receipt)receipt.textContent='Sent · response interrupted';
     add(error?.name==='AbortError'?'Ventorea AI is taking too long to respond. Please try again.':(error?.message||'Ventorea AI could not be reached. Please try again.'),'bot');checkPresence();
   }finally{
     input.disabled=false;attachButton.disabled=false;if(panel?.classList.contains('open'))input.focus();if(submit)submit.disabled=false;
