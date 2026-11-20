@@ -355,6 +355,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         const sendEvent = payload => res.write('data: ' + JSON.stringify(payload) + '\n\n');
         let content = '';
         let buffer = '';
+        const decoder = new TextDecoder();
         const reader = response.body?.getReader();
         if (!reader) {
           sendEvent({ type: 'error', error: 'Gemini streaming is unavailable for this response.' });
@@ -364,7 +365,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
           while (true) {
             const { value, done } = await reader.read();
             if (done) break;
-            buffer += new TextDecoder().decode(value, { stream: true });
+            buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split(/\r?\n/);
             buffer = lines.pop() || '';
             for (const line of lines) {
@@ -381,6 +382,17 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
                 content += chunk;
                 sendEvent({ type: 'chunk', text: chunk });
               }
+            }
+          }
+          buffer += decoder.decode();
+          if (buffer.startsWith('data:')) {
+            const raw = buffer.slice(5).trim();
+            if (raw && raw !== '[DONE]') {
+              try {
+                const event = JSON.parse(raw);
+                const chunk = (event?.candidates?.[0]?.content?.parts || []).filter(part => typeof part?.text === 'string').map(part => part.text).join('');
+                if (chunk) { content += chunk; sendEvent({ type: 'chunk', text: chunk }); }
+              } catch {}
             }
           }
         } catch (streamError) {
@@ -444,6 +456,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
     return res.status(502).json({ error: lastError || 'Gemini is temporarily unavailable. Please try again.' });
   } catch (error) {
+    if (res.headersSent) { res.end(); return; }
     const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
     console.error('Ventorea AI backend request failed:', activeModel || 'preflight', error?.name || 'unknown_error');
     return res.status(timedOut ? 504 : 500).json({
