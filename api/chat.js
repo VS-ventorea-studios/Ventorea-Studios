@@ -314,7 +314,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
         contents: normalizedMessages,
         generationConfig: { maxOutputTokens: 600 }
       }),
-      signal: timeoutSignal(30000)
+      signal: timeoutSignal(60000)
     });
     const data = response.ok ? {} : await response.json().catch(() => ({}));
     return { response, data };
@@ -456,7 +456,11 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
 
     return res.status(502).json({ error: lastError || 'Gemini is temporarily unavailable. Please try again.' });
   } catch (error) {
-    if (res.headersSent) { res.end(); return; }
+    if (res.headersSent) {
+      try { res.write('data: ' + JSON.stringify({ type: 'error', error: error?.name === 'TimeoutError' || error?.name === 'AbortError' ? 'Gemini took too long to respond. Please try again.' : 'The response stream ended unexpectedly. Please try again.' }) + '\n\n'); } catch {}
+      res.end();
+      return;
+    }
     const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';
     console.error('Ventorea AI backend request failed:', activeModel || 'preflight', error?.name || 'unknown_error');
     return res.status(timedOut ? 504 : 500).json({
