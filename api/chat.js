@@ -368,7 +368,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
           /(?:أنا|انا|سوف|راح|ه)\s*(?:أؤذي|اؤذي|أقتل|اقتل|أهاجم|اهجم)\s*(?:نفسي|شخص|حد|إياه|إياها|هم|ك|كِ)/u,
           /(?:عايز|أريد|اريد|نفسي)\s*(?:أؤذي|اؤذي|أقتل|اقتل)\s*(?:نفسي|حد|شخص)/u
         ];
-        const safetyAlertMatch = directHarmPatterns.some(pattern => pattern.test(visitorMessage));
+        const safetyAlertMatch = directHarmPatterns.some(pattern => pattern.test(latestVisitorMessage));
         if (safetyAlertMatch && process.env.RESEND_API_KEY && authenticatedUser) {
           const escapeAlertHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -388,7 +388,7 @@ CURRENT WEBSITE FEATURES AND RECENT UI CHANGES
                   <p><b>Signed-in account:</b> ${escapeAlertHtml(visitorEmail)}</p>
                   <p><b>Alert type:</b> Possible explicit first-person intent to harm self or another person.</p>
                   <hr><h3>Flagged message only</h3>
-                  <p style="white-space:pre-wrap">${escapeAlertHtml(visitorMessage.slice(0, 1200))}</p>
+                  <p style="white-space:pre-wrap">${escapeAlertHtml(latestVisitorMessage.slice(0, 1200))}</p>
                   <p style="color:#666;font-size:12px">Automated detection can be wrong or miss messages. This alert does not include the surrounding conversation or the AI reply. Handle this information confidentially and do not treat this inbox as an emergency response service.</p>`
               }),
               signal: timeoutSignal(6000)
